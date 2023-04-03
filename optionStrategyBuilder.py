@@ -1,97 +1,61 @@
-# Get all stocks options prices to the nearest strikes
 import datetime
-import sys
-
-from nsepy import get_history
-from datetime import date
-import matplotlib.pyplot as plt
-from nsepy.derivatives import get_expiry_date
-import math
-from IPython.display import display
+import logging
 import pandas as pd
-from tabulate import tabulate
-from sympy import symbols, Eq, solve, Integer, Rational
-import pandas as pd
-import xlsxwriter
 
-##Input params
+from util.nseUtil import get_fno_stocks, nse_optionchain
+from util.optionStratagies import long_iron_butterfly
+
+long_iron_butterfly_df = pd.DataFrame(
+    columns=['Stock', 'PremiumCredit', 'MaxProfit', 'MaxLoss', 'CE_sell_price', 'CE_sell_strike',
+             'PE_sell_price', 'PE_sell_strike', 'CE_buy_price', 'CE_buy_strike',
+             'PE_buy_price', 'PE_buy_strike', 'lot_size', 'Strikes'])
+
 write_to_file = True
-number_of_records = 2 # for debug purpose make it 1 or 2
-
-
-options_pe_df = pd.DataFrame()
-options_ce_df = pd.DataFrame()
-stock_price = pd.DataFrame()
-error_count = 0
-
-stock_opt = get_history(symbol=stock["Symbol"],
-                        start=date(year, month, day),
-                        end=date(year, month, day),
-                        option_type=type,
-                        strike_price=strike_price,
-                        expiry_date=expiry_date)
-
-
-
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    stocks = pd.read_excel("./data/options_details.xlsx", converters={'Name': str.strip,
-                                                                      'Symbol': str.strip})
-    print(stocks.columns)
-    print("---Starting loop for each stock defined in input file----")
-    for index, row in stocks.iterrows():
-        if index < number_of_records:
-            print("-##################################################################################-")
-            print(index," ---###############################  ",row["Symbol"], "  #########################################-")
-            print("-##################################################################################-")
-            print("---Getting data for", row["Symbol"], ", Strike Price any one: ", row["Strike_Price"],
-                  " , Tick Size: ", row["Tick_Size"], "-")
+
+    # Get the list of Fno stocks
+    fno_stock_list = get_fno_stocks() # For running it for less stocks add [:2], it will run for 2 stocks
+    print("---Starting loop for all fno stocks----")
+    print("-##################################################################################-")
+    i = 1
+    try:
+        for symbol in fno_stock_list:
             try:
-                get_option(row, "PE")
-                get_option(row, "CE")
-            except Exception as e:
-                print("Issue in getting option details for : ", row["Symbol"], e)
-            stocks.iloc[index] = row
-    #         print("### final options PE")
-    #         print(tabulate(options_pe_df, headers='keys'))
-    #         print("### final options CE")
-    #         print(tabulate(options_ce_df, headers='keys'))
-    #         print("### final stock prices")
-    #         print(tabulate(stock_price, headers='keys'))
-    call_put_df = options_pe_df
-    call_put_df = call_put_df.set_index('Symbol').join(options_ce_df.set_index('Symbol'), lsuffix='_put',
-                                                       rsuffix='_call')
-    call_put_df['Total Premium'] = call_put_df['Premium_put'] + call_put_df['Premium_call']
-    call_put_df['% Total Premium'] = call_put_df['% Premium_put'] + call_put_df['% Premium_call']
-    call_put_df['% Total Diff in price'] = call_put_df['% Diff in price_put'] + call_put_df['% Diff in price_call']
-    call_put_df['% Total Cushion'] = call_put_df['% Cushion_put'] + call_put_df['% Cushion_call']
+                logging.info(f"{i}. Running for {symbol}")
+                option_chain_json = nse_optionchain(symbol, timeout=20)
+                if option_chain_json is None:
+                    raise Exception("Timed Out")
+                logging.info(f"Got option chain for {symbol}")
+                i += 1
+                # logging.DEBUG(option_chain_json)
 
-    # Reorder columns for ease of reading
-    call_put_df = call_put_df[['Total Premium',
-                               '% Total Premium', '% Total Diff in price', '% Total Cushion',
-                               'Strike Price_put', 'Strike Price_call', 'Underlying_put',
-                               'Premium_put', '% Premium_put', '% Diff in price_put',
-                               '% Cushion_put', 'Premium_call', '% Premium_call',
-                               '% Diff in price_call', '% Cushion_call',
-                               'Expiry_put', 'Open_put',
-                               'High_put', 'Low_put', 'Close_put', 'Last_put', 'Settle Price_put',
-                               'Number of Contracts_put', 'Turnover_put', 'Premium Turnover_put',
-                               'Open Interest_put', 'Change in OI_put',
-                               'lot_size_put',
-                               'Open_call', 'High_call', 'Low_call', 'Close_call', 'Last_call', 'Settle Price_call',
-                               'Number of Contracts_call', 'Turnover_call',
-                               'Premium Turnover_call', 'Open Interest_call', 'Change in OI_call',
-                               'Underlying_call']]
+                df = long_iron_butterfly(symbol, option_chain_json, timeout=20)
+                if df is None:
+                    raise Exception("Timed Out")
 
-    # #write the output the final sheet
-    if write_to_file:
-        output_file = './data/output/' + str(year) + "-" + str(month) + "-" + str(day) + '.xlsx'
-        with pd.ExcelWriter(output_file) as writer:
-            options_pe_df.to_excel(writer, sheet_name='PE prices')
-            options_ce_df.to_excel(writer, sheet_name='CE prices')
-            stocks.to_excel(writer, sheet_name='Stock Data')
-            stock_price.to_excel(writer, sheet_name='Stock Price')
-            call_put_df.to_excel(writer, sheet_name='Call Put Prices')
-        # workbook = xlsxwriter.Workbook(output_file)
-        # workbook.add_vba_project('./vba/excelHighlighter.bin')
+                print(f"For {df.get('Stock')} total credit is {df.get('PremiumCredit')} ,"
+                      f"max_profit is {df.get('MaxProfit')}"
+                      f" and max_loss is {df.get('MaxLoss')}")
+
+                # Add the new row to the DataFrame with index=0
+                long_iron_butterfly_df = pd.concat([long_iron_butterfly_df, pd.DataFrame.from_records([df])],
+                                                   ignore_index=True)
+
+                # Write all the outputs as exit in between misses all the data
+                if write_to_file:
+                    output_file = './data/output/' + datetime.datetime.now().strftime("%Y-%m-%d") + '.xlsx'
+                    with pd.ExcelWriter(output_file) as writer:
+                        long_iron_butterfly_df.to_excel(writer, sheet_name='Long Iron Butterfly')
+
+            except Exception as ex:
+                # Many times the nse website response gets stuck an results in whole program halts
+                logging.error(f"Error in processing {symbol} is: ", ex)
+
+    finally:  # Required as not to miss the data which is already fetched and save it
+        # #write the output the final sheet
+        if write_to_file:
+            output_file = './data/output/' + datetime.datetime.now().strftime("%Y-%m-%d") + '.xlsx'
+            with pd.ExcelWriter(output_file) as writer:
+                long_iron_butterfly_df.to_excel(writer, sheet_name='Long Iron Butterfly')
