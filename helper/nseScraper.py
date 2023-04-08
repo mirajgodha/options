@@ -56,6 +56,3 @@ def get_strike_price_from_option_chain(symbol):
 
     print (strike_price_list)
     return strike_price_list
-
-get_strike_price_from_option_chain("SBIN")
-print("bye")
