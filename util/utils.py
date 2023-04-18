@@ -50,7 +50,9 @@ def clear_df(df):
     :param df:
     :return:
     """
-    return df.drop(df.columns[(df == 0).all()], axis=1)
+    df = df.drop(df.columns[(df == 0).all()], axis=1)
+    df_sorted = df.sort_values(by=['MaxLoss', 'MaxProfit'], ascending=[False, False])
+    return df_sorted
 
 
 def concat_df(df, row):
@@ -62,22 +64,3 @@ def concat_df(df, row):
     """
     df = pd.concat([df, pd.DataFrame.from_records([row])], ignore_index=True)
     return df
-
-
-def underscore_to_camel_case(s):
-    """
-    Used to convert the df to readable sheet name for Excel
-    :param s:
-    :return:
-    """
-    # Split the string by underscores
-    camel_case = ""
-    for name, value in inspect.currentframe().f_back.f_locals.items():
-        if value is s:
-            words = s.split('_')
-
-            # Capitalize the first letter of each word after the first
-            # and join them together with spaces
-            camel_case = words[0] + ' '.join(w.capitalize() for w in words[1:-1]) + words[-1].capitalize()
-
-    return camel_case

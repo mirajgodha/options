@@ -4,7 +4,7 @@ import pandas as pd
 
 from util.nseUtil import get_fno_stocks, nse_optionchain
 from util.optionStrategies import OptionStrategies
-from util.utils import clear_df, concat_df, underscore_to_camel_case
+from util.utils import clear_df, concat_df
 
 excel_columns = ['Stock', 'PremiumCredit', 'MaxProfit', 'MaxLoss',
                  'CE_sell_price', 'CE_sell_strike',
@@ -16,6 +16,7 @@ excel_columns = ['Stock', 'PremiumCredit', 'MaxProfit', 'MaxLoss',
                  'CE_buy_price_1', 'CE_buy_strike_1',
                  'PE_buy_price_1', 'PE_buy_strike_1',
                  'lot_size', 'pl_on_strikes', 'Strikes']
+
 
 long_iron_butterfly_df = pd.DataFrame(columns=excel_columns)
 short_call_butterfly_df = pd.DataFrame(columns=excel_columns)
@@ -37,15 +38,15 @@ def write_to_excel():
     if write_to_file:
         output_file = './data/output/' + datetime.datetime.now().strftime("%Y-%m-%d") + '.xlsx'
         with pd.ExcelWriter(output_file) as writer:
-            long_iron_butterfly_df.to_excel(writer, sheet_name=underscore_to_camel_case(long_iron_butterfly_df))
-            short_call_butterfly_df.to_excel(writer, sheet_name=underscore_to_camel_case(short_call_butterfly_df))
+            long_iron_butterfly_df.to_excel(writer, sheet_name="Long Iron Butterfly")
+            short_call_butterfly_df.to_excel(writer, sheet_name="Short Call Butterfly")
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
     # Get the list of Fno stocks
-    fno_stock_list = get_fno_stocks()[:1]  # For running it for less stocks add [:2], it will run for 2 stocks
+    fno_stock_list = get_fno_stocks()  # For running it for less stocks add [:2], it will run for 2 stocks
     print("---Starting loop for all fno stocks----")
     i = 1
     try:
