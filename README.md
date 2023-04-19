@@ -17,6 +17,7 @@ There are list of predifined strategies already been created
 - Short Straddle
 - Short Strangle
 
+For each of these strategies you will get a separate tab in excel sheet.
 
 The sample output file looks like this:
 
