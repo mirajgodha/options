@@ -8,8 +8,8 @@ from util.utils import get_nth_option, reduce_pl_strike_list
 
 def generate_strategy(strategy: [Option], symbol, option_chain_json):
     """
-    Generates the option strategy for the given strategy list and its returns its correspondign df
-    :param strategy: List of options stratiges
+    Generates the option strategy for the given strategy list and its returns its corresponding df
+    :param strategy: List of options trades which need to be executed for given option strategy
     :param symbol: Stock name
     :param option_chain_json: price data from NSE
     :return: df which contains data which can be printed in Excel
@@ -67,6 +67,22 @@ def generate_strategy(strategy: [Option], symbol, option_chain_json):
               x: x.option_type == OptionType.PUT and x.tranx_type == TranxType.BUY,n=2).premium,
           'PE_buy_strike_1': get_nth_option(strategy, condition=lambda
               x: x.option_type == OptionType.PUT and x.tranx_type == TranxType.BUY,n=2).strike_price,
+          'CE_sell_price_2': get_nth_option(strategy, condition=lambda
+              x: x.option_type == OptionType.CALL and x.tranx_type == TranxType.SELL, n=3).premium,
+          'CE_sell_strike_2': get_nth_option(strategy, condition=lambda
+              x: x.option_type == OptionType.CALL and x.tranx_type == TranxType.SELL, n=3).strike_price,
+          'PE_sell_price_2': get_nth_option(strategy, condition=lambda
+              x: x.option_type == OptionType.PUT and x.tranx_type == TranxType.SELL, n=3).premium,
+          'PE_sell_strike_2': get_nth_option(strategy, condition=lambda
+              x: x.option_type == OptionType.PUT and x.tranx_type == TranxType.SELL, n=3).strike_price,
+          'CE_buy_price_2': get_nth_option(strategy, condition=lambda
+              x: x.option_type == OptionType.CALL and x.tranx_type == TranxType.BUY, n=3).premium,
+          'CE_buy_strike_2': get_nth_option(strategy, condition=lambda
+              x: x.option_type == OptionType.CALL and x.tranx_type == TranxType.BUY, n=3).strike_price,
+          'PE_buy_price_2': get_nth_option(strategy, condition=lambda
+              x: x.option_type == OptionType.PUT and x.tranx_type == TranxType.BUY, n=3).premium,
+          'PE_buy_strike_2': get_nth_option(strategy, condition=lambda
+              x: x.option_type == OptionType.PUT and x.tranx_type == TranxType.BUY, n=3).strike_price,
           'lot_size': lot_size,
           'pl_on_strikes': reduce_pl_strike_list(pl_on_strikes),
           'Strikes': strike_price_list}

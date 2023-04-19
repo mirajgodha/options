@@ -3,11 +3,12 @@ import logging
 
 from dao.Option import Option, OptionType, TranxType
 import pandas as pd
+from util import optionStrategies
 
 
 def get_nth_option(options, condition, n=1):
     """
-    Rertusn the first or nth matching option from the given options list.
+    Returns the first or nth matching option from the given options list.
     :param options:
     :param condition:
     :param n:
@@ -19,6 +20,7 @@ def get_nth_option(options, condition, n=1):
             count += 1
             if count == n:
                 return option
+    # Requested option does not exists, return a dummy value.
     return Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=0)
 
 
@@ -64,3 +66,13 @@ def concat_df(df, row):
     """
     df = pd.concat([df, pd.DataFrame.from_records([row])], ignore_index=True)
     return df
+
+
+def get_list_option_strategies():
+    # Get all function names of MyClass
+    function_names = [func for func in dir(optionStrategies.OptionStrategies) if
+                      callable(getattr(optionStrategies.OptionStrategies, func)) and not func.startswith("__")]
+
+    # Print the function names
+    for name in function_names:
+        print(name)
