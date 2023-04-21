@@ -2,9 +2,13 @@ import datetime
 import logging
 import pandas as pd
 
-from util.nseUtil import get_fno_stocks, nse_optionchain
+from util.nsepythonUtil import get_fno_stocks, nse_optionchain
 from util.optionStrategies import OptionStrategies
 from util.utils import clear_df, concat_df
+
+test_run = False
+write_to_file = True
+
 
 excel_columns = ['Stock', 'PremiumCredit', 'MaxProfit', 'MaxLoss',
                  'CE_sell_price', 'CE_sell_strike',
@@ -33,9 +37,6 @@ short_put_butterfly_df = pd.DataFrame(columns=excel_columns)
 short_put_condor_df = pd.DataFrame(columns=excel_columns)
 short_straddle_df = pd.DataFrame(columns=excel_columns)
 short_strangle_df = pd.DataFrame(columns=excel_columns)
-
-
-write_to_file = True
 
 
 def write_to_excel():
@@ -82,12 +83,15 @@ def write_to_excel():
             short_straddle_df.to_excel(writer, sheet_name="short_straddle_df")
             short_strangle_df.to_excel(writer, sheet_name="short_strangle_df")
 
-
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
     # Get the list of Fno stocks
-    fno_stock_list = get_fno_stocks()  # For running it for less stocks add [:2], it will run for 2 stocks
+    if test_run:
+        fno_stock_list = get_fno_stocks()[:2]  # For running it for less stocks add [:2], it will run for 2 stocks
+    else:
+        fno_stock_list = get_fno_stocks()
+
     print("---Starting loop for all fno stocks----")
     i = 1
     try:

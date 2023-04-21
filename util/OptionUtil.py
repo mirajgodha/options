@@ -1,7 +1,7 @@
 import logging
 
 from dao.Option import Option, OptionType, TranxType
-from util.nseUtil import get_strike_price_list, get_atm_strike, get_pe_price, get_ce_price, get_lot_size
+from util.nsepythonUtil import get_strike_price_list, get_atm_strike, get_pe_price, get_ce_price, get_lot_size
 from util.profitLossCalculator import calc_profit_loss
 from util.utils import get_nth_option, reduce_pl_strike_list
 
@@ -25,9 +25,9 @@ def generate_strategy(strategy: [Option], symbol, option_chain_json):
     for option in strategy:
         option.strike_price = strike_price_list[index_of_item + option.strike]
         if option.option_type == OptionType.PUT:
-            option.premium = get_pe_price(option_chain_json, option.strike_price)
+            option.premium = get_pe_price(option_chain_json, option.strike_price, option.tranx_type)
         else:
-            option.premium = get_ce_price(option_chain_json, option.strike_price)
+            option.premium = get_ce_price(option_chain_json, option.strike_price, option.tranx_type)
 
     lot_size = get_lot_size(symbol)
 
@@ -52,21 +52,21 @@ def generate_strategy(strategy: [Option], symbol, option_chain_json):
           'PE_buy_strike': get_nth_option(strategy, condition=lambda
               x: x.option_type == OptionType.PUT and x.tranx_type == TranxType.BUY).strike_price,
           'CE_sell_price_1': get_nth_option(strategy, condition=lambda
-              x: x.option_type == OptionType.CALL and x.tranx_type == TranxType.SELL,n=2).premium,
+              x: x.option_type == OptionType.CALL and x.tranx_type == TranxType.SELL, n=2).premium,
           'CE_sell_strike_1': get_nth_option(strategy, condition=lambda
-              x: x.option_type == OptionType.CALL and x.tranx_type == TranxType.SELL,n=2).strike_price,
+              x: x.option_type == OptionType.CALL and x.tranx_type == TranxType.SELL, n=2).strike_price,
           'PE_sell_price_1': get_nth_option(strategy, condition=lambda
-              x: x.option_type == OptionType.PUT and x.tranx_type == TranxType.SELL,n=2).premium,
+              x: x.option_type == OptionType.PUT and x.tranx_type == TranxType.SELL, n=2).premium,
           'PE_sell_strike_1': get_nth_option(strategy, condition=lambda
-              x: x.option_type == OptionType.PUT and x.tranx_type == TranxType.SELL,n=2).strike_price,
+              x: x.option_type == OptionType.PUT and x.tranx_type == TranxType.SELL, n=2).strike_price,
           'CE_buy_price_1': get_nth_option(strategy, condition=lambda
-              x: x.option_type == OptionType.CALL and x.tranx_type == TranxType.BUY,n=2).premium,
+              x: x.option_type == OptionType.CALL and x.tranx_type == TranxType.BUY, n=2).premium,
           'CE_buy_strike_1': get_nth_option(strategy, condition=lambda
-              x: x.option_type == OptionType.CALL and x.tranx_type == TranxType.BUY,n=2).strike_price,
+              x: x.option_type == OptionType.CALL and x.tranx_type == TranxType.BUY, n=2).strike_price,
           'PE_buy_price_1': get_nth_option(strategy, condition=lambda
-              x: x.option_type == OptionType.PUT and x.tranx_type == TranxType.BUY,n=2).premium,
+              x: x.option_type == OptionType.PUT and x.tranx_type == TranxType.BUY, n=2).premium,
           'PE_buy_strike_1': get_nth_option(strategy, condition=lambda
-              x: x.option_type == OptionType.PUT and x.tranx_type == TranxType.BUY,n=2).strike_price,
+              x: x.option_type == OptionType.PUT and x.tranx_type == TranxType.BUY, n=2).strike_price,
           'CE_sell_price_2': get_nth_option(strategy, condition=lambda
               x: x.option_type == OptionType.CALL and x.tranx_type == TranxType.SELL, n=3).premium,
           'CE_sell_strike_2': get_nth_option(strategy, condition=lambda

@@ -8,3 +8,5 @@ matplotlib~=3.7.1
 XlsxWriter~=3.0.9
 ipython~=8.12.0
 sympy~=1.11.1
+numpy~=1.24.2
+stopit~=1.1.2
