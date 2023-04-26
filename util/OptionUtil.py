@@ -25,9 +25,9 @@ def generate_strategy(strategy: [Option], symbol, option_chain_json):
     for option in strategy:
         option.strike_price = strike_price_list[index_of_item + option.strike]
         if option.option_type == OptionType.PUT:
-            option.premium = get_pe_price(option_chain_json, option.strike_price, option.tranx_type)
+            option.premium = get_pe_price(option_chain_json, option.strike_price, option.tranx_type, expiry_date= option.expiry_date)
         else:
-            option.premium = get_ce_price(option_chain_json, option.strike_price, option.tranx_type)
+            option.premium = get_ce_price(option_chain_json, option.strike_price, option.tranx_type, expiry_date= option.expiry_date)
 
     lot_size = get_lot_size(symbol)
 

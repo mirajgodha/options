@@ -8,7 +8,7 @@ from util.optionStrategies import OptionStrategies
 from util.utils import clear_df, concat_df
 
 # Expiry month for which we want to run the utility
-expiry_month = get_expiry_date(Expiry.NEXT)
+expiry_month = Expiry.NEXT
 test_run = False
 write_to_file = True
 
@@ -95,6 +95,8 @@ if __name__ == '__main__':
     else:
         fno_stock_list = get_fno_stocks()
 
+    expiry_date = get_expiry_date(expiry_month)
+
     print("---Starting loop for all fno stocks----")
     i = 1
     try:
@@ -110,39 +112,42 @@ if __name__ == '__main__':
 
                 # Add the new row to the DataFrame with index=0
                 long_call_condor_df = concat_df(long_call_condor_df,
-                                                OptionStrategies.long_call_condor(symbol, option_chain_json,
+                                                OptionStrategies.long_call_condor(symbol, option_chain_json, expiry_date,
                                                                                   strike_diff=2,
                                                                                   timeout=20))
                 long_iron_butterfly_df = concat_df(long_iron_butterfly_df,
-                                                   OptionStrategies.long_iron_butterfly(symbol, option_chain_json,
+                                                   OptionStrategies.long_iron_butterfly(symbol, option_chain_json, expiry_date,
                                                                                         strike_diff=2,
                                                                                         timeout=20))
                 long_put_condor_df = concat_df(long_put_condor_df,
-                                               OptionStrategies.long_put_condor(symbol, option_chain_json, timeout=20))
+                                               OptionStrategies.long_put_condor(symbol, option_chain_json,  expiry_date,
+                                                                                timeout=20))
 
                 short_call_butterfly_df = concat_df(short_call_butterfly_df,
-                                                    OptionStrategies.short_call_butterfly(symbol, option_chain_json,
+                                                    OptionStrategies.short_call_butterfly(symbol, option_chain_json, expiry_date,
                                                                                           timeout=20))
                 short_call_condor_df = concat_df(short_call_condor_df,
-                                                 OptionStrategies.short_call_condor(symbol, option_chain_json,
+                                                 OptionStrategies.short_call_condor(symbol, option_chain_json, expiry_date,
                                                                                     timeout=20))
                 short_guts_df = concat_df(short_guts_df,
-                                          OptionStrategies.short_guts(symbol, option_chain_json, timeout=20))
+                                          OptionStrategies.short_guts(symbol, option_chain_json, expiry_date,
+                                                                      timeout=20))
 
                 short_iron_butterfly_df = concat_df(short_iron_butterfly_df,
-                                                    OptionStrategies.short_iron_butterfly(symbol, option_chain_json,
+                                                    OptionStrategies.short_iron_butterfly(symbol, option_chain_json, expiry_date,
                                                                                           timeout=20))
                 short_put_butterfly_df = concat_df(short_put_butterfly_df,
-                                                   OptionStrategies.short_put_butterfly(symbol, option_chain_json,
+                                                   OptionStrategies.short_put_butterfly(symbol, option_chain_json, expiry_date,
                                                                                         timeout=20))
                 short_put_condor_df = concat_df(short_put_condor_df,
-                                                OptionStrategies.short_put_condor(symbol, option_chain_json,
+                                                OptionStrategies.short_put_condor(symbol, option_chain_json, expiry_date,
                                                                                   timeout=20))
                 short_straddle_df = concat_df(short_straddle_df,
-                                              OptionStrategies.short_straddle(symbol, option_chain_json, timeout=20))
+                                              OptionStrategies.short_straddle(symbol, option_chain_json, expiry_date,
+                                                                              timeout=20))
 
                 short_strangle_df = concat_df(short_strangle_df,
-                                              OptionStrategies.short_strangle(symbol, option_chain_json,
+                                              OptionStrategies.short_strangle(symbol, option_chain_json, expiry_date,
                                                                               strike_diff=2,
                                                                               timeout=20))
 

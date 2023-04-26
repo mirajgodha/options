@@ -22,7 +22,7 @@ def get_nth_option(options, condition, n=1):
             if count == n:
                 return option
     # Requested option does not exists, return a dummy value.
-    return Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=0)
+    return Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, expiry_date="", strike=0)
 
 
 def reduce_pl_strike_list(data):
@@ -47,7 +47,7 @@ def reduce_pl_strike_list(data):
     return result
 
 
-def clear_df(df, sort_by=['MaxLoss', 'PremiumCredit'],sort_order=[False, False]):
+def clear_df(df, sort_by=['MaxLoss', 'PremiumCredit'], sort_order=[False, False]):
     """
     Clears the df by removing all the columns which just contains the value 0 in all rows.
     Also removes the columns which do not contain any value or empty string or NAN
@@ -60,7 +60,11 @@ def clear_df(df, sort_by=['MaxLoss', 'PremiumCredit'],sort_order=[False, False])
     # filter for rows where all columns containing 'price' have values greater than 0
     # df = df[df.apply(lambda row: all(row[col] > 0 for col in row.index if 'price' in col and df[col].dtype != 'object'), axis=1)]
 
-    df_sorted = df.sort_values(by=sort_by, ascending=sort_order)
+    try:
+        df_sorted = df.sort_values(by=sort_by, ascending=sort_order)
+    except:
+        df_sorted = df
+
     return df_sorted
 
 

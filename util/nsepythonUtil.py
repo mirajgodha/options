@@ -5,11 +5,11 @@ import pandas as pd
 import logging
 
 from dao.Option import TranxType
-from optionStrategyBuilder import expiry_month
 
 logging.basicConfig(level=logging.INFO)
 
 lot_sizes = pd.DataFrame()
+
 
 # ------------
 # Utility methods based on nsepython scraper utility
@@ -35,9 +35,9 @@ def get_atm_strike(option_chain_json):
     return atm_strike
 
 
-def get_pe_price(option_chain_json, strike_price, txType):
+def get_pe_price(option_chain_json, strike_price, txType, expiry_date):
     for dictt in option_chain_json['records']['data']:
-        if dictt['strikePrice'] == strike_price and dictt['expiryDate'] == expiry_month:
+        if dictt['strikePrice'] == strike_price and dictt['expiryDate'] == expiry_date:
             if txType == TranxType.SELL:
                 pe_price = dictt['PE']['bidprice']
             else:
@@ -48,12 +48,12 @@ def get_pe_price(option_chain_json, strike_price, txType):
         return 0
 
 
-def get_ce_price(option_chain_json, strike_price,txType):
+def get_ce_price(option_chain_json, strike_price, txType, expiry_date):
     for dictt in option_chain_json['records']['data']:
-        if dictt['strikePrice'] == strike_price and dictt['expiryDate'] == expiry_month:
+        if dictt['strikePrice'] == strike_price and dictt['expiryDate'] == expiry_date:
             if txType == TranxType.SELL:
                 ce_price = dictt['CE']['bidprice']
-            else :
+            else:
                 ce_price = dictt['CE']['askPrice']
             return ce_price
     else:
@@ -71,9 +71,11 @@ def get_fno_stocks():
     result_list = [elem for elem in fnoList if not_containing not in elem]
     return result_list
 
+
 @timeoutable()
 def nse_optionchain(symbol):
     return nse_optionchain_scrapper(symbol)
+
 
 def get_strike_price_list(option_chain_json):
     """
@@ -105,5 +107,6 @@ def get_lot_size(symbol):
 
     return lot_size
 
+
 def get_expiry_date(wihch_month):
-    return expiry_list("RELIANCE","list")[wihch_month]
+    return expiry_list("RELIANCE", "list")[wihch_month.value]

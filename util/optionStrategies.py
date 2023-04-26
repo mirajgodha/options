@@ -7,7 +7,7 @@ from util.OptionUtil import generate_strategy
 class OptionStrategies:
 
     @timeoutable()
-    def long_iron_butterfly(symbol, option_chain_json, strike_diff: int = 1):
+    def long_iron_butterfly(symbol, option_chain_json, expiry_date, strike_diff: int = 1):
         """
         Sell the PE and CE at ATM
         Buy PE and CE at one strike below and above
@@ -15,17 +15,20 @@ class OptionStrategies:
         :param strike_diff: The default strike difference is 1, but we can pass it as int.
                             If strike diff is 2 then the PUT and CALL which will be buyed will be one strike above the ATM.
         :return: df
+
+        Args:
+            expiry_date:
         """
 
-        strategy = [Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=0 * strike_diff, lots=1),
-                    Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=0 * strike_diff, lots=1),
-                    Option(option_type=OptionType.CALL, tranx_type=TranxType.BUY, strike=1 * strike_diff, lots=1),
-                    Option(option_type=OptionType.PUT, tranx_type=TranxType.BUY, strike=-1 * strike_diff, lots=1)]
+        strategy = [Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=0 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=0 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.CALL, tranx_type=TranxType.BUY, strike=1 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.PUT, tranx_type=TranxType.BUY, strike=-1 * strike_diff, lots=1, expiry_date=expiry_date)]
 
         return generate_strategy(strategy, symbol, option_chain_json)
 
     @timeoutable()
-    def short_iron_butterfly(symbol, option_chain_json, strike_diff: int = 1):
+    def short_iron_butterfly(symbol, option_chain_json, expiry_date, strike_diff: int = 1):
         """
         Buy the PE and CE at ATM
         Sell PE and CE at one strike below and above
@@ -33,18 +36,21 @@ class OptionStrategies:
         :param strike_diff: The default strike difference is 1, but we can pass it as int.
                             If strike diff is 2 then the PUT and CALL which will be buyed will be one strike above the ATM.
         :return: df
+
+        Args:
+            expiry_date:
         """
 
-        strategy = [Option(option_type=OptionType.CALL, tranx_type=TranxType.BUY, strike=0 * strike_diff, lots=1),
-                    Option(option_type=OptionType.PUT, tranx_type=TranxType.BUY, strike=0 * strike_diff, lots=1),
-                    Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=1 * strike_diff, lots=1),
-                    Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=-1 * strike_diff, lots=1)]
+        strategy = [Option(option_type=OptionType.CALL, tranx_type=TranxType.BUY, strike=0 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.PUT, tranx_type=TranxType.BUY, strike=0 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=1 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=-1 * strike_diff, lots=1, expiry_date=expiry_date)]
 
         return generate_strategy(strategy, symbol, option_chain_json)
 
 
     @timeoutable()
-    def short_call_butterfly(symbol, option_chain_json, strike_diff=1):
+    def short_call_butterfly(symbol, option_chain_json, expiry_date, strike_diff=1):
         """
         Calculates the short call butterfly
         Buy 2 call at ATM
@@ -53,17 +59,20 @@ class OptionStrategies:
         :param option_chain_json:
         :param strike_diff:
         :return:
+
+        Args:
+            expiry_date:
         """
 
-        strategy = [Option(option_type=OptionType.CALL, tranx_type=TranxType.BUY, strike=0 * strike_diff, lots=2),
-                    Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=1 * strike_diff, lots=1),
-                    Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=-1 * strike_diff, lots=1)]
+        strategy = [Option(option_type=OptionType.CALL, tranx_type=TranxType.BUY, strike=0 * strike_diff, lots=2, expiry_date=expiry_date),
+                    Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=1 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=-1 * strike_diff, lots=1, expiry_date=expiry_date)]
 
         return generate_strategy(strategy, symbol, option_chain_json)
 
 
     @timeoutable()
-    def short_put_butterfly(symbol, option_chain_json, strike_diff=1):
+    def short_put_butterfly(symbol, option_chain_json, expiry_date, strike_diff=1):
         """
         Calculates the short put butterfly
         Buy 2 put at ATM
@@ -72,17 +81,20 @@ class OptionStrategies:
         :param option_chain_json:
         :param strike_diff:
         :return:
+
+        Args:
+            expiry_date:
         """
 
-        strategy = [Option(option_type=OptionType.PUT, tranx_type=TranxType.BUY, strike=0 * strike_diff, lots=2),
-                    Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=1 * strike_diff, lots=1),
-                    Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=-1 * strike_diff, lots=1)]
+        strategy = [Option(option_type=OptionType.PUT, tranx_type=TranxType.BUY, strike=0 * strike_diff, lots=2, expiry_date=expiry_date),
+                    Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=1 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=-1 * strike_diff, lots=1, expiry_date=expiry_date)]
 
         return generate_strategy(strategy, symbol, option_chain_json)
 
 
     @timeoutable()
-    def short_call_condor(symbol, option_chain_json, strike_diff=1):
+    def short_call_condor(symbol, option_chain_json, expiry_date, strike_diff=1):
         """
         Calculates the Long call condor
         Buy 1 call at ATM
@@ -93,17 +105,20 @@ class OptionStrategies:
         :param option_chain_json:
         :param strike_diff:
         :return:
+
+        Args:
+            expiry_date:
         """
 
-        strategy = [Option(option_type=OptionType.CALL, tranx_type=TranxType.BUY, strike=0 * strike_diff, lots=1),
-                    Option(option_type=OptionType.CALL, tranx_type=TranxType.BUY, strike=1 * strike_diff, lots=1),
-                    Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=2 * strike_diff, lots=1),
-                    Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=-1 * strike_diff, lots=1)]
+        strategy = [Option(option_type=OptionType.CALL, tranx_type=TranxType.BUY, strike=0 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.CALL, tranx_type=TranxType.BUY, strike=1 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=2 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=-1 * strike_diff, lots=1, expiry_date=expiry_date)]
 
         return generate_strategy(strategy, symbol, option_chain_json)
 
     @timeoutable()
-    def long_call_condor(symbol, option_chain_json, strike_diff=1):
+    def long_call_condor(symbol, option_chain_json, expiry_date, strike_diff=1):
         """
         Calculates the Long call condor
         Buy 1 call at below ATM
@@ -114,17 +129,20 @@ class OptionStrategies:
         :param option_chain_json:
         :param strike_diff:
         :return:
+
+        Args:
+            expiry_date:
         """
 
-        strategy = [Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=0 * strike_diff, lots=1),
-                    Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=1 * strike_diff, lots=1),
-                    Option(option_type=OptionType.CALL, tranx_type=TranxType.BUY, strike=2 * strike_diff, lots=1),
-                    Option(option_type=OptionType.CALL, tranx_type=TranxType.BUY, strike=-1 * strike_diff, lots=1)]
+        strategy = [Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=0 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=1 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.CALL, tranx_type=TranxType.BUY, strike=2 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.CALL, tranx_type=TranxType.BUY, strike=-1 * strike_diff, lots=1, expiry_date=expiry_date)]
 
         return generate_strategy(strategy, symbol, option_chain_json)
 
     @timeoutable()
-    def short_put_condor(symbol, option_chain_json, strike_diff=1):
+    def short_put_condor(symbol, option_chain_json, expiry_date, strike_diff=1):
         """
         Calculates the Short put condor
         Buy 1 put at ATM
@@ -135,17 +153,20 @@ class OptionStrategies:
         :param option_chain_json:
         :param strike_diff:
         :return:
+
+        Args:
+            expiry_date:
         """
 
-        strategy = [Option(option_type=OptionType.PUT, tranx_type=TranxType.BUY, strike=0 * strike_diff, lots=1),
-                    Option(option_type=OptionType.PUT, tranx_type=TranxType.BUY, strike=1 * strike_diff, lots=1),
-                    Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=2 * strike_diff, lots=1),
-                    Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=-1 * strike_diff, lots=1)]
+        strategy = [Option(option_type=OptionType.PUT, tranx_type=TranxType.BUY, strike=0 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.PUT, tranx_type=TranxType.BUY, strike=1 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=2 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=-1 * strike_diff, lots=1, expiry_date=expiry_date)]
 
         return generate_strategy(strategy, symbol, option_chain_json)
 
     @timeoutable()
-    def long_put_condor(symbol, option_chain_json, strike_diff=1):
+    def long_put_condor(symbol, option_chain_json, expiry_date, strike_diff=1):
         """
         Calculates the Short put condor
         Buy 1 put blow ATM
@@ -156,17 +177,20 @@ class OptionStrategies:
         :param option_chain_json:
         :param strike_diff:
         :return:
+
+        Args:
+            expiry_date:
         """
 
-        strategy = [Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=0 * strike_diff, lots=1),
-                    Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=1 * strike_diff, lots=1),
-                    Option(option_type=OptionType.PUT, tranx_type=TranxType.BUY, strike=2 * strike_diff, lots=1),
-                    Option(option_type=OptionType.PUT, tranx_type=TranxType.BUY, strike=-1 * strike_diff, lots=1)]
+        strategy = [Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=0 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=1 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.PUT, tranx_type=TranxType.BUY, strike=2 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.PUT, tranx_type=TranxType.BUY, strike=-1 * strike_diff, lots=1, expiry_date=expiry_date)]
 
         return generate_strategy(strategy, symbol, option_chain_json)
 
     @timeoutable()
-    def short_straddle(symbol, option_chain_json, strike_diff=1):
+    def short_straddle(symbol, option_chain_json, expiry_date, strike_diff=1):
         """
         Calculates the Long call condor
         Sell 1 call at ATM
@@ -175,15 +199,18 @@ class OptionStrategies:
         :param option_chain_json:
         :param strike_diff:
         :return:
+
+        Args:
+            expiry_date:
         """
 
-        strategy = [Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=0 * strike_diff, lots=1),
-                    Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=0 * strike_diff, lots=1)]
+        strategy = [Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=0 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=0 * strike_diff, lots=1, expiry_date=expiry_date)]
 
         return generate_strategy(strategy, symbol, option_chain_json)
 
     @timeoutable()
-    def short_strangle(symbol, option_chain_json, strike_diff=1):
+    def short_strangle(symbol, option_chain_json, expiry_date, strike_diff=1):
         """
         Calculates the Long call condor
         Sell 1 call at above ATM
@@ -192,15 +219,18 @@ class OptionStrategies:
         :param option_chain_json:
         :param strike_diff:
         :return:
+
+        Args:
+            expiry_date:
         """
 
-        strategy = [Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=1 * strike_diff, lots=1),
-                    Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=-1 * strike_diff, lots=1)]
+        strategy = [Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=1 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=-1 * strike_diff, lots=1, expiry_date=expiry_date)]
 
         return generate_strategy(strategy, symbol, option_chain_json)
 
     @timeoutable()
-    def short_guts(symbol, option_chain_json, strike_diff=1):
+    def short_guts(symbol, option_chain_json, expiry_date, strike_diff=1):
         """
         Calculates the Long call condor
         Sell 1 call at below ATM
@@ -209,8 +239,11 @@ class OptionStrategies:
         :param option_chain_json:
         :param strike_diff:
         :return:
+
+        Args:
+            expiry_date:
         """
 
-        strategy = [Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=-1 * strike_diff, lots=1),
-                    Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=1 * strike_diff, lots=1)]
+        strategy = [Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=-1 * strike_diff, lots=1, expiry_date=expiry_date),
+                    Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=1 * strike_diff, lots=1, expiry_date=expiry_date)]
         return generate_strategy(strategy, symbol, option_chain_json)
