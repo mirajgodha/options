@@ -10,6 +10,10 @@ class TranxType(Enum):
     SELL = 1
     BUY = 2
 
+class Expiry(Enum):
+    CURRENT = 0
+    NEXT = 1
+    NEXT_TO_NEXT = 2
 
 class Option:
     def __init__(self, option_type: OptionType, tranx_type: TranxType, strike: int,

@@ -5,6 +5,7 @@ import pandas as pd
 import logging
 
 from dao.Option import TranxType
+from optionStrategyBuilder import expiry_month
 
 logging.basicConfig(level=logging.INFO)
 
@@ -35,8 +36,8 @@ def get_atm_strike(option_chain_json):
 
 
 def get_pe_price(option_chain_json, strike_price, txType):
-    for dictt in option_chain_json['filtered']['data']:
-        if dictt['strikePrice'] == strike_price:
+    for dictt in option_chain_json['records']['data']:
+        if dictt['strikePrice'] == strike_price and dictt['expiryDate'] == expiry_month:
             if txType == TranxType.SELL:
                 pe_price = dictt['PE']['bidprice']
             else:
@@ -48,8 +49,8 @@ def get_pe_price(option_chain_json, strike_price, txType):
 
 
 def get_ce_price(option_chain_json, strike_price,txType):
-    for dictt in option_chain_json['filtered']['data']:
-        if dictt['strikePrice'] == strike_price:
+    for dictt in option_chain_json['records']['data']:
+        if dictt['strikePrice'] == strike_price and dictt['expiryDate'] == expiry_month:
             if txType == TranxType.SELL:
                 ce_price = dictt['CE']['bidprice']
             else :
@@ -103,3 +104,6 @@ def get_lot_size(symbol):
     lot_size: int = int(lot_sizes[lot_sizes["SYMBOL"] == symbol].iloc[0, 2])
 
     return lot_size
+
+def get_expiry_date(wihch_month):
+    return expiry_list("RELIANCE","list")[wihch_month]

@@ -47,7 +47,7 @@ def reduce_pl_strike_list(data):
     return result
 
 
-def clear_df(df):
+def clear_df(df, sort_by=['MaxLoss', 'PremiumCredit'],sort_order=[False, False]):
     """
     Clears the df by removing all the columns which just contains the value 0 in all rows.
     Also removes the columns which do not contain any value or empty string or NAN
@@ -60,7 +60,7 @@ def clear_df(df):
     # filter for rows where all columns containing 'price' have values greater than 0
     # df = df[df.apply(lambda row: all(row[col] > 0 for col in row.index if 'price' in col and df[col].dtype != 'object'), axis=1)]
 
-    df_sorted = df.sort_values(by=['MaxLoss', 'PremiumCredit'], ascending=[False, False])
+    df_sorted = df.sort_values(by=sort_by, ascending=sort_order)
     return df_sorted
 
 

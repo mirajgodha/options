@@ -2,13 +2,15 @@ import datetime
 import logging
 import pandas as pd
 
-from util.nsepythonUtil import get_fno_stocks, nse_optionchain
+from dao.Option import Expiry
+from util.nsepythonUtil import get_fno_stocks, nse_optionchain, get_expiry_date
 from util.optionStrategies import OptionStrategies
 from util.utils import clear_df, concat_df
 
+# Expiry month for which we want to run the utility
+expiry_month = get_expiry_date(Expiry.NEXT)
 test_run = False
 write_to_file = True
-
 
 excel_columns = ['Stock', 'PremiumCredit', 'MaxProfit', 'MaxLoss',
                  'CE_sell_price', 'CE_sell_strike',
@@ -65,8 +67,8 @@ def write_to_excel():
     short_iron_butterfly_df = clear_df(short_iron_butterfly_df)
     short_put_butterfly_df = clear_df(short_put_butterfly_df)
     short_put_condor_df = clear_df(short_put_condor_df)
-    short_straddle_df = clear_df(short_straddle_df)
-    short_strangle_df = clear_df(short_strangle_df)
+    short_straddle_df = clear_df(short_straddle_df, sort_by=['MaxProfit', 'PremiumCredit'], sort_order=[False, False])
+    short_strangle_df = clear_df(short_strangle_df, sort_by=['MaxProfit', 'PremiumCredit'], sort_order=[False, False])
 
     if write_to_file:
         output_file = './data/output/' + datetime.datetime.now().strftime("%Y-%m-%d") + '.xlsx'
@@ -82,6 +84,7 @@ def write_to_excel():
             short_put_condor_df.to_excel(writer, sheet_name="short_put_condor_df")
             short_straddle_df.to_excel(writer, sheet_name="short_straddle_df")
             short_strangle_df.to_excel(writer, sheet_name="short_strangle_df")
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
@@ -108,12 +111,15 @@ if __name__ == '__main__':
                 # Add the new row to the DataFrame with index=0
                 long_call_condor_df = concat_df(long_call_condor_df,
                                                 OptionStrategies.long_call_condor(symbol, option_chain_json,
+                                                                                  strike_diff=2,
                                                                                   timeout=20))
                 long_iron_butterfly_df = concat_df(long_iron_butterfly_df,
                                                    OptionStrategies.long_iron_butterfly(symbol, option_chain_json,
+                                                                                        strike_diff=2,
                                                                                         timeout=20))
                 long_put_condor_df = concat_df(long_put_condor_df,
                                                OptionStrategies.long_put_condor(symbol, option_chain_json, timeout=20))
+
                 short_call_butterfly_df = concat_df(short_call_butterfly_df,
                                                     OptionStrategies.short_call_butterfly(symbol, option_chain_json,
                                                                                           timeout=20))
@@ -122,6 +128,7 @@ if __name__ == '__main__':
                                                                                     timeout=20))
                 short_guts_df = concat_df(short_guts_df,
                                           OptionStrategies.short_guts(symbol, option_chain_json, timeout=20))
+
                 short_iron_butterfly_df = concat_df(short_iron_butterfly_df,
                                                     OptionStrategies.short_iron_butterfly(symbol, option_chain_json,
                                                                                           timeout=20))
@@ -133,11 +140,14 @@ if __name__ == '__main__':
                                                                                   timeout=20))
                 short_straddle_df = concat_df(short_straddle_df,
                                               OptionStrategies.short_straddle(symbol, option_chain_json, timeout=20))
+
                 short_strangle_df = concat_df(short_strangle_df,
-                                              OptionStrategies.short_strangle(symbol, option_chain_json, timeout=20))
+                                              OptionStrategies.short_strangle(symbol, option_chain_json,
+                                                                              strike_diff=2,
+                                                                              timeout=20))
 
                 # Write all the outputs as exit in between misses all the data
-                write_to_excel()
+                # write_to_excel()
 
             except Exception as ex:
                 # Many times the nse website response gets stuck an results in whole program halts
