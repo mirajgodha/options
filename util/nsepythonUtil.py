@@ -9,6 +9,7 @@ from dao.Option import TranxType
 logging.basicConfig(level=logging.INFO)
 
 lot_sizes = pd.DataFrame()
+india_vix = 0
 
 
 # ------------
@@ -42,10 +43,11 @@ def get_pe_price(option_chain_json, strike_price, txType, expiry_date):
                 pe_price = dictt['PE']['bidprice']
             else:
                 pe_price = dictt['PE']['askPrice']
-            return pe_price
+            pe_iv = dictt['PE']['impliedVolatility']
+            return pe_price, pe_iv
     else:
         print(f"No instrument found with the given strike {strike_price}.")
-        return 0
+        return 0, 0
 
 
 def get_ce_price(option_chain_json, strike_price, txType, expiry_date):
@@ -55,10 +57,11 @@ def get_ce_price(option_chain_json, strike_price, txType, expiry_date):
                 ce_price = dictt['CE']['bidprice']
             else:
                 ce_price = dictt['CE']['askPrice']
-            return ce_price
+            ce_iv = dictt['CE']['impliedVolatility']
+            return ce_price, ce_iv
     else:
         print(f"No instrument found with the given strike {strike_price}.")
-        return 0
+        return 0, 0
 
 
 def get_fno_stocks():
@@ -73,8 +76,20 @@ def get_fno_stocks():
 
 
 @timeoutable()
-def nse_optionchain(symbol):
+def get_optionchain(symbol):
     return nse_optionchain_scrapper(symbol)
+
+
+def get_ltp(option_chain_json):
+    """
+    Returns the last traded price of the stock
+    Args:
+        option_chain_json:
+
+    Returns:
+
+    """
+    return option_chain_json["records"]["underlyingValue"]
 
 
 def get_strike_price_list(option_chain_json):
@@ -109,4 +124,56 @@ def get_lot_size(symbol):
 
 
 def get_expiry_date(wihch_month):
+    """
+    Returns the expiry date for the given expiry month
+    Args:
+        wihch_month:
+
+    Returns:
+
+    """
     return expiry_list("RELIANCE", "list")[wihch_month.value]
+
+
+def get_india_vix():
+    """
+    Returns the india vix value
+    Returns:
+
+    """
+    global india_vix
+    if india_vix == 0:
+        india_vix = indiavix()
+    return india_vix
+
+
+def get_black_scholes_dexter(S0, X, t, σ="", r=10, q=0.0, td=365):
+    if σ == "": σ = get_india_vix()
+    if σ == 0: σ = get_india_vix()
+
+    S0, X, σ, r, q, t = float(S0), float(X), float(σ / 100), float(r / 100), float(q / 100), float(t / td)
+    # https://unofficed.com/black-scholes-model-options-calculator-google-sheet/
+
+    d1 = (math.log(S0 / X) + (r - q + 0.5 * σ ** 2) * t) / (σ * math.sqrt(t))
+    # stackoverflow.com/questions/34258537/python-typeerror-unsupported-operand-types-for-float-and-int
+
+    # stackoverflow.com/questions/809362/how-to-calculate-cumulative-normal-distribution
+    Nd1 = (math.exp((-d1 ** 2) / 2)) / math.sqrt(2 * math.pi)
+    d2 = d1 - σ * math.sqrt(t)
+    Nd2 = norm.cdf(d2)
+    call_theta = (-((S0 * σ * math.exp(-q * t)) / (2 * math.sqrt(t)) * (1 / (math.sqrt(2 * math.pi))) * math.exp(
+        -(d1 * d1) / 2)) - (r * X * math.exp(-r * t) * norm.cdf(d2)) + (q * math.exp(-q * t) * S0 * norm.cdf(d1))) / td
+    put_theta = (-((S0 * σ * math.exp(-q * t)) / (2 * math.sqrt(t)) * (1 / (math.sqrt(2 * math.pi))) * math.exp(
+        -(d1 * d1) / 2)) + (r * X * math.exp(-r * t) * norm.cdf(-d2)) - (
+                         q * math.exp(-q * t) * S0 * norm.cdf(-d1))) / td
+    call_premium = math.exp(-q * t) * S0 * norm.cdf(d1) - X * math.exp(-r * t) * norm.cdf(d1 - σ * math.sqrt(t))
+    put_premium = X * math.exp(-r * t) * norm.cdf(-d2) - math.exp(-q * t) * S0 * norm.cdf(-d1)
+    call_delta = math.exp(-q * t) * norm.cdf(d1)
+    put_delta = math.exp(-q * t) * (norm.cdf(d1) - 1)
+    gamma = (math.exp(-r * t) / (S0 * σ * math.sqrt(t))) * (1 / (math.sqrt(2 * math.pi))) * math.exp(-(d1 * d1) / 2)
+    vega = ((1 / 100) * S0 * math.exp(-r * t) * math.sqrt(t)) * (
+            1 / (math.sqrt(2 * math.pi)) * math.exp(-(d1 * d1) / 2))
+    call_rho = (1 / 100) * X * t * math.exp(-r * t) * norm.cdf(d2)
+    put_rho = (-1 / 100) * X * t * math.exp(-r * t) * norm.cdf(-d2)
+
+    return call_theta, put_theta, call_premium, put_premium, call_delta, put_delta, gamma, vega, call_rho, put_rho

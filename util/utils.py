@@ -1,5 +1,6 @@
 import inspect
 import logging
+from datetime import datetime, date
 
 from dao.Option import Option, OptionType, TranxType
 import pandas as pd
@@ -57,8 +58,8 @@ def clear_df(df, sort_by=['MaxLoss', 'PremiumCredit'], sort_order=[False, False]
     # Remove columns which do not contain any value for this strategy
     df = df.drop(df.columns[(df == 0).all() | (df.isna().all())], axis=1)
 
-    # filter for rows where all columns containing 'price' have values greater than 0
-    # df = df[df.apply(lambda row: all(row[col] > 0 for col in row.index if 'price' in col and df[col].dtype != 'object'), axis=1)]
+    # filter for rows where all columns containing 'price' keyword and have values greater than 0
+    df = df.loc[~df.filter(like='price').eq(0).any(axis=1)]
 
     try:
         df_sorted = df.sort_values(by=sort_by, ascending=sort_order)
@@ -93,3 +94,19 @@ def get_list_option_strategies():
     # Print the function names
     for name in function_names:
         print(name)
+
+
+def get_days_to_expiry(expiry_date):
+    """
+    Returns the number of days left to expiry
+    Args:
+        expiry_date:
+
+    Returns:
+
+    """
+    # Calculate the difference between the dates
+    delta = datetime.strptime(expiry_date, "%d-%b-%Y").date() - date.today()
+
+    # Extract the number of days between the dates
+    return delta.days

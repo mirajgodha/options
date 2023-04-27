@@ -1,7 +1,9 @@
 import logging
 from typing import List
 
+from util.nsepythonUtil import get_black_scholes_dexter
 from util.optionStrategies import Option, OptionType, TranxType
+from util.utils import get_days_to_expiry
 
 
 def option_pl_calculator(option: Option, expiry_price, lot_size):
@@ -51,7 +53,7 @@ def calc_profit_loss(option_list: List[Option], lot_size, strike_price_list):
             premium_received = (premium_received + option.premium) * option.lots
 
     premium_received = round(premium_received * lot_size, 0)
-    logging.info(f"Premium received {premium_received}")
+    logging.debug(f"Premium received {premium_received}")
     max_profit = max(premium_received, 0)
     max_loss = min(premium_received, 0)
     pl_on_strikes = []
@@ -68,3 +70,66 @@ def calc_profit_loss(option_list: List[Option], lot_size, strike_price_list):
         logging.debug(f"P&L {pl} for expiry_price {expiry_price}")
 
     return round(max_profit / 10, 0) * 10, round(max_loss / 10, 0) * 10, premium_received, pl_on_strikes
+
+
+def calc_greeks(option_list: List[Option], lot_size, ltp):
+    """
+    Calcualtes the greeks for the given option strategy
+    Args:
+        option_list:
+        lot_size:
+
+    Returns:
+
+    """
+    delta, theta, total_delta, total_theta = 0.0, 0.0, 0.0, 0.0
+    for option in option_list:
+        # Calculate the greeks based on the transaction type
+
+        call_theta, put_theta, call_premium, put_premium, call_delta, put_delta, gamma, vega, call_rho, put_rho = \
+            get_black_scholes_dexter(
+                ltp, option.strike_price, get_days_to_expiry(option.expiry_date),
+                option.iv, r=10, q=0.0, td=365)
+
+        logging.debug(f"For option: {option}")
+        logging.debug(f"Greeks are Call Theta: {call_theta:.3f}, Put Theta: {put_theta:.3f}, Call Premium: "
+                     f"{call_premium:.3f}, Put Premium: {put_premium:.3f}, Call Delta: {call_delta:.3f}, "
+                     f"Put Delta: {put_delta:.3f}, Gamma: {gamma:.3f}, Vega: {vega:.3f}, "
+                     f"Call Rho: {call_rho:.3f}, Put Rho: {put_rho:.3f}")
+
+        if option.option_type == OptionType.PUT:
+            if option.tranx_type == TranxType.SELL:
+                theta += -1 * put_theta
+                delta += -1 * put_delta
+            else:
+                theta += put_theta
+                delta += put_delta
+        if option.option_type == OptionType.CALL:
+            if option.tranx_type == TranxType.SELL:
+                theta += -1 * call_theta
+                delta += -1 * call_delta
+            else:
+                theta += call_theta
+                delta += call_delta
+
+    return delta, theta, delta * lot_size, theta * lot_size
+
+
+def get_iv(option_list: List[Option]):
+    """
+    Returns the avg iv of all option trades
+    Args:
+        option_list:
+
+    Returns:
+
+    """
+    sum_iv = 0
+    total = 0
+    for option in option_list:
+        sum_iv += option.iv
+        if option.iv != 0:
+            total += 1
+    if total == 0:
+        total = 1
+    return sum_iv / total

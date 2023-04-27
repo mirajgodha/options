@@ -19,7 +19,7 @@ class Expiry(Enum):
 
 class Option:
     def __init__(self, option_type: OptionType, tranx_type: TranxType, strike: int, expiry_date,
-                 strike_price: float = 0, premium: float = 0, lots: int = 1):
+                 strike_price: float = 0, premium: float = 0, lots: int = 1, iv: float = 0):
         """
         inti constractor
         :param option_type:
@@ -35,9 +35,11 @@ class Option:
         self.lots: lots = lots
         self.strike_price = strike_price
         self.premium = premium
+        self.iv = iv
 
     def __str__(self):
         return f"Option Type: {self.option_type}, Transaction Type: {self.tranx_type}, " \
                f"Expiry Date: {self.expiry_date}, " \
                f"Strike Price: {self.strike_price}, Premium: {self.premium}, " \
-               f"Lots: {self.lots}"
+               f"Lots: {self.lots}, " \
+               f"IV: {self.iv}"

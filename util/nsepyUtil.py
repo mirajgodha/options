@@ -9,9 +9,11 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 lot_sizes = pd.DataFrame()
-#----------------------
+
+
+# ----------------------
 # This class contains utility method based on nsepy package
-#------------------
+# ------------------
 
 def find_atm_price(tick_start_price, tick_size, stock_price):
     """
