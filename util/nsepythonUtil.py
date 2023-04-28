@@ -150,6 +150,7 @@ def get_india_vix():
 def get_black_scholes_dexter(S0, X, t, σ="", r=10, q=0.0, td=365):
     if σ == "": σ = get_india_vix()
     if σ == 0: σ = get_india_vix()
+    if t == 0: t = 1 #it gives error on last day of expiry, when t is zero.
 
     S0, X, σ, r, q, t = float(S0), float(X), float(σ / 100), float(r / 100), float(q / 100), float(t / td)
     # https://unofficed.com/black-scholes-model-options-calculator-google-sheet/

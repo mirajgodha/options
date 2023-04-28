@@ -8,7 +8,7 @@ from util.optionStrategies import OptionStrategies
 from util.utils import clear_df, concat_df
 
 # Expiry month for which we want to run the utility
-expiry_month = Expiry.NEXT
+expiry_month = Expiry.CURRENT
 test_run = False
 write_to_file = True
 
@@ -65,8 +65,8 @@ def write_to_excel():
     long_iron_butterfly_df = clear_df(long_iron_butterfly_df)
     long_put_condor_df = clear_df(long_put_condor_df)
     short_call_butterfly_df = clear_df(short_call_butterfly_df)
-    short_call_condor_df = clear_df(short_call_condor_df)
-    short_guts_df = clear_df(short_guts_df)
+    short_call_condor_df = clear_df(short_call_condor_df, sort_by=['MaxProfit', 'MaxLoss'], sort_order=[False, True])
+    short_guts_df = clear_df(short_guts_df, sort_by=['PremiumCredit', 'MaxLoss'], sort_order=[False, True])
     short_iron_butterfly_df = clear_df(short_iron_butterfly_df)
     short_put_butterfly_df = clear_df(short_put_butterfly_df)
     short_put_condor_df = clear_df(short_put_condor_df)
@@ -76,17 +76,19 @@ def write_to_excel():
     if write_to_file:
         output_file = './data/output/' + datetime.datetime.now().strftime("%Y-%m-%d") + '.xlsx'
         with pd.ExcelWriter(output_file) as writer:
-            long_call_condor_df.to_excel(writer, sheet_name="long_call_condor_df")
-            long_iron_butterfly_df.to_excel(writer, sheet_name="long_iron_butterfly_df")
-            long_put_condor_df.to_excel(writer, sheet_name="long_put_condor_df")
-            short_call_butterfly_df.to_excel(writer, sheet_name="short_call_butterfly_df")
-            short_call_condor_df.to_excel(writer, sheet_name="short_call_condor_df")
-            short_guts_df.to_excel(writer, sheet_name="short_guts_df")
-            short_iron_butterfly_df.to_excel(writer, sheet_name="short_iron_butterfly_df")
-            short_put_butterfly_df.to_excel(writer, sheet_name="short_put_butterfly_df")
-            short_put_condor_df.to_excel(writer, sheet_name="short_put_condor_df")
             short_straddle_df.to_excel(writer, sheet_name="short_straddle_df")
             short_strangle_df.to_excel(writer, sheet_name="short_strangle_df")
+            short_guts_df.to_excel(writer, sheet_name="short_guts_df")
+            long_call_condor_df.to_excel(writer, sheet_name="long_call_condor_df")
+            long_put_condor_df.to_excel(writer, sheet_name="long_put_condor_df")
+            short_call_condor_df.to_excel(writer, sheet_name="short_call_condor_df")
+            short_put_condor_df.to_excel(writer, sheet_name="short_put_condor_df")
+            long_iron_butterfly_df.to_excel(writer, sheet_name="long_iron_butterfly_df")
+            short_iron_butterfly_df.to_excel(writer, sheet_name="short_iron_butterfly_df")
+            short_call_butterfly_df.to_excel(writer, sheet_name="short_call_butterfly_df")
+            short_put_butterfly_df.to_excel(writer, sheet_name="short_put_butterfly_df")
+
+
 
 
 # Press the green button in the gutter to run the script.
