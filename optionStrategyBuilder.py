@@ -70,7 +70,7 @@ def write_to_excel():
     short_iron_butterfly_df = clear_df(short_iron_butterfly_df)
     short_put_butterfly_df = clear_df(short_put_butterfly_df)
     short_put_condor_df = clear_df(short_put_condor_df)
-    short_straddle_df = clear_df(short_straddle_df, sort_by=['MaxProfit', 'PremiumCredit'], sort_order=[False, False])
+    short_straddle_df = clear_df(short_straddle_df, sort_by=['IV', 'PremiumCredit'], sort_order=[False, False])
     short_strangle_df = clear_df(short_strangle_df, sort_by=['MaxProfit', 'PremiumCredit'], sort_order=[False, False])
 
     if write_to_file:

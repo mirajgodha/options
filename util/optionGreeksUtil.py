@@ -82,7 +82,7 @@ def implied_volatility(option_price, S, K, T, r, option: OptionType, sigma):
     :param option_price: Option price
     :param S: Underlying price (per share): S;
     :param K: Strike price of the option (per share): K;
-    :param T: Time to maturity (days): T;
+    :param T: Time to expiry (days): T;
     :param r: Continuously compounding risk-free interest rate: r in %
     :param option:
     :param sigma: Volatility: sigma in %
@@ -123,6 +123,3 @@ def test_greek():
     sigma = 10.94
 
     print("The implied volatility is " + str(implied_volatility(Price, S, K, T, r, option, sigma)) + " %.")
-
-
-test_greek()

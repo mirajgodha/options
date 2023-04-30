@@ -1,10 +1,5 @@
-import inspect
-import logging
-from datetime import datetime, date
-
 from dao.Option import Option, OptionType, TranxType
 import pandas as pd
-import numpy as np
 from util import optionStrategies
 
 
@@ -96,17 +91,3 @@ def get_list_option_strategies():
         print(name)
 
 
-def get_days_to_expiry(expiry_date):
-    """
-    Returns the number of days left to expiry
-    Args:
-        expiry_date:
-
-    Returns:
-
-    """
-    # Calculate the difference between the dates
-    delta = datetime.strptime(expiry_date, "%d-%b-%Y").date() - date.today()
-
-    # Extract the number of days between the dates
-    return delta.days

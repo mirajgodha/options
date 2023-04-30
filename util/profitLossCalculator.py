@@ -1,9 +1,8 @@
 import logging
 from typing import List
 
-from util.nsepythonUtil import get_black_scholes_dexter
+from util.nsepythonUtil import get_black_scholes_dexter, get_days_to_expiry
 from util.optionStrategies import Option, OptionType, TranxType
-from util.utils import get_days_to_expiry
 
 
 def option_pl_calculator(option: Option, expiry_price, lot_size):
@@ -112,12 +111,13 @@ def calc_greeks(option_list: List[Option], lot_size, ltp):
                 theta += call_theta
                 delta += call_delta
 
-    return delta, theta, delta * lot_size, theta * lot_size
+    return delta, theta, round(delta * lot_size,0), round(theta * lot_size,0)
 
 
 def get_iv(option_list: List[Option]):
     """
     Returns the avg iv of all option trades
+    Rounded to nearest integer
     Args:
         option_list:
 
@@ -132,4 +132,4 @@ def get_iv(option_list: List[Option]):
             total += 1
     if total == 0:
         total = 1
-    return sum_iv / total
+    return round(sum_iv / total,0)

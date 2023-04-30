@@ -1,10 +1,12 @@
+from datetime import datetime, date
 from stopit import threading_timeoutable as timeoutable
 
 from nsepython import *
 import pandas as pd
 import logging
 
-from dao.Option import TranxType
+from dao.Option import TranxType, OptionType
+from util.optionGreeksUtil import implied_volatility
 
 logging.basicConfig(level=logging.INFO)
 
@@ -34,34 +36,6 @@ def get_atm_strike(option_chain_json):
     strike_price_list = [x['strikePrice'] for x in data]
     atm_strike = sorted([[round(abs(ltp - i), 2), i] for i in strike_price_list])[0][1]
     return atm_strike
-
-
-def get_pe_price(option_chain_json, strike_price, txType, expiry_date):
-    for dictt in option_chain_json['records']['data']:
-        if dictt['strikePrice'] == strike_price and dictt['expiryDate'] == expiry_date:
-            if txType == TranxType.SELL:
-                pe_price = dictt['PE']['bidprice']
-            else:
-                pe_price = dictt['PE']['askPrice']
-            pe_iv = dictt['PE']['impliedVolatility']
-            return pe_price, pe_iv
-    else:
-        print(f"No instrument found with the given strike {strike_price}.")
-        return 0, 0
-
-
-def get_ce_price(option_chain_json, strike_price, txType, expiry_date):
-    for dictt in option_chain_json['records']['data']:
-        if dictt['strikePrice'] == strike_price and dictt['expiryDate'] == expiry_date:
-            if txType == TranxType.SELL:
-                ce_price = dictt['CE']['bidprice']
-            else:
-                ce_price = dictt['CE']['askPrice']
-            ce_iv = dictt['CE']['impliedVolatility']
-            return ce_price, ce_iv
-    else:
-        print(f"No instrument found with the given strike {strike_price}.")
-        return 0, 0
 
 
 def get_fno_stocks():
@@ -135,6 +109,22 @@ def get_expiry_date(wihch_month):
     return expiry_list("RELIANCE", "list")[wihch_month.value]
 
 
+def get_days_to_expiry(expiry_date):
+    """
+    Returns the number of days left to expiry
+    Args:
+        expiry_date:
+
+    Returns:
+
+    """
+    # Calculate the difference between the dates
+    delta = datetime.datetime.strptime(expiry_date, "%d-%b-%Y").date() - date.today()
+
+    # Extract the number of days between the dates
+    return delta.days
+
+
 def get_india_vix():
     """
     Returns the india vix value
@@ -147,10 +137,63 @@ def get_india_vix():
     return india_vix
 
 
+def get_pe_price(option_chain_json, strike_price, txType, expiry_date):
+    """
+    Returns the PE price for the given stirke price
+    :param option_chain_json:
+    :param strike_price:
+    :param txType: It is used to get the correct price at which trade can happen, as many times there is a huge
+                    difference between bid and ask price. So bid price is take when we want to sell and
+                    ask price is considered when we want o buy
+    :param expiry_date:
+    :return:
+    """
+    for dictt in option_chain_json['records']['data']:
+        if dictt['strikePrice'] == strike_price and dictt['expiryDate'] == expiry_date:
+            if txType == TranxType.SELL:
+                pe_price = dictt['PE']['bidprice']
+            else:
+                pe_price = dictt['PE']['askPrice']
+            pe_iv = dictt['PE']['impliedVolatility']
+            if pe_iv == 0:
+                pe_iv = implied_volatility(pe_price, get_ltp(option_chain_json), strike_price,
+                                           get_days_to_expiry(expiry_date), 10, OptionType.PUT, get_india_vix())
+            return pe_price, pe_iv
+    else:
+        print(f"No instrument found with the given strike {strike_price}.")
+        return 0, 0
+
+
+
+def get_ce_price(option_chain_json, strike_price, txType, expiry_date):
+    """
+    Returns the CE price for the given details
+    :param option_chain_json:
+    :param strike_price:
+    :param txType:
+    :param expiry_date:
+    :return:
+    """
+    for dictt in option_chain_json['records']['data']:
+        if dictt['strikePrice'] == strike_price and dictt['expiryDate'] == expiry_date:
+            if txType == TranxType.SELL:
+                ce_price = dictt['CE']['bidprice']
+            else:
+                ce_price = dictt['CE']['askPrice']
+            ce_iv = dictt['CE']['impliedVolatility']
+            if ce_iv == 0:
+                ce_iv = implied_volatility(ce_price, get_ltp(option_chain_json), strike_price,
+                                           get_days_to_expiry(expiry_date), 10, OptionType.CALL, get_india_vix())
+            return ce_price, ce_iv
+    else:
+        print(f"No instrument found with the given strike {strike_price}.")
+        return 0, 0
+
+
 def get_black_scholes_dexter(S0, X, t, σ="", r=10, q=0.0, td=365):
     if σ == "": σ = get_india_vix()
     if σ == 0: σ = get_india_vix()
-    if t == 0: t = 1 #it gives error on last day of expiry, when t is zero.
+    if t == 0: t = 1  # it gives error on last day of expiry, when t is zero.
 
     S0, X, σ, r, q, t = float(S0), float(X), float(σ / 100), float(r / 100), float(q / 100), float(t / td)
     # https://unofficed.com/black-scholes-model-options-calculator-google-sheet/
@@ -178,3 +221,4 @@ def get_black_scholes_dexter(S0, X, t, σ="", r=10, q=0.0, td=365):
     put_rho = (-1 / 100) * X * t * math.exp(-r * t) * norm.cdf(-d2)
 
     return call_theta, put_theta, call_premium, put_premium, call_delta, put_delta, gamma, vega, call_rho, put_rho
+
