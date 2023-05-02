@@ -70,8 +70,8 @@ def write_to_excel():
     short_iron_butterfly_df = clear_df(short_iron_butterfly_df)
     short_put_butterfly_df = clear_df(short_put_butterfly_df)
     short_put_condor_df = clear_df(short_put_condor_df)
-    short_straddle_df = clear_df(short_straddle_df, sort_by=['IV', 'PremiumCredit'], sort_order=[False, False])
-    short_strangle_df = clear_df(short_strangle_df, sort_by=['MaxProfit', 'PremiumCredit'], sort_order=[False, False])
+    short_straddle_df = clear_df(short_straddle_df, sort_by=['MaxProfit', 'PremiumCredit'], sort_order=[False, False])
+    short_strangle_df = clear_df(short_strangle_df, sort_by=['IV', 'PremiumCredit'], sort_order=[False, False])
 
     if write_to_file:
         output_file = './data/output/' + datetime.datetime.now().strftime("%Y-%m-%d") + '.xlsx'
@@ -161,7 +161,7 @@ if __name__ == '__main__':
 
                 short_strangle_df = concat_df(short_strangle_df,
                                               OptionStrategies.short_strangle(symbol, option_chain_json, expiry_date,
-                                                                              strike_diff=4,
+                                                                              strike_diff=3,
                                                                               timeout=20))
 
                 # Write all the outputs as exit in between misses all the data

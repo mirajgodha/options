@@ -1,3 +1,5 @@
+import logging
+
 from numpy import sqrt, log, exp, pi
 from scipy.stats import norm
 import numpy as np
@@ -91,7 +93,7 @@ def implied_volatility(option_price, S, K, T, r, option: OptionType, sigma):
     T = T / 365  # convert to years
     r = r / 100  # convert to decimals
     sigma = sigma / 100  # convert to decimals
-    print(np.array([['option_price', 'S', 'K', 'T', 'r', 'sigma'], [option_price, S, K, T, r, sigma]]))
+    logging.debug(np.array([['option_price', 'S', 'K', 'T', 'r', 'sigma'], [option_price, S, K, T, r, sigma]]))
     if option == OptionType.CALL:
         while sigma < 1:
             Price_implied = S * norm.cdf(d1(S, K, T, r, sigma)) - K * exp(-r * T) * norm.cdf(d2(S, K, T, r, sigma))
