@@ -39,6 +39,8 @@ Columns explanation:
 
 It will also calcualte the greeks for the option price:
 
+Below greeks are calcualted for the whole option strategy 
+
 - IV - Implied Volatility for the whole strategy.
 - Theta - Theta is the measure of the sensitivity of the option price relative to the option's time to maturity. If the option's time to maturity goes down in one day, the option's price will change by the theta amount.
 - Total Theta - Total theta decay amount for the whole option lot in the strategy
