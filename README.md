@@ -37,6 +37,15 @@ Columns explanation:
 - pl_on_strikes - It gives you a range of pices and what is the profit and loss in that range. E.g. [(-430.0, 1120, 1420), (2320.0, 1420, 1440), (-430.0, 1440, 1800)] -- This tells at expirty if stock closes between 1120 to 1420 you will incur a loss of 430 Rs and if stock closes between 1420 and 1440 you will get a profit of 2320 Rs. 
 - Strikes - Different strikes traded for the options. E.g. [1120, 1140, 1160, 1180, 1190, 1200, 1210, 1220, 1230, 1240, 1250, 1260, 1270, 1280, 1290, 1300, 1310, 1320, 1330, 1340, 1350, 1360, 1370, 1380, 1390, 1400, 1410, 1420, 1430, 1440, 1450, 1460, 1470, 1480, 1490, 1500, 1510, 1520, 1530, 1540, 1550, 1560, 1570, 1580, 1590, 1600, 1610, 1620, 1630, 1640, 1660, 1680, 1700, 1720, 1740, 1760, 1780, 1800]
 
+It will also calcualte the greeks for the option price:
+
+- IV - Implied Volatility for the whole strategy.
+- Theta - Theta is the measure of the sensitivity of the option price relative to the option's time to maturity. If the option's time to maturity goes down in one day, the option's price will change by the theta amount.
+- Total Theta - Total theta decay amount for the whole option lot in the strategy
+- Delta - It's a measure of the sensitivity of an option's price changes that are relative to the changes in the underlying asset' prices.
+- Total Delta - Total delta for the whole option lots in the strategy
+- Gamma  - Gamma is a measure of the Delta's change relative to the changes in the price of the underlying asset.
+- Vega - Vega is an option Greek that would measure the sensitivity of the option price that is relative to the volatility of the asset
 
 ## Option Strategies
 
