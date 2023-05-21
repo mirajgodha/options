@@ -37,9 +37,11 @@ def generate_strategy(strategy: [Option], symbol, option_chain_json):
     max_profit, max_loss, premium_received, pl_on_strikes = calc_profit_loss(strategy, lot_size, strike_price_list)
     delta, theta, total_delta, total_theta = calc_greeks(strategy, lot_size, ltp)
     iv = get_iv(strategy)
+    premium_credit = round(premium_received / lot_size, 0)
+    precent_premium = round(premium_credit / ltp, 4)
 
     # Create a DF so that it can be printed into Excel.
-    df = {'Stock': symbol, 'PremiumCredit': premium_received, 'MaxProfit': max_profit, 'MaxLoss': max_loss,
+    df = {'Stock': symbol, 'PremiumCreditTotal': premium_received, 'MaxProfit': max_profit, 'MaxLoss': max_loss,
           'LTP': ltp,
           'CE_sell_price': get_nth_option(strategy, condition=lambda
               x: x.option_type == OptionType.CALL and x.tranx_type == TranxType.SELL).premium,
@@ -89,6 +91,8 @@ def generate_strategy(strategy: [Option], symbol, option_chain_json):
               x: x.option_type == OptionType.PUT and x.tranx_type == TranxType.BUY, n=3).premium,
           'PE_buy_strike_2': get_nth_option(strategy, condition=lambda
               x: x.option_type == OptionType.PUT and x.tranx_type == TranxType.BUY, n=3).strike_price,
+          'Premium Credit': premium_credit,
+          '# Premium': precent_premium,
           'lot_size': lot_size,
           'IV': iv,
           'delta': delta,

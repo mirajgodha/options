@@ -18,9 +18,11 @@ def get_banknifty():
                 start=date(start_day.year, start_day.month, start_day.day),
                 end=date(end_day.year, end_day.month, end_day.day),
                                index=True)
+
     print(tabulate(banknifty_df, headers='keys'))
+
     output_file = './data/output/banknifty' + '.xlsx'
     with pd.ExcelWriter(output_file) as writer:
-        banknifty_df.to_excel(writer, sheet_name='PE prices')
+        banknifty_df.to_excel(writer, sheet_name='Bank Nifty')
 
 get_banknifty()
