@@ -92,7 +92,7 @@ def generate_strategy(strategy: [Option], symbol, option_chain_json):
           'PE_buy_strike_2': get_nth_option(strategy, condition=lambda
               x: x.option_type == OptionType.PUT and x.tranx_type == TranxType.BUY, n=3).strike_price,
           'Premium Credit': premium_credit,
-          '# Premium': precent_premium,
+          '% Premium': precent_premium,
           'lot_size': lot_size,
           'IV': iv,
           'delta': delta,

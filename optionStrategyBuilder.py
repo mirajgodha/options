@@ -25,7 +25,7 @@ excel_columns = ['Stock', 'PremiumCreditTotal', 'MaxProfit', 'MaxLoss', 'LTP',
                  'PE_sell_price_2', 'PE_sell_strike_2',
                  'CE_buy_price_2', 'CE_buy_strike_2',
                  'PE_buy_price_2', 'PE_buy_strike_2',
-                 '# Premium', 'Premium Credit',
+                 '% Premium', 'Premium Credit',
                  'IV',
                  'delta', 'theta',
                  'total_delta', 'total_theta',
@@ -71,7 +71,7 @@ def write_to_excel():
     short_iron_butterfly_df = clear_df(short_iron_butterfly_df)
     short_put_butterfly_df = clear_df(short_put_butterfly_df)
     short_put_condor_df = clear_df(short_put_condor_df)
-    short_straddle_df = clear_df(short_straddle_df, sort_by=['# Premium', 'PremiumCredit'], sort_order=[False, False])
+    short_straddle_df = clear_df(short_straddle_df, sort_by=['% Premium', 'PremiumCredit'], sort_order=[False, False])
     short_strangle_df = clear_df(short_strangle_df, sort_by=['PremiumCredit', 'IV'], sort_order=[False, False])
 
     if write_to_file:
@@ -162,7 +162,7 @@ if __name__ == '__main__':
 
                 short_strangle_df = concat_df(short_strangle_df,
                                               OptionStrategies.short_strangle(symbol, option_chain_json, expiry_date,
-                                                                              strike_diff=5,
+                                                                              strike_diff=3,
                                                                               timeout=20))
 
                 # Write all the outputs as exit in between misses all the data
