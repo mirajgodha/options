@@ -43,7 +43,7 @@ def reduce_pl_strike_list(data):
     return result
 
 
-def clear_df(df, sort_by=['MaxLoss', 'PremiumCredit'], sort_order=[False, False]):
+def clear_df(df, sort_by=['MaxLoss', 'PremiumCreditTotal'], sort_order=[False, False]):
     """
     Clears the df by removing all the columns which just contains the value 0 in all rows.
     Also removes the columns which do not contain any value or empty string or NAN
@@ -73,6 +73,20 @@ def concat_df(df, row):
     """
     df = pd.concat([df, pd.DataFrame.from_records([row])], ignore_index=True)
     return df
+
+def merge_dataframes(*dfs):
+    """
+    Merge multiple dfs,
+    returns the filterd results, for positive trades
+    :param dfs:
+    :return:
+    """
+    merged_df = pd.concat(dfs, axis=0)
+    filtered_df = merged_df[merged_df['MaxLoss'] > -1000]
+    filtered_df1 = filtered_df[filtered_df['MaxProfit'] > 1000]
+
+    return filtered_df1
+
 
 
 def get_list_option_strategies():

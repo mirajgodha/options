@@ -5,7 +5,7 @@ import pandas as pd
 from dao.Option import Expiry
 from util.nsepythonUtil import get_fno_stocks, get_optionchain, get_expiry_date
 from util.optionStrategies import OptionStrategies
-from util.utils import clear_df, concat_df
+from util.utils import clear_df, concat_df, merge_dataframes
 
 # Expiry month for which we want to run the utility
 expiry_month = Expiry.CURRENT
@@ -43,6 +43,7 @@ short_put_butterfly_df = pd.DataFrame(columns=excel_columns)
 short_put_condor_df = pd.DataFrame(columns=excel_columns)
 short_straddle_df = pd.DataFrame(columns=excel_columns)
 short_strangle_df = pd.DataFrame(columns=excel_columns)
+concated_df = pd.DataFrame(columns=excel_columns)
 
 
 def write_to_excel():
@@ -61,6 +62,7 @@ def write_to_excel():
     global short_put_condor_df
     global short_straddle_df
     global short_strangle_df
+    global concated_df
 
     long_call_condor_df = clear_df(long_call_condor_df)
     long_iron_butterfly_df = clear_df(long_iron_butterfly_df)
@@ -74,11 +76,18 @@ def write_to_excel():
     short_straddle_df = clear_df(short_straddle_df, sort_by=['% Premium', 'PremiumCredit'], sort_order=[False, False])
     short_strangle_df = clear_df(short_strangle_df, sort_by=['PremiumCredit', 'IV'], sort_order=[False, False])
 
+    concated_df = merge_dataframes(long_call_condor_df, long_iron_butterfly_df, long_put_condor_df,
+                                   short_call_butterfly_df, short_call_condor_df, short_guts_df,
+                                   short_iron_butterfly_df, short_put_butterfly_df,
+                                   short_put_condor_df)
+    concated_df = clear_df(concated_df, sort_by=['MaxLoss', 'MaxProfit'], sort_order=[False, False])
+
     if write_to_file:
         output_file = './data/output/' + datetime.datetime.now().strftime("%Y-%m-%d") + '.xlsx'
         with pd.ExcelWriter(output_file) as writer:
             short_straddle_df.to_excel(writer, sheet_name="short_straddle_df")
             short_strangle_df.to_excel(writer, sheet_name="short_strangle_df")
+            concated_df.to_excel(writer, sheet_name="All_Strategies_Profitable")
             short_guts_df.to_excel(writer, sheet_name="short_guts_df")
             long_call_condor_df.to_excel(writer, sheet_name="long_call_condor_df")
             long_put_condor_df.to_excel(writer, sheet_name="long_put_condor_df")
@@ -162,7 +171,7 @@ if __name__ == '__main__':
 
                 short_strangle_df = concat_df(short_strangle_df,
                                               OptionStrategies.short_strangle(symbol, option_chain_json, expiry_date,
-                                                                              strike_diff=3,
+                                                                              strike_diff=5,
                                                                               timeout=20))
 
                 # Write all the outputs as exit in between misses all the data
