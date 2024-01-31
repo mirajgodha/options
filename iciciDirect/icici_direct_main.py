@@ -4,12 +4,21 @@ from breeze_connect import BreezeConnect
 
 import iciciDirect.helpers  as icici_direct_helper
 from datetime import datetime
+import configparser
 
 #Configure the strategy using API Keys and set stoploss/takeprofit level.
 #Login : https://api.icicidirect.com/apiuser/home
-api_key = ""
-api_secret = ""
-api_session = ''
+
+# Create a ConfigParser object
+config = configparser.ConfigParser()
+# Read the configuration file
+config.read('../secreates/config.ini')
+
+# Access values using sections and keys
+api_key = config['ICICI']['api_key']
+api_secret = config['ICICI']['api_secret']
+api_session = config['ICICI']['api_session']
+
 
 #Import the library
 from breeze_connect import BreezeConnect

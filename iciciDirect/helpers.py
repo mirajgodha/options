@@ -55,6 +55,14 @@ def get_threasholds():
 
     return df
 
+def get_secreates():
+    # Specify the path to your Excel file
+    csv_file_path = '../secreates/secreates.csv'
+    # Read the Excel file into a pandas DataFrame
+    df = pd.read_csv(csv_file_path)
+
+    return df
+
 
 def get_pnl_target(response):
     # Code to calculate PnL
