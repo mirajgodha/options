@@ -8,9 +8,10 @@ from util.optionStrategies import OptionStrategies
 from util.utils import clear_df, concat_df, merge_dataframes
 
 # Expiry month for which we want to run the utility
-expiry_month = Expiry.CURRENT
+expiry_month = Expiry.NEXT
 test_run = False
 write_to_file = True
+strike_diff = 8
 
 excel_columns = ['Stock', 'PremiumCreditTotal', 'MaxProfit', 'MaxLoss', 'LTP',
                  'CE_sell_price', 'CE_sell_strike',
@@ -171,7 +172,7 @@ if __name__ == '__main__':
 
                 short_strangle_df = concat_df(short_strangle_df,
                                               OptionStrategies.short_strangle(symbol, option_chain_json, expiry_date,
-                                                                              strike_diff=5,
+                                                                              strike_diff=strike_diff,
                                                                               timeout=20))
 
                 # Write all the outputs as exit in between misses all the data
