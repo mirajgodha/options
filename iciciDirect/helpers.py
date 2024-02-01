@@ -2,6 +2,9 @@
 import datetime
 import pandas as pd
 
+from helper.colours import Colors
+from tabulate import tabulate
+
 
 def is_market_open():
     current_time = datetime.datetime.now().time()
@@ -43,7 +46,21 @@ def calculate_pnl(response):
 
     else:  # If no positions are open
         pnl = None
-    print("Pnl Currently:", df)
+
+    print("Pnl Currently:\n")
+    total_pnl = df['pnl'].sum()
+    if total_pnl > 0:
+        print(f"{Colors.BLUE}Total:: {Colors.GREEN}{total_pnl}{Colors.WHITE}")
+    else:
+        print(f"{Colors.BLUE}Total:: {Colors.RED}{total_pnl}{Colors.WHITE}")
+    print("\n")
+
+    for index, data in df.iterrows():
+        if data['pnl'] > 0:
+            print(f"{data['stock']}: {Colors.GREEN}{data['pnl']}{Colors.WHITE}")
+        if data['pnl'] < 0:
+            print(f"{data['stock']}: {Colors.RED}{data['pnl']}{Colors.WHITE}")
+
     return df
 
 
@@ -64,19 +81,6 @@ def get_secreates():
     return df
 
 
-def get_pnl_target(response):
-    # Code to calculate PnL
-
-    df_threshold = get_threasholds()
-    df_pnl = calculate_pnl(response)
-    df = pd.merge(df_threshold, df_pnl, on='stock')
-
-    print("Pnl Targets:")
-    print(df)
-    profit_or_loss_threshold_reached(df)
-
-    return df
-
 
 # Function to check if profit or loss threshold is reached
 
@@ -93,36 +97,52 @@ def profit_or_loss_threshold_reached(df):
 
     print("\n\n#######################################")
 
-def contract_value(df, threshold):
-    # Code to calculate contract value and if its less than threshold
-    # it will make sense to sq of the contract
-
-    print("\nCHECKING CONTRACT VALUE...")
-    print("\n\n#######################################")
-
-    for index, data in df.iterrows():
-        if float(data['pnl']) > float(threshold):
-            print(f"{data['stock']}: Contract Value is greater than {threshold}")
-        else:
-            print(f"{data['stock']}: Contract Value is less than {threshold}")
-
-    print("\n\n#######################################")
-
 
 def contract_value(response, threshold):
     # Code to calculate contract value and if its less than threshold
     # it will make sense to sq of the contract
 
-    print("\nCHECKING CONTRACT VALUE...")
-    df_to_sq_off_contracts = pd.DataFrame(columns=["stock", "price_left", "pnl" ])
+    # print("\nCHECKING CONTRACT VALUE...")
+    df_to_sq_off_contracts = pd.DataFrame(columns=["stock", "price_left", "pnl","strike_price", "expiry_date", "right" ])
 
     for item in response:
         if item['segment'] == 'fno':
             ltp = float(item['ltp'])
             cost = float(item['average_price'])
             qty = int(item['quantity'])
-            # print((item['ltp'],item['average_price']))
             if item['action'] == 'Sell':
-                value_left = item['ltp'] * item['quantity']
+                value_left = ltp * qty
                 if value_left < threshold:
-                    df_to_sq_off_contracts.append(item)
+                    df_to_sq_off_contracts = \
+                        pd.concat([df_to_sq_off_contracts, pd.DataFrame.from_records(
+                            [{'stock': item['stock_code'],
+                              'price_left': value_left,
+                              'pnl': round((cost - ltp) * qty, 2),
+                              'strike_price': item['strike_price'],
+                              'expiry_date': item['expiry_date'],
+                              'right': item['right']}])]
+                                  ,ignore_index=True)
+    print("\n\n#######################################")
+    print("Contracts to sq off:")
+    print(f'{Colors.GREEN}{df_to_sq_off_contracts}{Colors.WHITE}')
+    return df_to_sq_off_contracts
+
+
+def get_pnl_target(response):
+    # Code to calculate PnL
+
+    df_threshold = get_threasholds()
+    df_pnl = calculate_pnl(response)
+    df = pd.merge(df_threshold, df_pnl, on='stock')
+
+    # print("Pnl Targets:")
+    # print(df)
+    # profit_or_loss_threshold_reached(df)
+
+    #get  the contracts to be sq_offed
+    contract_value(response, 2000)
+
+
+    print("\n\n#######################################")
+
+    return df

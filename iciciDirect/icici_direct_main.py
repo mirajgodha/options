@@ -5,6 +5,14 @@ from breeze_connect import BreezeConnect
 import iciciDirect.helpers  as icici_direct_helper
 from datetime import datetime
 import configparser
+import time
+
+
+# Set the desired wait time in seconds
+wait_time = 30
+test_run = True
+
+from helper.colours import Colors
 
 #Configure the strategy using API Keys and set stoploss/takeprofit level.
 #Login : https://api.icicidirect.com/apiuser/home
@@ -32,20 +40,28 @@ today_date = datetime.today().date().strftime("%Y-%m-%d")
 iso_date_string = datetime.strptime("28/02/2021", "%d/%m/%Y").isoformat()[:10] + 'T05:30:00.000Z'
 iso_date_time_string = datetime.strptime("28/02/2021 23:59:59", "%d/%m/%Y %H:%M:%S").isoformat()[:19] + '.000Z'
 
-response = api.get_portfolio_positions()
-if response['Status'] == 200:
-    response = response['Success']
-    # print(response)
+while icici_direct_helper.is_market_open() | test_run:
+    print(f"{Colors.PURPLE}ICICI Direct {datetime.today()}{Colors.WHITE}")
+    response = api.get_portfolio_positions()
+    if response['Status'] == 200:
+        response = response['Success']
+        # print(response)
 
-icici_direct_helper.get_pnl_target(response)
+    icici_direct_helper.get_pnl_target(response)
 
-orders = api.get_order_list('NFO',from_date=today_date,to_date=today_date)
-print(orders)
+    orders = api.get_order_list('NFO',from_date=today_date,to_date=today_date)
+    #print(orders)
 
-for item in orders['Success']:
-    if item['status'] == 'Executed':
-        print(f"Executed Order: {item['stock_code']} : {item['action']} :  {item['price']} ")
-    if item['status'] == 'Ordered':
-        print(f"Pending Execution: {item['stock_code']} : {item['action']} :  {item['price']} ")
+    print("\n\n##################################")
+    # print(orders)
+    print("Order Status: ")
+    if orders is not None:
+        for item in orders['Success']:
+            if item['status'] == 'Executed':
+                print(f"{Colors.BLUE}Executed Order: {item['stock_code']} : {item['action']} :  {item['price']} ")
+            if item['status'] == 'Ordered':
+                print(f"{Colors.CYAN}Pending Execution: {item['stock_code']} : {item['action']} :  {item['price']} ")
+    else:
+        print("No orders found")
 
-
+    time.sleep(wait_time)
