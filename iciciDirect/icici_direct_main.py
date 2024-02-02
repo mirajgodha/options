@@ -20,7 +20,7 @@ from helper.colours import Colors
 # Create a ConfigParser object
 config = configparser.ConfigParser()
 # Read the configuration file
-config.read('../secreates/config.ini')
+config.read('../secretes/config.ini')
 
 # Access values using sections and keys
 api_key = config['ICICI']['api_key']

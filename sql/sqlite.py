@@ -45,7 +45,7 @@ def create_tables():
             stock TEXT NOT NULL,
             expiry TEXT NOT NULL,
             pnl float,
-            timestamp dateTime NOT NULL DEFAULT CURRENT_TIMESTAMP
+            timestamp dateTime NOT NULL DEFAULT (datetime('now','localtime'))
         )
     ''')
     conn.commit()
