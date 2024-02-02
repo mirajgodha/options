@@ -70,3 +70,14 @@ Investor view: Neutral on direction and bearish on Stock/ Index volatility.
 **Higher breakeven:** Highest Strike – net premium paid. 
 
 ![image](https://user-images.githubusercontent.com/3658490/233072905-24081545-ffcf-4577-9dd9-02ebd5194ced.png)
+
+# Added intergration with multiple brokes
+
+## ICICI Direct
+
+# Added Metabase
+A nice dashboard which will help you with the following:
+
+Consolidated total loss and profit across all option strategies across all borkers
+Charts of profit and loss of total PnL 
+Charts of profit and loss of each stock option strategy -- This is the very important feature i was looking for and was not available any where including Sensibull and Quantsapp.
