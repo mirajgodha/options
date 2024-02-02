@@ -81,3 +81,8 @@ A nice dashboard which will help you with the following:
 Consolidated total loss and profit across all option strategies across all borkers
 Charts of profit and loss of total PnL 
 Charts of profit and loss of each stock option strategy -- This is the very important feature i was looking for and was not available any where including Sensibull and Quantsapp.
+
+<img width="1272" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/3580e74e-ac6f-4dc4-bc17-5d26daa6b1f4">
+
+<img width="1061" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/5b7f4eb6-d764-4bc8-86e8-026625bd54cc">
+
