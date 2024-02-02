@@ -2,6 +2,7 @@
 import datetime
 import pandas as pd
 
+import sql.sqlite
 from helper.colours import Colors
 from tabulate import tabulate
 
@@ -15,13 +16,15 @@ def is_market_open():
 
 def calculate_pnl(response):
     pnl = 0
-    df = pd.DataFrame(columns=["stock", "pnl"])
+    df = pd.DataFrame(columns=["stock", "pnl","expiry_date"])
     if response:
         unique_stock_codes = set(item['stock_code'] for item in response)
         #print(unique_stock_codes)
 
         for stock in unique_stock_codes:
             pnl = 0
+            expiry_date = ''
+
             for item in response:
                 if item['stock_code'] == stock:
                     # print(item)
@@ -29,6 +32,7 @@ def calculate_pnl(response):
                         ltp = float(item['ltp'])
                         cost = float(item['average_price'])
                         qty = int(item['quantity'])
+                        expiry_date = item['expiry_date']
                         # print((item['ltp'],item['average_price']))
                         if item['action'] == 'Sell':
                             pnl += round((cost - ltp) * qty, 2)
@@ -38,7 +42,8 @@ def calculate_pnl(response):
             # Sample DataFrame
             pnl_data = {
                 'stock': stock,
-                'pnl': pnl
+                'pnl': pnl,
+                'expiry_date': expiry_date
             }
 
             df = pd.concat([df, pd.DataFrame.from_records([pnl_data])], ignore_index=True)
@@ -132,7 +137,10 @@ def get_pnl_target(response):
     # Code to calculate PnL
 
     df_threshold = get_threasholds()
+
     df_pnl = calculate_pnl(response)
+    sql.sqlite.insert_pnl(df_pnl)
+
     df = pd.merge(df_threshold, df_pnl, on='stock')
 
     # print("Pnl Targets:")

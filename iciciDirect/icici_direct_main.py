@@ -10,7 +10,7 @@ import time
 
 # Set the desired wait time in seconds
 wait_time = 30
-test_run = True
+test_run = False
 
 from helper.colours import Colors
 
@@ -55,7 +55,7 @@ while icici_direct_helper.is_market_open() | test_run:
     print("\n\n##################################")
     # print(orders)
     print("Order Status: ")
-    if orders is not None:
+    if orders is not None and orders['Success'] is not None:
         for item in orders['Success']:
             if item['status'] == 'Executed':
                 print(f"{Colors.BLUE}Executed Order: {item['stock_code']} : {item['action']} :  {item['price']} ")
