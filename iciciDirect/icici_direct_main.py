@@ -10,7 +10,7 @@ import time
 
 # Set the desired wait time in seconds
 wait_time = 30
-test_run = False
+test_run = True
 
 from helper.colours import Colors
 
@@ -20,7 +20,7 @@ from helper.colours import Colors
 # Create a ConfigParser object
 config = configparser.ConfigParser()
 # Read the configuration file
-config.read('../secretes/config.ini')
+config.read('../secreates/config.ini')
 
 # Access values using sections and keys
 api_key = config['ICICI']['api_key']
