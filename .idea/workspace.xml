@@ -4,12 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="44484f79-8743-4570-9b87-9e30e97b0f27" name="Changes" comment="Added the project files">
-      <change afterPath="$PROJECT_DIR$/nuvama/nuvama_main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/nuvama/settings.ini" afterDir="false" />
+    <list default="true" id="44484f79-8743-4570-9b87-9e30e97b0f27" name="Changes" comment="Added the nuvama support">
+      <change afterPath="$PROJECT_DIR$/helper/constants.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/iciciDirect/helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/iciciDirect/helpers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/iciciDirect/icici_direct_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/iciciDirect/icici_direct_main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/metabase/metabase.db.mv.db" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/metabase.db.mv.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nuvama/nuvama_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/nuvama/nuvama_main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/secreates/config.ini" beforeDir="false" afterPath="$PROJECT_DIR$/secreates/config.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/sqlite.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/sqlite.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sql/stocks.db" beforeDir="false" afterPath="$PROJECT_DIR$/sql/stocks.db" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -57,7 +60,7 @@
       <recent name="$PROJECT_DIR$/data" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.nuvama_main">
+  <component name="RunManager" selected="Python.icici_direct_main">
     <configuration name="icici_direct_main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="options" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -121,8 +124,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.nuvama_main" />
         <item itemvalue="Python.icici_direct_main" />
+        <item itemvalue="Python.nuvama_main" />
       </list>
     </recent_temporary>
   </component>
@@ -247,7 +250,14 @@
       <option name="project" value="LOCAL" />
       <updated>1706875679573</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Added the nuvama support">
+      <created>1706890341213</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1706890341213</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -270,6 +280,7 @@
     <MESSAGE value="Added the functionality of sqlite" />
     <MESSAGE value="Added the functionality of metabase" />
     <MESSAGE value="Added the project files" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added the project files" />
+    <MESSAGE value="Added the nuvama support" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added the nuvama support" />
   </component>
 </project>

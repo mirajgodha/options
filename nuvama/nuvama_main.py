@@ -20,7 +20,8 @@ today_date = datetime.today().date().strftime("%m/%d/%Y")
 
 
 api_connect = APIConnect(api_key, api_secret, api_session, True, "settings.ini")
-response = api_connect.OrderHistory('01/15/2024', '01/31/2024')
+#response = api_connect.OrderHistory('01/15/2024', '01/31/2024')
+response = api_connect.NetPosition()
 
 print(response)
 
