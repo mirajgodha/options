@@ -8,7 +8,7 @@ from util.optionStrategies import OptionStrategies
 from util.utils import clear_df, concat_df, merge_dataframes
 
 # Expiry month for which we want to run the utility
-expiry_month = Expiry.NEXT
+expiry_month = Expiry.CURRENT
 test_run = False
 write_to_file = True
 strike_diff = 8

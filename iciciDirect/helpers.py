@@ -183,7 +183,7 @@ def calculate_margin_used(response, api):
 
             for stock in unique_stock_codes:
                 if sqlt.get_margins_used_time(stock, expiry_date) > (
-                        datetime.datetime.now() - datetime.timedelta(minutes=constants.MARGING_DELAY_TIME)).time():
+                        datetime.datetime.now() - datetime.timedelta(minutes=constants.MARGING_DELAY_TIME)):
                     # print(f"Not calculating margin for {stock} as its was calculated less than 10 minutes ago")
                     continue
 
@@ -224,6 +224,17 @@ def calculate_margin_used(response, api):
                     sqlt.insert_margins_used(stock, expiry_date, margin_response['Success'])
 
 
+def get_option_ltp(api, stock_code, expiry_date, strike_price, right):
+    # Get LTP for all open option positions
+    print(f'Getting LTP for {stock_code}, {expiry_date}, {strike_price}, {right}')
+    response = api.get_quotes(stock_code=stock_code, exchange_code='NFO',product_type='options',
+                              expiry_date=expiry_date, strike_price=strike_price, right=right)
+
+    print("LTP: ")
+    print(response['Success'])
+    return response['Success'][0]['ltp']
+
+
 def order_list(api, from_date, to_date):
     # Get list of orders and also print them in different colour based on execution status.
 
@@ -241,9 +252,35 @@ def order_list(api, from_date, to_date):
                 print(
                     f"{Colors.CYAN}Pending Execution: {item['stock_code']} : {item['action']} :  {item['price']} ")
 
+        # Update ltp in orders as icici do not provide ltp in order list
+        for item in orders['Success']:
+            item['ltp'] = get_option_ltp(api, item['stock_code'], item['expiry_date'], item['strike_price'],
+                                         item['right'])
         # insert the order status in to order status table
         sqlt.insert_order_status(orders['Success'])
     else:
         print("No orders found")
 
 
+def get_closed_open_pnl(api):
+    response_portfolio_position = api.get_trade_list(from_date='2024-01-01', to_date='2024-02-04', exchange_code='NFO')
+    if response_portfolio_position['Status'] == 200:
+        response_portfolio_position = response_portfolio_position['Success']
+        # print(response_portfolio_position)
+        df_portfolio_position = pd.DataFrame(response_portfolio_position)
+        for index, row in df_portfolio_position.iterrows():
+            if row['action'] == 'Sell':
+                row['quantity'] = -1 * float(row['quantity'])
+
+        df_portfolio_position['quantity'] = df_portfolio_position['quantity'].astype(float)
+        df_portfolio_position['strike_price'] = df_portfolio_position['strike_price'].astype(float)
+
+        # Group by specific columns
+        grouped_df = df_portfolio_position.groupby(['stock_code', 'expiry_date', 'right', 'strike_price'])
+
+        # Perform aggregation or other operations on the grouped data
+        result_df = grouped_df.agg({'quantity': 'sum', 'action': 'count'}).reset_index()
+
+        print(tabulate(result_df, headers='keys', tablefmt='pretty', showindex=True))
+
+        print("\n\n#######################################")

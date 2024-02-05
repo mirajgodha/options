@@ -159,10 +159,10 @@ def get_margins_used_time(stock, expiry):
     rows = cursor_inner.fetchall()
     for row in rows:
         if row[0] is None:
-            return datetime.datetime.utcfromtimestamp(0).time()
+            return datetime.datetime.strptime('1970-01-01 00:00:00','%Y-%m-%d %H:%M:%S')
         else:
-            # print(row[0])
-            return datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S").time()
+            # print(datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S"))
+            return datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
 
 def insert_order_status(orders):
     conn_inner = get_conn()
@@ -177,7 +177,8 @@ def insert_order_status(orders):
                                  "right, strike_price, pending_quantity) "
                                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                                  (item['stock_code'], item['expiry_date'], item['SLTP_price'], item['price'],
-                                  item['status'], item['order_datetime'], item['action'], item['quantity'],
+                                  item['status'], datetime.datetime.strptime(item['order_datetime'],"%d-%b-%Y %H:%M:%S"),
+                                  item['action'], item['quantity'],
                                   item['right'], item['strike_price'], item['pending_quantity']))
     except sqlite3.OperationalError as e:
         if e.args[0] == 'no such table: order_status':
@@ -185,7 +186,7 @@ def insert_order_status(orders):
             create_tables()
             insert_order_status(orders)
         else:
-            print("Error inserting data into order_status")
+            print(f"Error inserting data into order_status {e}")
     finally:
         try:
             conn_inner.commit()
