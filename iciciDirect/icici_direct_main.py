@@ -56,7 +56,11 @@ def main():
         if iciciDirectHelper.is_market_open() | constants.TEST_RUN:
             time.sleep(constants.REFRESH_TIME_SECONDS)
             main()
+        if not iciciDirectHelper.is_market_open():
+            print(f"{Colors.PURPLE}Market Closed{Colors.WHITE}")
 
+
+    # iciciDirectHelper.get_closed_open_pnl(api)
 
 
 # Main function to be executed in the main thread

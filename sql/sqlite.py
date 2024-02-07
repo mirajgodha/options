@@ -1,5 +1,6 @@
 import datetime
 import sqlite3
+import traceback
 
 db_name = '../sql/stocks.db'
 
@@ -84,6 +85,33 @@ def create_tables():
                 )
             ''')
 
+    # Create a table ltp (if it doesn't exist)
+    cursor_inner.execute('''
+                CREATE TABLE if not exists ltp (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    stock TEXT NOT NULL,
+                    expiry TEXT NOT NULL,
+                    right TEXT NOT NULL,
+                    strike_price float,
+                    ltp float,
+                    ltt dateTime,
+                    best_bid_price float,
+                    best_bid_quantity int,
+                    best_offer_price float,
+                    best_offer_quantity int,
+                    open float,
+                    high float,
+                    low float,
+                    previous_close float,
+                    ltp_percent_change float,
+                    upper_circuit float,
+                    lower_circuit float,
+                    total_quantity_traded int,
+                    spot_price float,
+                    timestamp dateTime NOT NULL DEFAULT (datetime('now','localtime'))
+                )
+            ''')
+    # Commit the changes to the database
     conn.commit()
     cursor_inner.close()
 
@@ -126,7 +154,7 @@ def get_pnl(stock, expiry):
     return rows
 
 
-def insert_margins_used(stock, expiry,data):
+def insert_margins_used(stock, expiry, data):
     conn_inner = get_conn()
     cursor_inner = get_cursor()
     try:
@@ -141,8 +169,6 @@ def insert_margins_used(stock, expiry,data):
     except sqlite3.OperationalError as e:
         if e.args[0] == 'no such table: option_pnl':
             print("Table not found - margins_used. Creating table")
-            create_tables()
-            insert_margins_used(stock, expiry, data)
         else:
             print("Error inserting data")
     finally:
@@ -159,10 +185,11 @@ def get_margins_used_time(stock, expiry):
     rows = cursor_inner.fetchall()
     for row in rows:
         if row[0] is None:
-            return datetime.datetime.strptime('1970-01-01 00:00:00','%Y-%m-%d %H:%M:%S')
+            return datetime.datetime.strptime('1970-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
         else:
             # print(datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S"))
             return datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
+
 
 def insert_order_status(orders):
     conn_inner = get_conn()
@@ -176,15 +203,14 @@ def insert_order_status(orders):
                                  "(stock, expiry, ltp, order_price, order_status, order_time, action, quantity, "
                                  "right, strike_price, pending_quantity) "
                                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                                 (item['stock_code'], item['expiry_date'], item['SLTP_price'], item['price'],
-                                  item['status'], datetime.datetime.strptime(item['order_datetime'],"%d-%b-%Y %H:%M:%S"),
+                                 (item['stock_code'], item['expiry_date'], item['ltp'], item['price'],
+                                  item['status'],
+                                  datetime.datetime.strptime(item['order_datetime'], "%d-%b-%Y %H:%M:%S"),
                                   item['action'], item['quantity'],
                                   item['right'], item['strike_price'], item['pending_quantity']))
     except sqlite3.OperationalError as e:
         if e.args[0] == 'no such table: order_status':
             print("Table not found - order_status. Creating table")
-            create_tables()
-            insert_order_status(orders)
         else:
             print(f"Error inserting data into order_status {e}")
     finally:
@@ -192,3 +218,61 @@ def insert_order_status(orders):
             conn_inner.commit()
         except:
             pass
+
+
+def insert_ltp(ltp_response):
+    conn_inner = get_conn()
+    cursor_inner = get_cursor()
+    try:
+        for item in ltp_response:
+            cursor_inner.execute("INSERT INTO ltp (stock, expiry, right, strike_price, ltp, ltt, best_bid_price, "
+                                 "best_bid_quantity, best_offer_price, best_offer_quantity, open, high, low, "
+                                 "previous_close, ltp_percent_change, upper_circuit, lower_circuit, "
+                                 "total_quantity_traded, spot_price) "
+                                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                 (item['stock_code'], item['expiry_date'], item['right'], item['strike_price'],
+                                  item['ltp'], item['ltt'], item['best_bid_price'], item['best_bid_quantity'],
+                                  item['best_offer_price'], item['best_offer_quantity'], item['open'], item['high'],
+                                  item['low'], item['previous_close'], item['ltp_percent_change'],
+                                  item['upper_circuit'], item['lower_circuit'], item['total_quantity_traded'],
+                                  item['spot_price']))
+
+    except sqlite3.OperationalError as e:
+        if e.args[0] == 'no such table: order_status':
+            print("Table not found - order_status. Creating table")
+        else:
+            print(f"Error inserting data into order_status {e}")
+    finally:
+        try:
+            conn_inner.commit()
+        except:
+            pass
+
+
+def get_ltp(stock_code, expiry_date, strike_price, right):
+    conn_inner = get_conn()
+    cursor_inner = get_cursor()
+
+    # as rights are stored as 'P' and 'C' in this table converting them to appropriate values
+    if right.upper() == 'CE' or right.upper() == 'CALL':
+        right = 'C'
+    else:
+        if right.upper() == 'PE' or right.upper() == 'PUT':
+            right = 'P'
+
+    try:
+        cursor_inner.execute("SELECT ltp FROM ltp  WHERE timestamp = "
+                             "(SELECT MAX(timestamp) FROM ltp WHERE "
+                             "stock = ? AND expiry = ? AND strike_price = ? AND right = ? ) "
+                             "and stock = ? AND expiry = ? AND strike_price = ? AND right = ?",
+                             (stock_code, expiry_date, strike_price, right, stock_code, expiry_date, strike_price,
+                              right))
+        rows = cursor_inner.fetchall()
+
+        # print(f'Got ltp for {stock_code} {expiry_date} {strike_price} {right} : {rows[0][0]]}')
+        return rows[0][0]
+
+    except Exception as e:
+        print(f"Error getting ltp data from SQL DB for {stock_code} {expiry_date} {strike_price} {right}")
+        traceback.print_exc()
+        return None

@@ -226,12 +226,24 @@ def calculate_margin_used(response, api):
 
 def get_option_ltp(api, stock_code, expiry_date, strike_price, right):
     # Get LTP for all open option positions
-    print(f'Getting LTP for {stock_code}, {expiry_date}, {strike_price}, {right}')
-    response = api.get_quotes(stock_code=stock_code, exchange_code='NFO',product_type='options',
-                              expiry_date=expiry_date, strike_price=strike_price, right=right)
+    try:
+        response = api.get_quotes(stock_code=stock_code, exchange_code='NFO', product_type='options',
+                                  expiry_date=expiry_date, strike_price=strike_price, right=right)
+        # print(f"LTP: {response}")
+        sqlt.insert_ltp(response['Success'])
+    except Exception as e:
+        print(f"{Colors.RED}Exception while getting LTP for {stock_code}, {expiry_date}, "
+              f"{strike_price}, {right}: {e} {Colors.RESET}")
+        ltp = sqlt.get_ltp(stock_code, expiry_date, strike_price, right)
+        if ltp:
+            return ltp
+        return 0
 
-    print("LTP: ")
-    print(response['Success'])
+    if response['Status'] != 200:
+        print(f"{Colors.RED}Error while getting LTP for {stock_code}, {expiry_date}, "
+              f"{strike_price}, {right}: {response}{Colors.RESET}")
+        return 0
+
     return response['Success'][0]['ltp']
 
 
@@ -252,10 +264,25 @@ def order_list(api, from_date, to_date):
                 print(
                     f"{Colors.CYAN}Pending Execution: {item['stock_code']} : {item['action']} :  {item['price']} ")
 
+        # Specify the columns for which you want to create a set
+        selected_columns = ['stock_code', 'expiry_date', 'strike_price', 'right']
+
+        # Create a set for the specified columns
+        unique_combinations_set = {tuple(item_dict[column] for column in selected_columns) for item_dict in
+                                   orders['Success']}
+
+        # create a hash map which will contain the ltp for
+        # each unique combination of stock_code, expiry_date, strike_price, right
+        hashmap_orders_ltp = {combination: 0 for combination in unique_combinations_set}
+
+        for item in unique_combinations_set:
+            hashmap_orders_ltp[item] = get_option_ltp(api, item[0], item[1], item[2], item[3])
+
         # Update ltp in orders as icici do not provide ltp in order list
         for item in orders['Success']:
-            item['ltp'] = get_option_ltp(api, item['stock_code'], item['expiry_date'], item['strike_price'],
-                                         item['right'])
+            item['ltp'] = hashmap_orders_ltp[tuple(item[column] for column in selected_columns)]
+
+        # print(orders['Success'])
         # insert the order status in to order status table
         sqlt.insert_order_status(orders['Success'])
     else:
@@ -266,20 +293,62 @@ def get_closed_open_pnl(api):
     response_portfolio_position = api.get_trade_list(from_date='2024-01-01', to_date='2024-02-04', exchange_code='NFO')
     if response_portfolio_position['Status'] == 200:
         response_portfolio_position = response_portfolio_position['Success']
-        # print(response_portfolio_position)
+        print(response_portfolio_position)
         df_portfolio_position = pd.DataFrame(response_portfolio_position)
+
         for index, row in df_portfolio_position.iterrows():
             if row['action'] == 'Sell':
-                row['quantity'] = -1 * float(row['quantity'])
+                df_portfolio_position.at[index, 'quantity'] = -1 * float(row['quantity'])
 
         df_portfolio_position['quantity'] = df_portfolio_position['quantity'].astype(float)
         df_portfolio_position['strike_price'] = df_portfolio_position['strike_price'].astype(float)
+        df_portfolio_position['ltp'] = df_portfolio_position['ltp'].astype(float)
+
+        # amount paid or received for the given contract
+        df_portfolio_position['amount'] = df_portfolio_position['average_cost'].astype(float) * \
+                                          df_portfolio_position['quantity'].astype(float) * -1 - \
+                                          df_portfolio_position['brokerage_amount'].astype(float) - \
+                                          df_portfolio_position['total_taxes'].astype(float)
+        df_portfolio_position['amount'] = round(df_portfolio_position['amount'], 2)
+
+
+
+        print(tabulate(df_portfolio_position, headers='keys', tablefmt='pretty', showindex=True))
 
         # Group by specific columns
         grouped_df = df_portfolio_position.groupby(['stock_code', 'expiry_date', 'right', 'strike_price'])
 
         # Perform aggregation or other operations on the grouped data
-        result_df = grouped_df.agg({'quantity': 'sum', 'action': 'count'}).reset_index()
+        result_df = grouped_df.agg(
+            {'quantity': 'sum', 'amount': 'sum', 'ltp': 'mean', 'action': 'count'}).reset_index()
+
+        result_df['Realized'] = 0
+        result_df['Unrealized'] = 0
+
+        # current value of the contract
+        result_df['current_value'] = result_df['ltp'].astype(float) * result_df['quantity'].astype(float)
+        result_df['current_value'] = round(result_df['current_value'], 2)
+
+        for index, row in result_df.iterrows():
+            if row['quantity'] < 0:
+                result_df.at[index, 'current_value'] = row['current_value'] * -1
+
+        for index, row in result_df.iterrows():
+            if row['quantity'] == 0:
+                result_df.at[index, 'Realized'] = row['amount']
+            else:
+                if row['quantity'] > 0:
+                    # doing plus as amount will be negative here because its a
+                    # buy order and amount is the amount paid so -ve
+                    result_df.at[index, 'Unrealized'] = row['current_value'] + row['amount']
+                else:
+                    if row['quantity'] < 0:
+                        result_df.at[index, 'Unrealized'] = row['amount'] - row['current_value']
+
+        result_df['amount'] = round(result_df['amount'], 2)
+        result_df['current_value'] = round(result_df['current_value'], 2)
+        result_df['Realized'] = round(result_df['Realized'], 2)
+        result_df['Unrealized'] = round(result_df['Unrealized'], 2)
 
         print(tabulate(result_df, headers='keys', tablefmt='pretty', showindex=True))
 
