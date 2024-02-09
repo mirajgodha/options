@@ -38,14 +38,14 @@ def main():
     try:
         while iciciDirectHelper.is_market_open() | constants.TEST_RUN:
             print(f"{Colors.PURPLE}ICICI Direct {datetime.today()}{Colors.WHITE}")
-            response = api.get_portfolio_positions()
-            if response['Status'] == 200:
-                response = response['Success']
+            portfolio_positions_response = api.get_portfolio_positions()
+            if portfolio_positions_response['Status'] == 200:
+                portfolio_positions_response = portfolio_positions_response['Success']
                 # print(response)
 
             # Call the icici direct functions
-            iciciDirectHelper.get_pnl_target(response)
-            iciciDirectHelper.calculate_margin_used(response, api)
+            iciciDirectHelper.get_pnl_target(portfolio_positions_response)
+            iciciDirectHelper.calculate_margin_used(portfolio_positions_response, api)
             iciciDirectHelper.order_list(api, from_date=today_date, to_date=today_date)
 
             time.sleep(constants.REFRESH_TIME_SECONDS)
@@ -56,15 +56,17 @@ def main():
         if iciciDirectHelper.is_market_open() | constants.TEST_RUN:
             time.sleep(constants.REFRESH_TIME_SECONDS)
             main()
-        if not iciciDirectHelper.is_market_open():
-            print(f"{Colors.PURPLE}Market Closed{Colors.WHITE}")
-
-
-    # iciciDirectHelper.get_closed_open_pnl(api)
+        else:
+            if not iciciDirectHelper.is_market_open():
+                print(f"{Colors.PURPLE}Market Closed{Colors.WHITE}")
 
 
 # Main function to be executed in the main thread
 
 
 if __name__ == "__main__":
+    # Call the main function to start the program
+    print(f"{Colors.PURPLE}Starting ICICI Direct{Colors.WHITE}")
+    # iciciDirectHelper.get_closed_open_pnl(api)
+    iciciDirectHelper.get_mwpl(portfolio_positions_response=api.get_portfolio_positions()['Success'])
     main()

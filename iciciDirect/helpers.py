@@ -3,7 +3,8 @@ import datetime
 import pandas as pd
 
 import sql.sqlite
-from helper import constants
+from helper import constants, optionsMWPL, fuzzMatch
+
 from helper.colours import Colors
 import sql.sqlite as sqlt
 from tabulate import tabulate
@@ -21,20 +22,20 @@ def is_market_open():
         return False
 
 
-def calculate_pnl(response):
+def calculate_pnl(portfolio_positions_response):
     # This method calculates the pnl for all open positions at stock level
 
     pnl = 0
     df = pd.DataFrame(columns=["stock", "pnl", "expiry_date"])
-    if response:
-        unique_stock_codes = set(item['stock_code'] for item in response)
+    if portfolio_positions_response:
+        unique_stock_codes = set(item['stock_code'] for item in portfolio_positions_response)
         # print(unique_stock_codes)
 
         for stock in unique_stock_codes:
             pnl = 0
             expiry_date = ''
 
-            for item in response:
+            for item in portfolio_positions_response:
                 if item['stock_code'] == stock:
                     # print(item)
                     if item['segment'] == 'fno':
@@ -182,7 +183,7 @@ def calculate_margin_used(response, api):
         for expiry_date in unique_expiry_dates:
 
             for stock in unique_stock_codes:
-                if sqlt.get_margins_used_time(stock, expiry_date) > (
+                if sqlt.get_last_updated_time_margins_used(stock, expiry_date) > (
                         datetime.datetime.now() - datetime.timedelta(minutes=constants.MARGING_DELAY_TIME)):
                     # print(f"Not calculating margin for {stock} as its was calculated less than 10 minutes ago")
                     continue
@@ -311,8 +312,6 @@ def get_closed_open_pnl(api):
                                           df_portfolio_position['total_taxes'].astype(float)
         df_portfolio_position['amount'] = round(df_portfolio_position['amount'], 2)
 
-
-
         print(tabulate(df_portfolio_position, headers='keys', tablefmt='pretty', showindex=True))
 
         # Group by specific columns
@@ -353,3 +352,43 @@ def get_closed_open_pnl(api):
         print(tabulate(result_df, headers='keys', tablefmt='pretty', showindex=True))
 
         print("\n\n#######################################")
+    else:
+        if response_portfolio_position['Status'] == 500:
+            print(f"{Colors.RED}Internal Server Error while getting portfolio position. "
+                  f"Status Code: {response_portfolio_position['Status']} received. {Colors.RESET}")
+        else:
+            print(f"{Colors.RED}Error while getting portfolio position: {response_portfolio_position}{Colors.RESET}")
+
+
+def get_mwpl(portfolio_positions_response):
+    if sqlt.get_last_insert_time_mwpl() > (
+                        datetime.datetime.now() - datetime.timedelta(minutes=constants.MWPL_DELAY_TIME)):
+        #Updated MWPL less than a hour ago, so not updating now.
+        return
+
+    print("Getting MWPL")
+
+    # Get the data of mwpl
+    mwpl_df = optionsMWPL.optionsMWPL()
+    if portfolio_positions_response:
+        unique_stock_codes_portfolio = set(item['stock_code'] for item in portfolio_positions_response)
+        unique_stock_codes_mwpl = mwpl_df.drop_duplicates(subset=['Symbol', 'Price', 'Chg', 'Cur.MWPL', 'Pre.MWPL'])[
+            'Symbol'].tolist()
+
+        matched_stock_codes = \
+            fuzzMatch.get_stock_code_pairs_using_fuzzy_match(unique_stock_codes_portfolio, unique_stock_codes_mwpl)
+
+        similar_code = ''
+        for stock in unique_stock_codes_portfolio:
+            for x in matched_stock_codes:
+                if x[0] == stock:
+                    similar_code = x[1]
+                    break
+
+            for index, row in mwpl_df.iterrows():
+                if row['Symbol'].upper() == similar_code:
+                    mwpl_list.append((row['Symbol'], row['Price'], row['Chg'], row['Cur.MWPL'], row['Pre.MWPL']))
+                    print(row['Symbol'], row['Price'], row['Chg'], row['Cur.MWPL'], row['Pre.MWPL'])
+                    break
+
+    sqlt.insert_mwpl(mwpl_list)

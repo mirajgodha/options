@@ -111,6 +111,18 @@ def create_tables():
                     timestamp dateTime NOT NULL DEFAULT (datetime('now','localtime'))
                 )
             ''')
+
+    cursor_inner.execute('''
+                CREATE TABLE if not exists mwpl(
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    stock TEXT NOT NULL,
+                    price float,
+                    price_change_percent float,
+                    mwpl_prev float,
+                    mwpl_current float,
+                   timestamp dateTime NOT NULL DEFAULT (datetime('now','localtime'))
+                )
+                ''')
     # Commit the changes to the database
     conn.commit()
     cursor_inner.close()
@@ -178,7 +190,7 @@ def insert_margins_used(stock, expiry, data):
             pass
 
 
-def get_margins_used_time(stock, expiry):
+def get_last_updated_time_margins_used(stock, expiry):
     cursor_inner = get_cursor()
     cursor_inner.execute("SELECT max(timestamp) FROM margins_used WHERE stock = ? AND expiry = ?",
                          (stock, expiry))
@@ -276,3 +288,33 @@ def get_ltp(stock_code, expiry_date, strike_price, right):
         print(f"Error getting ltp data from SQL DB for {stock_code} {expiry_date} {strike_price} {right}")
         traceback.print_exc()
         return None
+
+def insert_mwpl(mwpl_list):
+    conn_inner = get_conn()
+    cursor_inner = get_cursor()
+    try:
+        for item in mwpl_list:
+            cursor_inner.execute("INSERT INTO mwpl (stock, price, price_change_percent,mwpl_prev, mwpl_current) "
+                                 "VALUES (?, ?, ?, ?, ?)",
+                                 (item[0], item[1], item[2], item[4],item[3]))
+    except sqlite3.OperationalError as e:
+        if e.args[0] == 'no such table: mwpl':
+            print("Table not found - mwpl")
+        else:
+            print(f"Error inserting data into order_status {e}")
+    finally:
+        try:
+            conn_inner.commit()
+        except:
+            pass
+
+def get_last_insert_time_mwpl():
+    cursor_inner = get_cursor()
+    cursor_inner.execute("SELECT max(timestamp) FROM mwpl")
+    rows = cursor_inner.fetchall()
+    for row in rows:
+        if row[0] is None:
+            return datetime.datetime.strptime('1970-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
+        else:
+            # print(datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S"))
+            return datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")

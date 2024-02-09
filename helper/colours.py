@@ -7,3 +7,7 @@ class Colors:
     CYAN = '\033[96m'
     WHITE = '\033[97m'
     RESET = '\033[0m'
+    BOLD = '\033[1m'
+    ITALICS = '\033[3m'
+    UNDERLINE = '\033[4m'
+    END = '\033[0m'
