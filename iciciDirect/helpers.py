@@ -145,6 +145,9 @@ def contract_value(response, threshold):
     print("\n\n#######################################")
     print("Contracts to sq off:")
     print(f'{Colors.GREEN}{df_to_sq_off_contracts}{Colors.WHITE}')
+
+    sqlt.insert_contracts_to_be_sq_off(df_to_sq_off_contracts)
+
     return df_to_sq_off_contracts
 
 
@@ -368,6 +371,8 @@ def get_mwpl(portfolio_positions_response):
 
     print("Getting MWPL")
 
+    mwpl_list = []
+
     # Get the data of mwpl
     mwpl_df = optionsMWPL.optionsMWPL()
     if portfolio_positions_response:
@@ -392,3 +397,23 @@ def get_mwpl(portfolio_positions_response):
                     break
 
     sqlt.insert_mwpl(mwpl_list)
+
+def insert_ltp_for_positions(portfolio_positions_response):
+    # Insert the LTP for the open positions so that we can plot the LTP chart
+    df = pd.DataFrame(columns=["stock_code", "strike_price", "expiry_date","right", "ltp"])
+
+    for item in portfolio_positions_response:
+        if item['segment'] == 'fno':
+            # Sample DataFrame
+            ltp_data = {
+                'stock': item['stock_code'],
+                'pnl': float(item['ltp']),
+                'expiry_date': item['expiry_date'],
+                'right': item['right'],
+                'strike_price': item['strike_price'],
+                'ltp': float(item['ltp'])
+            }
+
+            df = pd.concat([df, pd.DataFrame.from_records([ltp_data])], ignore_index=True)
+
+    sqlt.insert_ltp_df(df)

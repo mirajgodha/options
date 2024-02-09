@@ -2,6 +2,9 @@ import datetime
 import sqlite3
 import traceback
 
+import pandas as pd
+from helper.colours import Colors
+
 db_name = '../sql/stocks.db'
 
 # Create a connection object
@@ -123,9 +126,22 @@ def create_tables():
                    timestamp dateTime NOT NULL DEFAULT (datetime('now','localtime'))
                 )
                 ''')
+
+    cursor_inner.execute('''
+                    CREATE TABLE if not exists contracts_to_be_sq_off(
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        stock TEXT NOT NULL,
+                        price_left float,
+                        pnl float,
+                        strike_price float,
+                        expiry_date TEXT NOT NULL,
+                        right TEXT NOT NULL,
+                       timestamp dateTime NOT NULL DEFAULT (datetime('now','localtime'))
+                    )
+                    ''')
+
     # Commit the changes to the database
     conn.commit()
-    cursor_inner.close()
 
 
 # Insert a row of data
@@ -233,6 +249,9 @@ def insert_order_status(orders):
 
 
 def insert_ltp(ltp_response):
+    # inserts the ltp response into the ltp table
+    # print(ltp_response)
+
     conn_inner = get_conn()
     cursor_inner = get_cursor()
     try:
@@ -254,6 +273,35 @@ def insert_ltp(ltp_response):
             print("Table not found - order_status. Creating table")
         else:
             print(f"Error inserting data into order_status {e}")
+    finally:
+        try:
+            conn_inner.commit()
+        except:
+            pass
+
+
+def insert_ltp_df(ltp_df: pd.DataFrame):
+    conn_inner = get_conn()
+    cursor_inner = get_cursor()
+    right = ''
+    try:
+        for index, item in ltp_df.iterrows():
+            if item['right'].upper() == 'CE' or item['right'].upper() == 'CALL':
+                right = 'C'
+            else:
+                if item['right'].upper() == 'PE' or item['right'].upper() == 'PUT':
+                    right = 'P'
+
+            cursor_inner.execute("INSERT INTO ltp (stock, expiry, right, strike_price, ltp) "
+                                 "VALUES (?, ?, ?, ?, ?)",
+                                 (item['stock'], item['expiry_date'], right, item['strike_price'],
+                                  item['ltp']))
+
+    except sqlite3.OperationalError as e:
+        if e.args[0] == 'no such table: ltp':
+            print(f"{Colors.RED} Table not found - order_status. Creating table{Colors.RESET}")
+        else:
+            print(f"{Colors.RED}Error inserting data into ltp {e}{Colors.RESET}")
     finally:
         try:
             conn_inner.commit()
@@ -289,6 +337,7 @@ def get_ltp(stock_code, expiry_date, strike_price, right):
         traceback.print_exc()
         return None
 
+
 def insert_mwpl(mwpl_list):
     conn_inner = get_conn()
     cursor_inner = get_cursor()
@@ -296,7 +345,7 @@ def insert_mwpl(mwpl_list):
         for item in mwpl_list:
             cursor_inner.execute("INSERT INTO mwpl (stock, price, price_change_percent,mwpl_prev, mwpl_current) "
                                  "VALUES (?, ?, ?, ?, ?)",
-                                 (item[0], item[1], item[2], item[4],item[3]))
+                                 (item[0], item[1], item[2], item[4], item[3]))
     except sqlite3.OperationalError as e:
         if e.args[0] == 'no such table: mwpl':
             print("Table not found - mwpl")
@@ -308,6 +357,7 @@ def insert_mwpl(mwpl_list):
         except:
             pass
 
+
 def get_last_insert_time_mwpl():
     cursor_inner = get_cursor()
     cursor_inner.execute("SELECT max(timestamp) FROM mwpl")
@@ -318,3 +368,33 @@ def get_last_insert_time_mwpl():
         else:
             # print(datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S"))
             return datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
+
+
+def insert_contracts_to_be_sq_off(contracts: pd.DataFrame):
+    conn_inner = get_conn()
+    cursor_inner = get_cursor()
+    try:
+        if len(contracts) > 0:
+            # New contracts calculation is done, so delete the old ones.
+            cursor_inner.execute("DELETE FROM contracts_to_be_sq_off")
+
+        for index, item in contracts.iterrows():
+            cursor_inner.execute("INSERT INTO contracts_to_be_sq_off "
+                                 "(stock, price_left, pnl, strike_price, expiry_date, right) "
+                                 "VALUES (?, ?, ?, ?, ?, ?)",
+                                 (item['stock'], item["price_left"], item["pnl"], item["strike_price"],
+                                  item["expiry_date"], item["right"]))
+    except sqlite3.OperationalError as e:
+        if e.args[0] == 'no such table: contracts_to_be_sq_off':
+            print("Table not found - contracts_to_be_sq_off")
+        else:
+            print(f"Error inserting data into order_status {e}")
+    finally:
+        try:
+            conn_inner.commit()
+        except:
+            pass
+
+
+# Create the tables when the module is imported, and if the tables are not created
+create_tables()

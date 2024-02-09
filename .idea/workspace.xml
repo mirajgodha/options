@@ -4,14 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="44484f79-8743-4570-9b87-9e30e97b0f27" name="Changes" comment="Updated the ltp logic">
-      <change afterPath="$PROJECT_DIR$/.idea/csv-editor.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/stock_symbols.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/helper/fuzzMatch.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/helper/optionsMWPL.py" afterDir="false" />
+    <list default="true" id="44484f79-8743-4570-9b87-9e30e97b0f27" name="Changes" comment="Added the logic for getting market wide open postions, so that can figure out stocks going to ban list">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/output/2022-10-31.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/helper/colours.py" beforeDir="false" afterPath="$PROJECT_DIR$/helper/colours.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/helper/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/helper/constants.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/iciciDirect/helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/iciciDirect/helpers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/iciciDirect/icici_direct_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/iciciDirect/icici_direct_main.py" afterDir="false" />
@@ -345,7 +340,14 @@
       <option name="project" value="LOCAL" />
       <updated>1707300174518</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="Added the logic for getting market wide open postions, so that can figure out stocks going to ban list">
+      <created>1707477186199</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1707477186199</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -372,6 +374,7 @@
     <MESSAGE value="Added the margings calculations support" />
     <MESSAGE value="Updated the charging and ltp price too" />
     <MESSAGE value="Updated the ltp logic" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated the ltp logic" />
+    <MESSAGE value="Added the logic for getting market wide open postions, so that can figure out stocks going to ban list" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added the logic for getting market wide open postions, so that can figure out stocks going to ban list" />
   </component>
 </project>

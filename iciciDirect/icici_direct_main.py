@@ -45,8 +45,10 @@ def main():
 
             # Call the icici direct functions
             iciciDirectHelper.get_pnl_target(portfolio_positions_response)
+            iciciDirectHelper.insert_ltp_for_positions(portfolio_positions_response)
             iciciDirectHelper.calculate_margin_used(portfolio_positions_response, api)
             iciciDirectHelper.order_list(api, from_date=today_date, to_date=today_date)
+            iciciDirectHelper.get_mwpl(portfolio_positions_response=portfolio_positions_response)
 
             time.sleep(constants.REFRESH_TIME_SECONDS)
     except Exception as e:
@@ -68,5 +70,5 @@ if __name__ == "__main__":
     # Call the main function to start the program
     print(f"{Colors.PURPLE}Starting ICICI Direct{Colors.WHITE}")
     # iciciDirectHelper.get_closed_open_pnl(api)
-    iciciDirectHelper.get_mwpl(portfolio_positions_response=api.get_portfolio_positions()['Success'])
+
     main()
