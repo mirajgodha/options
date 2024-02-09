@@ -110,6 +110,10 @@ When you place multiple orders and as a Strangle or Straddle writer, you might h
 - Get the list of executed orders.
 - It also shows the nice chart along with executed orders, to find out how much Mark to market loss or profit you have for for your executed orders. Its nice to figure out how good was your decision to place that order.
 
+Option price LTP charts for all your open positions, very helpful in looking at the option price.
+<img width="803" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/a7b344fa-189a-4737-a699-a675fc4446c3">
+
+
 ## ICICI Direct
 
 Gets following data from ICICI Direct:
