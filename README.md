@@ -73,7 +73,55 @@ Investor view: Neutral on direction and bearish on Stock/ Index volatility.
 
 # Added intergration with multiple brokes
 
+This section of code is added to solve the following problems:
+
+As a option trader, when you do trading on multiple platfrom, its difficult to manage positions across different brokers. So to get a consolidated positons accross different borkers I started this idea.
+Now as the code is growing its helping me to visulize lot of things on a single nice dashboard.
+- Nice Dashboard for get the consolidated total PnL across different borkers.
+- Nice charts to view the PnL over time. Which is not possible in any of the brokers tools or apps.
+
+As a option trader when you create different strategies, on different stocks there is no way to keep track of profit and loss across different stock strategies. So to solve that problem, this dashboards, help in:
+- Getting nice charts to view the loss profit bar graphs across different strategies.
+  <img width="1273" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/c40c8a49-714d-4537-81bc-afebf932ef28">
+
+- View the timeseries chart of PnL across each stock strategy.
+<img width="1277" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/0f9c76e0-eca1-4466-83f3-0fa18c56afae">
+
+
+
+When the stock is about to go to ban list its difficult to exit the positions or add new ones to safegaurd your strategies. Its very difficult, to get the MWPL (Market wide open positions), to handle that problem, i have added a nice MWPL dashboard, which will not only show the MWPL for your stocks but will also hightlight the possible entrants.
+
+<img width="847" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/32953db0-0350-4b91-83d0-dbd290d9b13e">
+
+
+When you have different option strategies open, there is no tool to show you the historical price chart for the price of given strike for a stock. I have added a charting option to plot the option price charts of your open positions.
+
+<img width="1290" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/32813d73-abdc-4687-a7de-09ee03bb481c">
+
+As a option writer, when you have many open positions its difficult to track which positions you should exit based on different rules. There could be automated triggers to exit, but you know whne you exit with Market order how much loss you will face even for profitiable exits. So to handle this problem there are few solutions implemented:
+- Charts with continous PnL at strategy level, so that can get a quick view.
+- PnL tracker alerts - In the excel sheet profit_loss.xlsx fill in the trigger prices for profit and loss and it will alert you.
+
+Margin is the most killing thing to manage as a option writer. It just vanishes in your open positions, so to keep an track of margin used realtime, I have added nice chart to track total Margin used and split across strategies of different stocks positions.
+<img width="998" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/f4c42c0b-f820-4fba-afa7-5acc5fa6c431">
+
+When you place multiple orders and as a Strangle or Straddle writer, you might have to put multiple orders together, and if one gets execcuted its urgent to trigger the other one(s) at the current market price to stop the loss or prevent your strategy from spoiling. So its difficult to keep track orders, therefore added the orders dashbaords as well. It will help in following ways:
+- Get all the open orders list at realtime, along with LTP which is most important thing as most brokers do not show LTP and its difficult to figure out when your order will be triggered.
+- Get the list of executed orders.
+- It also shows the nice chart along with executed orders, to find out how much Mark to market loss or profit you have for for your executed orders. Its nice to figure out how good was your decision to place that order.
+
 ## ICICI Direct
+
+Gets following data from ICICI Direct:
+
+- Get the Current Positions
+- Margins used
+- Order list of executed orders
+- Order list of pendng orders
+  
+
+**How to run ICICI Direct positions:**
+Run icici_direct_main.py file in your IDE or via console.
 
 # Added Metabase
 A nice dashboard which will help you with the following:
@@ -85,4 +133,16 @@ Charts of profit and loss of each stock option strategy -- This is the very impo
 <img width="1272" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/3580e74e-ac6f-4dc4-bc17-5d26daa6b1f4">
 
 <img width="1061" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/5b7f4eb6-d764-4bc8-86e8-026625bd54cc">
+
+**How to Run Metabase:**
+- Download the Metabase jar https://www.metabase.com/start/oss/jar inside the metabase folder
+- Please install java if not installed
+- Run the command on your command line:
+- cd to the metabase directory in the code and from there run the below command, as this directory contains the metabase dashboards files.
+- java -jar metabase.jar
+- Once it starts, on your browser type: http://localhost:3000/dashboard/1-pnl?tab=1-tab-1
+
+# Points to note
+- Broker positions and other stuff runs only when Market is open on weekdays, for test run if you want to run update the flag TEST_RUN to True in file helper.constants.py
+- 
 
