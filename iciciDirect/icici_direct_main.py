@@ -1,9 +1,11 @@
 # Some helpers
-# https://github.com/Idirect-Tech/Breeze-Python-Examples/blob/main/webinar/how_to_use_websockets.py
-# Configure the strategy using API Keys and set stoploss/takeprofit level.
+# Configure the strategy using API Keys.
 # Login : https://api.icicidirect.com/apiuser/home
+# and get the api session key
+
 import traceback
 
+import iciciDirect.helpers
 import iciciDirect.helpers as iciciDirectHelper
 from datetime import datetime
 import configparser
@@ -44,11 +46,24 @@ def main():
                 # print(response)
 
             # Call the icici direct functions
+
+            # Calculates the real time PnL for the option open positions in the account
             iciciDirectHelper.get_pnl_target(portfolio_positions_response)
+
+            # Update the LTP for the open positions so that we can plot the LTP chart
             iciciDirectHelper.insert_ltp_for_positions(portfolio_positions_response)
+
+            # Calculate margin used for all open option positions and update in margin table
             iciciDirectHelper.calculate_margin_used(portfolio_positions_response, api)
+
+            # Get the order status real time, also gets and update the ltp for traders and update the ltp in ltp table
             iciciDirectHelper.order_list(api, from_date=today_date, to_date=today_date)
+
+            # Update the Market wide open positions in mwpl table, for the stocks options in the portfolio
             iciciDirectHelper.get_mwpl(portfolio_positions_response=portfolio_positions_response)
+
+            # Update the funds and limits available in a demat account hourly
+            iciciDirect.helpers.update_funds(api)
 
             time.sleep(constants.REFRESH_TIME_SECONDS)
     except Exception as e:
@@ -69,6 +84,5 @@ def main():
 if __name__ == "__main__":
     # Call the main function to start the program
     print(f"{Colors.PURPLE}Starting ICICI Direct{Colors.WHITE}")
-    # iciciDirectHelper.get_closed_open_pnl(api)
-
-    main()
+    iciciDirect.helpers.update_funds(api)
+    # main()

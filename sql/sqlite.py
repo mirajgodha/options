@@ -140,6 +140,24 @@ def create_tables():
                     )
                     ''')
 
+    cursor_inner.execute('''
+                        CREATE TABLE if not exists funds(
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            total_bank_balance float,
+                            allocated_equity float,
+                            allocated_fno float,
+                            block_by_trade_equity float,
+                            block_by_trade_fno float,
+                            block_by_trade_balance float,
+                            available_balance float,
+                            unallocated_balance float,
+                            limit_used float,
+                            limit_available float,
+                            limit_total float,
+                            timestamp dateTime NOT NULL DEFAULT (datetime('now','localtime'))
+                        )
+                        ''')
+
     # Commit the changes to the database
     conn.commit()
 
@@ -358,18 +376,6 @@ def insert_mwpl(mwpl_list):
             pass
 
 
-def get_last_insert_time_mwpl():
-    cursor_inner = get_cursor()
-    cursor_inner.execute("SELECT max(timestamp) FROM mwpl")
-    rows = cursor_inner.fetchall()
-    for row in rows:
-        if row[0] is None:
-            return datetime.datetime.strptime('1970-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
-        else:
-            # print(datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S"))
-            return datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
-
-
 def insert_contracts_to_be_sq_off(contracts: pd.DataFrame):
     conn_inner = get_conn()
     cursor_inner = get_cursor()
@@ -394,6 +400,48 @@ def insert_contracts_to_be_sq_off(contracts: pd.DataFrame):
             conn_inner.commit()
         except:
             pass
+
+
+def insert_funds(funds_response, margin_response):
+    conn_inner = get_conn()
+    cursor_inner = get_cursor()
+    try:
+        cursor_inner.execute("INSERT INTO funds "
+                             "(total_bank_balance,allocated_equity, "
+                             "allocated_fno, block_by_trade_equity, "
+                             "block_by_trade_fno, block_by_trade_balance,"
+                             "unallocated_balance,limit_used,limit_available,"
+                             "limit_total) "
+                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                             (funds_response['total_bank_balance'], funds_response['allocated_equity'],
+                              funds_response['allocated_fno'], funds_response['block_by_trade_equity'],
+                              funds_response['block_by_trade_fno'], funds_response['block_by_trade_balance'],
+                              funds_response['unallocated_balance'], margin_response['limit_list'][0]['amount'],
+                              margin_response['cash_limit'],
+                              (float(margin_response['limit_list'][0]['amount']) * -1) + float(margin_response['cash_limit'])
+                              ))
+    except sqlite3.OperationalError as e:
+        if e.args[0] == 'no such table: contracts_to_be_sq_off':
+            print("Table not found - contracts_to_be_sq_off")
+        else:
+            print(f"Error inserting data into order_status {e}")
+    finally:
+        try:
+            conn_inner.commit()
+        except:
+            pass
+
+
+def get_last_updated_time(table_name):
+    cursor_inner = get_cursor()
+    cursor_inner.execute(f"SELECT max(timestamp) FROM {table_name}")
+    rows = cursor_inner.fetchall()
+    for row in rows:
+        if row[0] is None:
+            return datetime.datetime.strptime('1970-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
+        else:
+            # print(datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S"))
+            return datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
 
 
 # Create the tables when the module is imported, and if the tables are not created

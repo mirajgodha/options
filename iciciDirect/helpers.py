@@ -364,9 +364,9 @@ def get_closed_open_pnl(api):
 
 
 def get_mwpl(portfolio_positions_response):
-    if sqlt.get_last_insert_time_mwpl() > (
-                        datetime.datetime.now() - datetime.timedelta(minutes=constants.MWPL_DELAY_TIME)):
-        #Updated MWPL less than a hour ago, so not updating now.
+    if sqlt.get_last_updated_time("mwpl") > (
+            datetime.datetime.now() - datetime.timedelta(minutes=constants.MWPL_DELAY_TIME)):
+        # Updated MWPL less than a hour ago, so not updating now.
         return
 
     print("Getting MWPL")
@@ -398,9 +398,10 @@ def get_mwpl(portfolio_positions_response):
 
     sqlt.insert_mwpl(mwpl_list)
 
+
 def insert_ltp_for_positions(portfolio_positions_response):
     # Insert the LTP for the open positions so that we can plot the LTP chart
-    df = pd.DataFrame(columns=["stock_code", "strike_price", "expiry_date","right", "ltp"])
+    df = pd.DataFrame(columns=["stock_code", "strike_price", "expiry_date", "right", "ltp"])
 
     for item in portfolio_positions_response:
         if item['segment'] == 'fno':
@@ -417,3 +418,20 @@ def insert_ltp_for_positions(portfolio_positions_response):
             df = pd.concat([df, pd.DataFrame.from_records([ltp_data])], ignore_index=True)
 
     sqlt.insert_ltp_df(df)
+
+
+def update_funds(api):
+    if sqlt.get_last_updated_time("funds") > (
+            datetime.datetime.now() - datetime.timedelta(minutes=constants.FUNDS_DELAY_TIME)):
+        return
+    funds_response = api.get_funds()
+    if funds_response['Status'] != 200:
+        print(f"{Colors.RED}Error while getting funds: {funds_response}{Colors.RESET}")
+        return
+
+    margin_response = api.get_margin('nfo')
+    if margin_response['Status'] != 200:
+        print(f"{Colors.RED}Error while getting margin: {margin_response}{Colors.RESET}")
+        return
+
+    sqlt.insert_funds(funds_response['Success'], margin_response['Success'])
