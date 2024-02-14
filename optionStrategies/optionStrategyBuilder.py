@@ -1,17 +1,21 @@
 import datetime
 import logging
+import sys
+import traceback
+
+import numpy as np
 import pandas as pd
 
+import constants.constants_local as c
 from dao.Option import Expiry
+import sql.sqlite as sqlt
 from util.nsepythonUtil import get_fno_stocks, get_optionchain, get_expiry_date
 from util.optionStrategies import OptionStrategies
 from util.utils import clear_df, concat_df, merge_dataframes
+from helper.colours import Colors
 
 # Expiry month for which we want to run the utility
-expiry_month = Expiry.CURRENT
-test_run = False
-write_to_file = True
-strike_diff = 8
+
 
 excel_columns = ['Stock', 'PremiumCreditTotal', 'MaxProfit', 'MaxLoss', 'LTP',
                  'CE_sell_price', 'CE_sell_strike',
@@ -44,10 +48,10 @@ short_put_butterfly_df = pd.DataFrame(columns=excel_columns)
 short_put_condor_df = pd.DataFrame(columns=excel_columns)
 short_straddle_df = pd.DataFrame(columns=excel_columns)
 short_strangle_df = pd.DataFrame(columns=excel_columns)
-concated_df = pd.DataFrame(columns=excel_columns)
+concatenate_df = pd.DataFrame(columns=excel_columns)
 
 
-def write_to_excel():
+def write_data():
     """
     Writes the dfs to excel sheet
     :return:
@@ -63,7 +67,7 @@ def write_to_excel():
     global short_put_condor_df
     global short_straddle_df
     global short_strangle_df
-    global concated_df
+    global concatenate_df
 
     long_call_condor_df = clear_df(long_call_condor_df)
     long_iron_butterfly_df = clear_df(long_iron_butterfly_df)
@@ -77,18 +81,17 @@ def write_to_excel():
     short_straddle_df = clear_df(short_straddle_df, sort_by=['% Premium', 'PremiumCredit'], sort_order=[False, False])
     short_strangle_df = clear_df(short_strangle_df, sort_by=['PremiumCredit', 'IV'], sort_order=[False, False])
 
-    concated_df = merge_dataframes(long_call_condor_df, long_iron_butterfly_df, long_put_condor_df,
-                                   short_call_butterfly_df, short_call_condor_df, short_guts_df,
-                                   short_iron_butterfly_df, short_put_butterfly_df,
-                                   short_put_condor_df)
-    concated_df = clear_df(concated_df, sort_by=['MaxLoss', 'MaxProfit'], sort_order=[False, False])
+    concatenate_df = merge_dataframes(long_call_condor_df, long_iron_butterfly_df, long_put_condor_df,
+                                      short_call_butterfly_df, short_call_condor_df, short_guts_df,
+                                      short_iron_butterfly_df, short_put_butterfly_df,
+                                      short_put_condor_df)
+    concatenate_df = clear_df(concatenate_df, sort_by=['MaxLoss', 'MaxProfit'], sort_order=[False, False])
 
-    if write_to_file:
-        output_file = './data/output/' + datetime.datetime.now().strftime("%Y-%m-%d") + '.xlsx'
-        with pd.ExcelWriter(output_file) as writer:
+    if c.OPTIONS_STRATEGIES_WRITE_TO_FILE:
+        with pd.ExcelWriter(c.OPTIONS_STRATEGIES_EXEL_FILE) as writer:
             short_straddle_df.to_excel(writer, sheet_name="short_straddle_df")
             short_strangle_df.to_excel(writer, sheet_name="short_strangle_df")
-            concated_df.to_excel(writer, sheet_name="All_Strategies_Profitable")
+            concatenate_df.to_excel(writer, sheet_name="All_Strategies_Profitable")
             short_guts_df.to_excel(writer, sheet_name="short_guts_df")
             long_call_condor_df.to_excel(writer, sheet_name="long_call_condor_df")
             long_put_condor_df.to_excel(writer, sheet_name="long_put_condor_df")
@@ -98,22 +101,95 @@ def write_to_excel():
             short_iron_butterfly_df.to_excel(writer, sheet_name="short_iron_butterfly_df")
             short_call_butterfly_df.to_excel(writer, sheet_name="short_call_butterfly_df")
             short_put_butterfly_df.to_excel(writer, sheet_name="short_put_butterfly_df")
+    if c.OPTIONS_STRATEGIES_WRITE_TO_DB:
+        conn_inner = sqlt.get_conn()
+        try:
+
+            # drop columns which create issues while inserting the data to db and of not much use.
+            short_straddle_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
+            short_straddle_df.to_sql('os_short_straddle', conn_inner, if_exists='replace', index=False)
+            print("os_short_straddle table created successfully")
+
+            short_strangle_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
+            short_strangle_df.to_sql('os_short_strangle', conn_inner, if_exists='replace', index=False)
+            print("os_short_strangle table created successfully")
+
+            if concatenate_df is not None and not concatenate_df.empty:
+                concatenate_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
+                concatenate_df.to_sql('os_all_strategies_profitable', conn_inner, if_exists='replace', index=False)
+                print("concatenate_df table created successfully")
+
+            short_guts_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
+            short_guts_df.to_sql(name="os_short_guts", con=conn_inner, if_exists='replace', index=False)
+            print("short_guts_df table created successfully")
+
+            long_call_condor_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
+            long_call_condor_df.to_sql(name="os_long_call_condor", con=conn_inner, if_exists='replace', index=False)
+            print("long_call_condor_df table created successfully")
+
+            long_put_condor_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
+            long_put_condor_df.to_sql(name="os_long_put_condor", con=conn_inner, if_exists='replace', index=False)
+            print("long_put_condor_df table created successfully")
+
+            short_call_condor_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
+            short_call_condor_df.to_sql(name="os_short_call_condor", con=conn_inner, if_exists='replace', index=False)
+            print("short_call_condor_df table created successfully")
+
+            short_put_condor_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
+            short_put_condor_df.to_sql(name="os_short_put_condor", con=conn_inner, if_exists='replace', index=False)
+            print("short_put_condor_df table created successfully")
+
+            long_iron_butterfly_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
+            long_iron_butterfly_df.to_sql(name="os_long_iron_butterfly", con=conn_inner, if_exists='replace',
+                                          index=False)
+            print("long_iron_butterfly_df table created successfully")
+
+            short_iron_butterfly_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
+            short_iron_butterfly_df.to_sql(name="os_short_iron_butterfly", con=conn_inner, if_exists='replace',
+                                           index=False)
+            print("short_iron_butterfly_df table created successfully")
+
+            short_call_butterfly_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
+            short_call_butterfly_df.to_sql(name="os_short_call_butterfly", con=conn_inner, if_exists='replace',
+                                           index=False)
+            print("short_call_butterfly_df table created successfully")
+
+            short_put_butterfly_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
+            short_put_butterfly_df.to_sql(name="os_short_put_butterfly", con=conn_inner, if_exists='replace',
+                                          index=False)
+            print("short_put_butterfly_df table created successfully")
+
+        except Exception as e:
+            print(f"Error inserting data for options strategies {e}")
+            traceback.print_exc(file=sys.stdout)
+        finally:
+            try:
+                conn_inner.commit()
+            except:
+                pass
 
 
+def option_strategies_builder():
+    if sqlt.get_last_updated_time("os_status") > (
+            datetime.datetime.now() - datetime.timedelta(minutes=c.OPTION_STRATEGIES_DELAY_TIME)):
+        # Updated MWPL less than a hour ago, so not updating now.
+        return
 
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
+    sqlt.insert_os_lastupdated("os_status", c.PROCESS_STARTED)
 
     # Get the list of Fno stocks
-    if test_run:
+    global long_call_condor_df, long_iron_butterfly_df, long_put_condor_df, short_call_butterfly_df, \
+        short_call_condor_df, short_guts_df, short_iron_butterfly_df, short_put_butterfly_df, \
+        short_put_condor_df, short_straddle_df, short_strangle_df
+
+    if c.OPTIONS_STRATEGIES_TEST_RUN:
         fno_stock_list = get_fno_stocks()[:5]  # For running it for less stocks add [:2], it will run for 2 stocks
     else:
         fno_stock_list = get_fno_stocks()
 
-    expiry_date = get_expiry_date(expiry_month)
+    expiry_date = get_expiry_date(c.OPTIONS_STRATEGIES_EXPIRY_MONTH)
 
-    print("---Starting loop for all fno stocks----")
+    print("---Starting Option Trading Strategies----")
     i = 1
     try:
         for symbol in fno_stock_list:
@@ -172,7 +248,7 @@ if __name__ == '__main__':
 
                 short_strangle_df = concat_df(short_strangle_df,
                                               OptionStrategies.short_strangle(symbol, option_chain_json, expiry_date,
-                                                                              strike_diff=strike_diff,
+                                                                              strike_diff=c.OPTIONS_STRATEGIES_STRIKE_RANGE,
                                                                               timeout=20))
 
                 # Write all the outputs as exit in between misses all the data
@@ -180,8 +256,18 @@ if __name__ == '__main__':
 
             except Exception as ex:
                 # Many times the nse website response gets stuck an results in whole program halts
-                logging.error(f"Error in processing {symbol} is: ", ex)
+                logging.error(f"{Colors.WHITE}Error in processing {symbol} is:  {ex}{Colors.RESET}")
+
+    except Exception as ex:
+        logging.error(f"{Colors.RED}Error in creating option strategies is:  {ex} {Colors.RESET}")
+        sqlt.insert_os_lastupdated("os_status", c.PROCESS_FAILED)
 
     finally:  # Required as not to miss the data which is already fetched and save it
         # #write the output the final sheet
-        write_to_excel()
+        write_data()
+        sqlt.insert_os_lastupdated("os_status", c.PROCESS_COMPLETED)
+
+
+# Press the green button in the gutter to run the script.
+if __name__ == '__main__':
+    option_strategies_builder()

@@ -4,6 +4,7 @@ import traceback
 
 import pandas as pd
 from helper.colours import Colors
+from tabulate import tabulate
 
 db_name = '../sql/stocks.db'
 
@@ -73,6 +74,7 @@ def create_tables():
     cursor_inner.execute('''
                 CREATE TABLE if not exists order_status (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    broker TEXT NOT NULL,
                     stock TEXT NOT NULL,
                     expiry TEXT NOT NULL,
                     ltp float,
@@ -158,6 +160,15 @@ def create_tables():
                         )
                         ''')
 
+    # Option Strategies job status table
+    cursor_inner.execute('''
+                            CREATE TABLE if not exists os_status (
+                                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                status TEXT,
+                                timestamp dateTime NOT NULL DEFAULT (datetime('now','localtime'))
+                            )
+                            ''')
+
     # Commit the changes to the database
     conn.commit()
 
@@ -237,21 +248,26 @@ def get_last_updated_time_margins_used(stock, expiry):
             return datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
 
 
-def insert_order_status(orders):
+def insert_order_status(orders_df):
     conn_inner = get_conn()
     cursor_inner = get_cursor()
     try:
-        if len(orders) > 0:
+        if len(orders_df) > 0:
             # New orders to insert so truncate the table
             cursor_inner.execute("DELETE FROM order_status")
-        for item in orders:
+
+        # convert the in a pandas DataFrame datetime64[ns] to python datetime
+        orders_df['order_time'] = pd.to_datetime(orders_df['order_time'])
+        orders_df['order_time'] = orders_df['order_time'].dt.strftime('%Y-%m-%d %H:%M:%S')
+
+        for index, item in orders_df.iterrows():
             cursor_inner.execute("INSERT INTO order_status "
-                                 "(stock, expiry, ltp, order_price, order_status, order_time, action, quantity, "
+                                 "(broker, stock, expiry, ltp, order_price, order_status, order_time, action, quantity,"
                                  "right, strike_price, pending_quantity) "
-                                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                                 (item['stock_code'], item['expiry_date'], item['ltp'], item['price'],
-                                  item['status'],
-                                  datetime.datetime.strptime(item['order_datetime'], "%d-%b-%Y %H:%M:%S"),
+                                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                 (item['broker'],item['stock'], item['expiry_date'], item['ltp'], item['order_price'],
+                                  item['order_status'],
+                                  item['order_time'],
                                   item['action'], item['quantity'],
                                   item['right'], item['strike_price'], item['pending_quantity']))
     except sqlite3.OperationalError as e:
@@ -378,23 +394,10 @@ def insert_mwpl(mwpl_list):
 
 def insert_contracts_to_be_sq_off(contracts: pd.DataFrame):
     conn_inner = get_conn()
-    cursor_inner = get_cursor()
     try:
-        if len(contracts) > 0:
-            # New contracts calculation is done, so delete the old ones.
-            cursor_inner.execute("DELETE FROM contracts_to_be_sq_off")
-
-        for index, item in contracts.iterrows():
-            cursor_inner.execute("INSERT INTO contracts_to_be_sq_off "
-                                 "(stock, price_left, pnl, strike_price, expiry_date, right) "
-                                 "VALUES (?, ?, ?, ?, ?, ?)",
-                                 (item['stock'], item["price_left"], item["pnl"], item["strike_price"],
-                                  item["expiry_date"], item["right"]))
-    except sqlite3.OperationalError as e:
-        if e.args[0] == 'no such table: contracts_to_be_sq_off':
-            print("Table not found - contracts_to_be_sq_off")
-        else:
-            print(f"Error inserting data into order_status {e}")
+        contracts.to_sql('contracts_to_be_sq_off', get_conn(), if_exists='replace', index=False)
+    except Exception as e:
+        print(f"Error inserting data into contracts_to_be_sq_off {e}")
     finally:
         try:
             conn_inner.commit()
@@ -418,13 +421,14 @@ def insert_funds(funds_response, margin_response):
                               funds_response['block_by_trade_fno'], funds_response['block_by_trade_balance'],
                               funds_response['unallocated_balance'], margin_response['limit_list'][0]['amount'],
                               margin_response['cash_limit'],
-                              (float(margin_response['limit_list'][0]['amount']) * -1) + float(margin_response['cash_limit'])
+                              (float(margin_response['limit_list'][0]['amount']) * -1) + float(
+                                  margin_response['cash_limit'])
                               ))
     except sqlite3.OperationalError as e:
         if e.args[0] == 'no such table: contracts_to_be_sq_off':
             print("Table not found - contracts_to_be_sq_off")
         else:
-            print(f"Error inserting data into order_status {e}")
+            print(f"Error inserting data into funds {e}")
     finally:
         try:
             conn_inner.commit()
@@ -446,3 +450,20 @@ def get_last_updated_time(table_name):
 
 # Create the tables when the module is imported, and if the tables are not created
 create_tables()
+
+
+def insert_os_lastupdated(table_name, status):
+    conn_inner = get_conn()
+    cursor_inner = get_cursor()
+    try:
+        cursor_inner.execute(f"INSERT INTO {table_name} (status) VALUES (?)", (status,))
+    except sqlite3.OperationalError as e:
+        if e.args[0] == f'no such table: {table_name}':
+            print(f"{Colors.RED}Table not found - {table_name}{Colors.RESET}")
+        else:
+            print(f"{Colors.RED}Error inserting data into {table_name} {e}{Colors.RESET}")
+    finally:
+        try:
+            conn_inner.commit()
+        except:
+            pass

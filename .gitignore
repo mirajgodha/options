@@ -1,2 +1,14 @@
 /metabase/plugins/googleanalytics.metabase-driver.jar
 /metabase/plugins/athena.metabase-driver.jar
+/metabase/plugins/*.jar
+/nuvama/mfInstruments.zip
+/nuvama/instruments.zip
+/nuvama/data_1hEqmOmIh5_H2A.txt
+/nuvama/instruments/
+/nuvama/mfInstruments/
+/optionTrading/instruments/
+/optionTrading/mfInstruments/
+/optionTrading/apiconnect.log
+/optionTrading/data_1hEqmOmIh5_H2A.txt
+/optionTrading/instruments.zip
+/optionTrading/mfInstruments.zip

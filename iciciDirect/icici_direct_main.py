@@ -5,19 +5,23 @@
 
 import traceback
 
-import iciciDirect.helpers
-import iciciDirect.helpers as iciciDirectHelper
+import iciciDirect.icici_helper
+import iciciDirect.icici_helper as iciciDirectHelper
 from datetime import datetime
 import configparser
 import time
+from optionTrading.openPositionsDF import get_icici_option_open_positions_df
+from optionTrading.orderBookDF import get_icici_order_book_df
+from optionTrading.trading_helper import is_market_open
 
-from helper import constants
+import optionTrading.openPositionsDF
+from constants import constants_local as constants
 from helper.colours import Colors
 
 # Create a ConfigParser object
 config = configparser.ConfigParser()
 # Read the configuration file
-config.read('../secreates/config.ini')
+config.read('../secretes/config.ini')
 
 # Access values using sections and keys
 api_key = config['ICICI']['api_key']
@@ -33,12 +37,34 @@ api.generate_session(api_secret=api_secret, session_token=api_session)
 
 today_date = datetime.today().date().strftime("%Y-%m-%d")
 
+def get_api_session():
+    return api
+
+
+# Get the portfolio positions
+
+def get_portfolio_positions():
+    portfolio_positions_response = api.get_portfolio_positions()
+    if portfolio_positions_response['Status'] == 200:
+        portfolio_positions_response = portfolio_positions_response['Success']
+        portfolio_positions_df = get_icici_option_open_positions_df(portfolio_positions_response)
+        # print(portfolio_positions_df)
+        return portfolio_positions_df
+
+def get_order_book():
+    orders = api.get_order_list('NFO', from_date=today_date, to_date=today_date)
+    if orders['Status'] == 200:
+        orders = orders['Success']
+        # print(orders)
+        orders_df = get_icici_order_book_df(orders)
+        # print(orders_df)
+        return orders_df
 
 # Main function to be executed in the main thread
 def main():
     # Your main code goes here
     try:
-        while iciciDirectHelper.is_market_open() | constants.TEST_RUN:
+        while is_market_open() | constants.TEST_RUN:
             print(f"{Colors.PURPLE}ICICI Direct {datetime.today()}{Colors.WHITE}")
             portfolio_positions_response = api.get_portfolio_positions()
             if portfolio_positions_response['Status'] == 200:
@@ -63,18 +89,18 @@ def main():
             iciciDirectHelper.get_mwpl(portfolio_positions_response=portfolio_positions_response)
 
             # Update the funds and limits available in a demat account hourly
-            iciciDirect.helpers.update_funds(api)
+            iciciDirect.icici_helper.update_funds(api)
 
             time.sleep(constants.REFRESH_TIME_SECONDS)
     except Exception as e:
         print(f"{Colors.RED}Error in main{Colors.WHITE}")
         traceback.print_exc()
     finally:
-        if iciciDirectHelper.is_market_open() | constants.TEST_RUN:
+        if is_market_open() | constants.TEST_RUN:
             time.sleep(constants.REFRESH_TIME_SECONDS)
             main()
         else:
-            if not iciciDirectHelper.is_market_open():
+            if not is_market_open():
                 print(f"{Colors.PURPLE}Market Closed{Colors.WHITE}")
 
 
@@ -84,5 +110,5 @@ def main():
 if __name__ == "__main__":
     # Call the main function to start the program
     print(f"{Colors.PURPLE}Starting ICICI Direct{Colors.WHITE}")
-    iciciDirect.helpers.update_funds(api)
+    iciciDirectHelper.order_list(api, from_date=today_date, to_date=today_date)
     # main()
