@@ -2,6 +2,7 @@
 import datetime
 import pandas as pd
 
+import iciciDirect.icici_direct_main
 import sql.sqlite
 from helper import optionsMWPL, fuzzMatch
 import constants.constants_local as c
@@ -9,6 +10,7 @@ import constants.constants_local as c
 from helper.colours import Colors
 import sql.sqlite as sqlt
 from tabulate import tabulate
+from profitnloss import Call, Put, Strategy
 
 
 def is_market_open():
@@ -16,7 +18,7 @@ def is_market_open():
     today = datetime.datetime.now().date()
     if today.weekday() < 5:  # Monday to Friday (0 to 4 are the weekdays)
         current_time = datetime.datetime.now().time()
-        market_open_time = datetime.time(9, 15)  # Assuming market opens at 9:15 AM
+        market_open_time = datetime.time(9, 00)  # Assuming market opens at 9:00 AM
         market_close_time = datetime.time(15, 30)  # Assuming market closes at 3:30 PM
         return market_open_time <= current_time <= market_close_time
     else:
@@ -271,7 +273,7 @@ def get_option_ltp(api, stock_code, expiry_date, strike_price, right):
     except Exception as e:
         print(f"{Colors.RED}Exception while getting LTP for {stock_code}, {expiry_date}, "
               f"{strike_price}, {right}: {e} {Colors.RESET}")
-        ltp = sqlt.get_ltp(stock_code, expiry_date, strike_price, right)
+        ltp = sqlt.get_ltp_option(stock_code, expiry_date, strike_price, right)
         if ltp:
             return ltp
         return 0
@@ -299,3 +301,144 @@ def order_list(orders_df):
 
         # insert the order status in to order status table
         sqlt.insert_order_status(orders_df)
+
+
+def get_ltp_stock(portfolio_positions_df):
+    if portfolio_positions_df is not None and len(portfolio_positions_df) > 0:
+        unique_stock_codes_portfolio = set(portfolio_positions_df['stock'].values.flatten())
+    else:
+        print(f"{Colors.GREEN}No open portfolio positions found{Colors.RESET}")
+        return
+
+    for stock in unique_stock_codes_portfolio:
+        # print(f"Getting LTP for {stock}")
+        api = iciciDirect.icici_direct_main.get_api_session()
+
+        # {'Success': [{'exchange_code': 'NSE', 'product_type': '', 'stock_code': 'MOTSUM', 'expiry_date': None,
+        # 'right': None, 'strike_price': 0.0, 'ltp': 114.05, 'ltt': '14-Feb-2024 15:29:58', 'best_bid_price': 0.0,
+        # 'best_bid_quantity': '0', 'best_offer_price': 0.0, 'best_offer_quantity': '0', 'open': 114.65,
+        # 'high': 114.75, 'low': 112.2, 'previous_close': 115.45, 'ltp_percent_change': 1.21264616717194,
+        # 'upper_circuit': 126.95, 'lower_circuit': 103.9, 'total_quantity_traded': '15946868', 'spot_price': None},
+        # {'exchange_code': 'BSE', 'product_type': '', 'stock_code': 'MOTSUM', 'expiry_date': None, 'right': None,
+        # 'strike_price': 0.0, 'ltp': 114.3, 'ltt': '14-Feb-2024 15:30:38', 'best_bid_price': 114.2,
+        # 'best_bid_quantity': '100', 'best_offer_price': 114.3, 'best_offer_quantity': '869', 'open': 114.25,
+        # 'high': 114.65, 'low': 112.2, 'previous_close': 115.55, 'ltp_percent_change': 1.08178277801817,
+        # 'upper_circuit': 127.1, 'lower_circuit': 104.0, 'total_quantity_traded': '1053974', 'spot_price': None}],
+        # 'Status': 200, 'Error': None}
+
+        ltp_df = pd.DataFrame(
+            columns=["stock", "ltp", 'ltt', 'best_bid_price',
+                     'best_bid_quantity', 'best_offer_price', 'best_offer_quantity', 'open',
+                     'high', 'low', 'previous_close', 'ltp_percent_change',
+                     'upper_circuit', 'lower_circuit', 'total_quantity_traded'])
+        try:
+            ltp = api.get_quotes(stock_code=stock, exchange_code='NSE', product_type='cash')
+            for item in ltp['Success']:
+                # data for each ltp response so that can crated a consolidated df
+                if ['exchange_code'] == 'BSE':  # No need to store the BSE traded price
+                    continue
+                # print(ltp['Success'])
+                ltp_data = {
+                    "stock": item['stock_code'],
+                    "ltp": float(item['ltp']),
+                    'ltt': datetime.datetime.strptime(item['ltt'], "%d-%b-%Y %H:%M:%S"),
+                    'best_bid_price': float(item['best_bid_price']),
+                    'best_bid_quantity': int(item['best_bid_quantity']),
+                    'best_offer_price': float(item['best_offer_price']),
+                    'best_offer_quantity': int(item['best_offer_quantity']),
+                    'open': float(item['open']),
+                    'high': float(item['high']),
+                    'low': float(item['low']),
+                    'previous_close': float(item['previous_close']),
+                    'ltp_percent_change': float(item['ltp_percent_change']),
+                    'upper_circuit': float(item['upper_circuit']),
+                    'lower_circuit': float(item['lower_circuit']),
+                    'total_quantity_traded': int(item['total_quantity_traded'])
+                }
+                ltp_df = pd.concat([ltp_df, pd.DataFrame.from_records([ltp_data])], ignore_index=True)
+
+            # convert the in a pandas DataFrame datetime64[ns] to python datetime
+            ltp_df['ltt'] = pd.to_datetime(ltp_df['ltt'])
+            ltp_df['ltt'] = ltp_df['ltt'].dt.strftime('%Y-%m-%d %H:%M:%S')
+
+        except Exception as e:
+            print(f"{Colors.RED}Exception while getting LTP for {stock}: {e}{Colors.RESET}")
+        finally:
+            ltp_df.to_sql(name="ltp_stock", con=sqlt.get_conn(), if_exists='append',
+                          index=False)
+
+
+def get_strategy_breakeven(portfolio_positions_df):
+    # Calculate the strategies breakeven points and can also plot them.
+    if portfolio_positions_df is not None and len(portfolio_positions_df) > 0:
+        unique_stock_codes_portfolio = set(portfolio_positions_df['stock'].values.flatten())
+    else:
+        print(f"{Colors.GREEN}No open portfolio positions found{Colors.RESET}")
+        return
+
+    break_even_df = pd.DataFrame(
+        columns=["stock", "lower_side", "higher_side","lower_break_even_per", "higher_break_even_per" ])
+
+    try:
+        for stock in unique_stock_codes_portfolio:
+            # Filter 1: Get all the open positions for the stock
+            open_positions_df = portfolio_positions_df[portfolio_positions_df['stock'] == stock]
+            # For the given open position create strategy object
+            s = Strategy()
+            for index, item in open_positions_df.iterrows():
+
+
+                # Create strategy for each right and action type
+                if item['right'] == 'Call' and item['action'] == 'Sell':
+                    s.sell(Call(item['strike_price'], item['average_price'], item['quantity'] * -1))
+                if item['right'] == 'Call' and item['action'] == 'Buy':
+                    s.buy(Call(item['strike_price'], item['average_price'], item['quantity']))
+                if item['right'] == 'Put' and item['action'] == 'Sell':
+                    s.sell(Put(item['strike_price'], item['average_price'], item['quantity'] * -1))
+                if item['right'] == 'Put' and item['action'] == 'Buy':
+                    s.buy(Put(item['strike_price'], item['average_price'], item['quantity']))
+            print(f"{Colors.PURPLE}Breakeven for {stock}, {s.break_evens()}{Colors.RESET}")
+            # print("max loss: %f, max gain: %f" % (s.max_loss(), s.max_gain()))
+            # print("strikes and payoffs: " + str(list(zip(s.strikes(), s.payoffs(s.strikes())))))
+            break_even_array = s.break_evens()
+            if break_even_array:
+
+                if len(break_even_array) > 1:
+                    higher_side = break_even_array[1]
+                else:
+                    higher_side = None
+                lower_break_even_per = 0
+                higher_break_even_per = 0
+
+                ltp = sqlt.get_ltp_stock(stock)
+
+                if ltp is not None:
+                    lower_break_even_per = (ltp - break_even_array[0]) / ltp
+
+                if higher_side is not None and ltp is not None:
+                    higher_break_even_per = (higher_side - ltp) / ltp
+
+                break_even_data = {
+                    "stock": stock,
+                    "lower_side": break_even_array[0],
+                    "higher_side": higher_side,
+                    "lower_break_even_per": lower_break_even_per,
+                    "higher_break_even_per": higher_break_even_per
+                }
+                break_even_df = pd.concat([break_even_df, pd.DataFrame.from_records([break_even_data])],
+                                          ignore_index=True)
+
+            # s.plot()
+        print(tabulate(break_even_df))
+
+    except Exception as e:
+        print(f"{Colors.RED}Exception while getting Breakeven for {stock}: {e}{Colors.RESET}")
+
+    finally:
+        try:
+            conn = sqlt.get_conn()
+            break_even_df.to_sql(name="open_positions", con=conn, if_exists='replace',
+                                 index=False)
+            conn.commit()
+        except:
+            pass

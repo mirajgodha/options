@@ -90,7 +90,7 @@ def create_tables():
                 )
             ''')
 
-    # Create a table ltp (if it doesn't exist)
+    # Create a table ltp to store options prices (if it doesn't exist)
     cursor_inner.execute('''
                 CREATE TABLE if not exists ltp (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -116,6 +116,29 @@ def create_tables():
                     timestamp dateTime NOT NULL DEFAULT (datetime('now','localtime'))
                 )
             ''')
+
+    # Create a table ltp to store options prices (if it doesn't exist)
+    cursor_inner.execute('''
+                    CREATE TABLE if not exists ltp_stock (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        stock TEXT NOT NULL,
+                        ltp float,
+                        ltt dateTime,
+                        best_bid_price float, 
+                        best_bid_quantity int, 
+                        best_offer_price float, 
+                        best_offer_quantity float, 
+                        open float, 
+                        high float, 
+                        low float,
+                        previous_close float, 
+                        ltp_percent_change float, 
+                        upper_circuit float, 
+                        lower_circuit float, 
+                        total_quantity_traded int, 
+                        timestamp dateTime NOT NULL DEFAULT (datetime('now','localtime'))
+                    )
+                ''')
 
     cursor_inner.execute('''
                 CREATE TABLE if not exists mwpl(
@@ -343,7 +366,7 @@ def insert_ltp_df(ltp_df: pd.DataFrame):
             pass
 
 
-def get_ltp(stock_code, expiry_date, strike_price, right):
+def get_ltp_option(stock_code, expiry_date, strike_price, right):
     conn_inner = get_conn()
     cursor_inner = get_cursor()
 
@@ -370,6 +393,27 @@ def get_ltp(stock_code, expiry_date, strike_price, right):
         print(f"Error getting ltp data from SQL DB for {stock_code} {expiry_date} {strike_price} {right}")
         traceback.print_exc()
         return None
+
+
+def get_ltp_stock(stock):
+    conn_inner = get_conn()
+    cursor_inner = get_cursor()
+
+    try:
+        cursor_inner.execute("SELECT ltp FROM ltp_stock  WHERE id = "
+                             "(SELECT MAX(id) FROM ltp_stock WHERE "
+                             "stock = ? ) "
+                             "and stock = ? ",
+                             (stock, stock))
+        rows = cursor_inner.fetchall()
+        return rows[0][0]
+
+    except Exception as e:
+        print(f"Error getting ltp_stock data from SQL DB for {stock}")
+        traceback.print_exc()
+        return None
+
+
 
 
 def insert_mwpl(mwpl_list):

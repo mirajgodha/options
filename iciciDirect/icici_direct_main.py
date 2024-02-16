@@ -37,6 +37,7 @@ api.generate_session(api_secret=api_secret, session_token=api_session)
 
 today_date = datetime.today().date().strftime("%Y-%m-%d")
 
+
 def get_api_session():
     return api
 
@@ -51,6 +52,7 @@ def get_portfolio_positions():
         # print(portfolio_positions_df)
         return portfolio_positions_df
 
+
 def get_order_book():
     orders = api.get_order_list('NFO', from_date=today_date, to_date=today_date)
     if orders['Status'] == 200:
@@ -59,6 +61,7 @@ def get_order_book():
         orders_df = get_icici_order_book_df(orders)
         # print(orders_df)
         return orders_df
+
 
 # Main function to be executed in the main thread
 def main():

@@ -37,6 +37,9 @@ def main():
             # Calculates the real time PnL for the option open positions in all the accounts
             trading_helper.get_pnl_target(portfolio_positions_df)
 
+            # Get ltp for the stocks and its change prices, so that its easy to track all positions.
+            trading_helper.get_ltp_stock(portfolio_positions_df)
+
             # # Update the LTP for the open positions so that we can plot the LTP chart
             # Getting charts on Sensibull so not doing now.
             # iciciDirectHelper.insert_ltp_for_positions(portfolio_positions_response)
@@ -57,7 +60,10 @@ def main():
 
             # # Update the Market wide open positions in mwpl table, for the stocks options in the portfolio
             trading_helper.get_mwpl(portfolio_positions_df=portfolio_positions_df)
-            #
+
+            # Calculate the breakeven points for the strategies.
+            trading_helper.get_strategy_breakeven(portfolio_positions_df)
+
             # # Update the funds and limits available in a demat account hourly
             iciciDirectHelper.update_funds(api)
 
@@ -79,10 +85,38 @@ def main():
                 print(f"{Colors.PURPLE}Market Closed{Colors.WHITE}")
 
 
+def test():
+    # Your main code goes here
+    try:
+        api = iciciDirect.get_api_session()
+
+        # Get portfolio positions from all brokers accounts.
+        icici_portfolio_positions = iciciDirect.get_portfolio_positions()
+        nuvama_portfolio_positions = nuvama.get_portfolio_positions()
+        # print(icici_portfolio_positions)
+        # print(nuvama_portfolio_positions)
+        portfolio_positions_df = pd.concat([icici_portfolio_positions, nuvama_portfolio_positions])
+
+
+
+        trading_helper.get_strategy_breakeven(portfolio_positions_df)
+
+    except Exception as e:
+        print(f"{Colors.RED}Error in test{Colors.WHITE}")
+        traceback.print_exc()
+    finally:
+        print(f"{Colors.PURPLE}All done")
+
+
+
 # Main function to be executed in the main thread
-
-
 if __name__ == "__main__":
     # Call the main function to start the program
     print(f"{Colors.PURPLE}Starting Options Trading Dashboarding Toolbox {Colors.WHITE}")
-    main()
+    if constants.TEST_RUN:
+        print(f"{Colors.PURPLE}Test run Started{Colors.WHITE}")
+        test()
+    else:
+        print(f"{Colors.PURPLE}Starting Live Trading{Colors.WHITE}")
+        main()
+
