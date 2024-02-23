@@ -20,75 +20,69 @@ def get_secreates():
     return df
 
 
+def get_closed_open_pnl(df_order_history):
+    for index, row in df_order_history.iterrows():
+        if row['action'] == 'Sell':
+            df_order_history.at[index, 'quantity'] = -1 * float(row['quantity'])
 
-def get_closed_open_pnl(api):
-    response_portfolio_position = api.get_trade_list(from_date='2024-01-01', to_date='2024-02-04', exchange_code='NFO')
-    if response_portfolio_position['Status'] == 200:
-        response_portfolio_position = response_portfolio_position['Success']
-        print(response_portfolio_position)
-        df_portfolio_position = pd.DataFrame(response_portfolio_position)
+    df_order_history['quantity'] = df_order_history['quantity'].astype(float)
+    df_order_history['strike_price'] = df_order_history['strike_price'].astype(float)
+    df_order_history['ltp'] = df_order_history['ltp'].astype(float)
 
-        for index, row in df_portfolio_position.iterrows():
-            if row['action'] == 'Sell':
-                df_portfolio_position.at[index, 'quantity'] = -1 * float(row['quantity'])
+    # amount paid or received for the given contract
+    df_order_history['amount'] = df_order_history['average_cost'].astype(float) * \
+                                 df_order_history['quantity'].astype(float) * -1 - \
+                                 df_order_history['brokerage_amount'].astype(float) - \
+                                 df_order_history['total_taxes'].astype(float)
+    df_order_history['amount'] = round(df_order_history['amount'], 2)
 
-        df_portfolio_position['quantity'] = df_portfolio_position['quantity'].astype(float)
-        df_portfolio_position['strike_price'] = df_portfolio_position['strike_price'].astype(float)
-        df_portfolio_position['ltp'] = df_portfolio_position['ltp'].astype(float)
+    # print(tabulate(df_order_history, headers='keys', tablefmt='pretty', showindex=True))
 
-        # amount paid or received for the given contract
-        df_portfolio_position['amount'] = df_portfolio_position['average_cost'].astype(float) * \
-                                          df_portfolio_position['quantity'].astype(float) * -1 - \
-                                          df_portfolio_position['brokerage_amount'].astype(float) - \
-                                          df_portfolio_position['total_taxes'].astype(float)
-        df_portfolio_position['amount'] = round(df_portfolio_position['amount'], 2)
+    # Group by specific columns
+    grouped_df = df_order_history.groupby(['stock_code', 'expiry_date', 'right', 'strike_price'])
 
-        print(tabulate(df_portfolio_position, headers='keys', tablefmt='pretty', showindex=True))
+    # Perform aggregation or other operations on the grouped data
+    result_df = grouped_df.agg(
+        {'quantity': 'sum', 'amount': 'sum', 'ltp': 'mean', 'action': 'count'}).reset_index()
 
-        # Group by specific columns
-        grouped_df = df_portfolio_position.groupby(['stock_code', 'expiry_date', 'right', 'strike_price'])
+    result_df['Realized'] = 0
+    result_df['Unrealized'] = 0
 
-        # Perform aggregation or other operations on the grouped data
-        result_df = grouped_df.agg(
-            {'quantity': 'sum', 'amount': 'sum', 'ltp': 'mean', 'action': 'count'}).reset_index()
+    # current value of the contract
+    result_df['current_value'] = result_df['ltp'].astype(float) * result_df['quantity'].astype(float)
+    result_df['current_value'] = round(result_df['current_value'], 2)
 
-        result_df['Realized'] = 0
-        result_df['Unrealized'] = 0
+    for index, row in result_df.iterrows():
+        if row['quantity'] < 0:
+            result_df.at[index, 'current_value'] = row['current_value'] * -1
 
-        # current value of the contract
-        result_df['current_value'] = result_df['ltp'].astype(float) * result_df['quantity'].astype(float)
-        result_df['current_value'] = round(result_df['current_value'], 2)
-
-        for index, row in result_df.iterrows():
-            if row['quantity'] < 0:
-                result_df.at[index, 'current_value'] = row['current_value'] * -1
-
-        for index, row in result_df.iterrows():
-            if row['quantity'] == 0:
-                result_df.at[index, 'Realized'] = row['amount']
-            else:
-                if row['quantity'] > 0:
-                    # doing plus as amount will be negative here because its a
-                    # buy order and amount is the amount paid so -ve
-                    result_df.at[index, 'Unrealized'] = row['current_value'] + row['amount']
-                else:
-                    if row['quantity'] < 0:
-                        result_df.at[index, 'Unrealized'] = row['amount'] - row['current_value']
-
-        result_df['amount'] = round(result_df['amount'], 2)
-        result_df['current_value'] = round(result_df['current_value'], 2)
-        result_df['Realized'] = round(result_df['Realized'], 2)
-        result_df['Unrealized'] = round(result_df['Unrealized'], 2)
-
-        print(tabulate(result_df, headers='keys', tablefmt='pretty', showindex=True))
-
-        print("\n\n#######################################")
-    else:
-        if response_portfolio_position['Status'] == 500:
-            print(f"{Colors.RED}Internal Server Error while getting portfolio position. "
-                  f"Status Code: {response_portfolio_position['Status']} received. {Colors.RESET}")
+    for index, row in result_df.iterrows():
+        if row['quantity'] == 0:
+            result_df.at[index, 'Realized'] = row['amount']
         else:
-            print(f"{Colors.RED}Error while getting portfolio position: {response_portfolio_position}{Colors.RESET}")
+            if row['quantity'] > 0:
+                # doing plus as amount will be negative here because its a
+                # buy order and amount is the amount paid so -ve
+                result_df.at[index, 'Unrealized'] = row['current_value'] + row['amount']
+            else:
+                if row['quantity'] < 0:
+                    result_df.at[index, 'Unrealized'] = row['amount'] - row['current_value']
+
+    result_df['amount'] = round(result_df['amount'], 2)
+    result_df['current_value'] = round(result_df['current_value'], 2)
+    result_df['Realized'] = round(result_df['Realized'], 2)
+    result_df['Unrealized'] = round(result_df['Unrealized'], 2)
+
+    # print(tabulate(result_df, headers='keys', tablefmt='pretty', showindex=True))
+
+    result_df = result_df.groupby(by=['stock_code', 'expiry_date'])
+    result_df = result_df.agg(
+        {'Realized': 'sum', 'Unrealized': 'sum'}).reset_index()
+
+    result_df['Realized'] = round(result_df['Realized'], 0)
+    result_df['Unrealized'] = round(result_df['Unrealized'], 0)
+    print(tabulate(result_df, headers='keys', tablefmt='pretty', showindex=True))
+    # result_df.to_sql('options_closed_open_pnl', sqlt.get_conn(), if_exists='replace')
 
 
 

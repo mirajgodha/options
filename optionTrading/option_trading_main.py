@@ -6,16 +6,28 @@ import iciciDirect.icici_helper
 import iciciDirect.icici_helper as iciciDirectHelper
 import iciciDirect.icici_direct_main as iciciDirect
 import nuvama.nuvama_main as nuvama
-from datetime import datetime
+import nuvama.nuvama_helper as nuvamaHelper
+from datetime import datetime, timedelta
 import configparser
 import time
 
 from constants import constants_local as constants
+from dao import historicalOrderBookDF
 from helper.colours import Colors
 import trading_helper as trading_helper
 import optionStrategies.optionStrategyBuilder as optionStrategyBuilder
 
-today_date = datetime.today().date().strftime("%Y-%m-%d")
+
+
+today_date = datetime.today().date()
+
+# Get the current date
+current_date = datetime.now()
+
+# Calculate the 15th date of the last month
+last_month_start_date = datetime(current_date.year if current_date.month != 1 else current_date.year - 1,
+                                  current_date.month - 1 if current_date.month != 1 else 12,
+                                  15)
 
 
 def main():
@@ -32,10 +44,24 @@ def main():
             # print(nuvama_portfolio_positions)
             portfolio_positions_df = pd.concat([icici_portfolio_positions, nuvama_portfolio_positions])
 
-            # print(portfolio_positions_df)
+            trading_helper.persist(portfolio_positions_df)
 
             # Calculates the real time PnL for the option open positions in all the accounts
             trading_helper.get_pnl_target(portfolio_positions_df)
+
+            # Used to figure out historical pnl booked on positions.
+            icici_order_history = iciciDirect.get_historical_order_book(
+                from_date=last_month_start_date.strftime(constants.ICICI_DATE_FORMAT),
+                to_date=today_date.strftime(constants.ICICI_DATE_FORMAT))
+
+            nuvama_order_history = nuvama.get_historical_order_book(
+                from_date=last_month_start_date.strftime(constants.NUVAMA_DATE_FORMAT),
+                to_date=today_date.strftime(constants.NUVAMA_DATE_FORMAT))
+
+            order_history = pd.concat([icici_order_history, nuvama_order_history])
+
+            pnl_df = trading_helper.get_closed_pnl(order_history)
+            # End historical pnl
 
             # Get ltp for the stocks and its change prices, so that its easy to track all positions.
             trading_helper.get_ltp_stock(portfolio_positions_df)
@@ -88,18 +114,34 @@ def main():
 def test():
     # Your main code goes here
     try:
-        api = iciciDirect.get_api_session()
+        icici_order_history = iciciDirect.get_historical_order_book(
+            from_date=last_month_start_date.strftime(constants.ICICI_DATE_FORMAT),
+            to_date=today_date.strftime(constants.ICICI_DATE_FORMAT))
 
-        # Get portfolio positions from all brokers accounts.
-        icici_portfolio_positions = iciciDirect.get_portfolio_positions()
-        nuvama_portfolio_positions = nuvama.get_portfolio_positions()
-        # print(icici_portfolio_positions)
-        # print(nuvama_portfolio_positions)
-        portfolio_positions_df = pd.concat([icici_portfolio_positions, nuvama_portfolio_positions])
-
+        nuvama_order_history = nuvama.get_historical_order_book(
+            from_date=last_month_start_date.strftime(constants.NUVAMA_DATE_FORMAT),
+            to_date=today_date.strftime(constants.NUVAMA_DATE_FORMAT))
 
 
-        trading_helper.get_strategy_breakeven(portfolio_positions_df)
+        order_history = pd.concat([icici_order_history, nuvama_order_history])
+
+        pnl_df = trading_helper.get_closed_pnl(order_history)
+        from tabulate import tabulate
+        print(tabulate(pnl_df, headers='keys', tablefmt='psql'))
+
+
+
+        # # Get portfolio positions from all brokers accounts.
+        # icici_portfolio_positions = iciciDirect.get_portfolio_positions()
+        # nuvama_portfolio_positions = nuvama.get_portfolio_positions()
+        # # print(icici_portfolio_positions)
+        # # print(nuvama_portfolio_positions)
+        # portfolio_positions_df = pd.concat([icici_portfolio_positions, nuvama_portfolio_positions])
+        #
+        # # trading_helper.persist(portfolio_positions_df)
+        #
+        #
+        # trading_helper.get_strategy_breakeven(portfolio_positions_df)
 
     except Exception as e:
         print(f"{Colors.RED}Error in test{Colors.WHITE}")

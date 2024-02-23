@@ -4,14 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="44484f79-8743-4570-9b87-9e30e97b0f27" name="Changes" comment="Req file">
-      <change afterPath="$PROJECT_DIR$/profitnloss/__init__.py" afterDir="false" />
+    <list default="true" id="44484f79-8743-4570-9b87-9e30e97b0f27" name="Changes" comment="Added option break even calculations.">
+      <change afterPath="$PROJECT_DIR$/nuvama/nuvama_helper.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/secretes/config.ini" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/util/optionWriterUtil.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/constants/constants_local.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants/constants_local.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/output/2022-10-31.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/stock_symbols.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/stock_symbols.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/iciciDirect/icici_direct_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/iciciDirect/icici_direct_main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/iciciDirect/icici_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/iciciDirect/icici_helper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/metabase/metabase.db.mv.db" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/metabase.db.mv.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nuvama/apiconnect.log" beforeDir="false" afterPath="$PROJECT_DIR$/dao/historicalOrderBookDF.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nuvama/nuvama_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/nuvama/nuvama_main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/optionTrading/openPositionsDF.py" beforeDir="false" afterPath="$PROJECT_DIR$/dao/openPositionsDF.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/optionTrading/option_trading_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionTrading/option_trading_main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/optionTrading/orderBookDF.py" beforeDir="false" afterPath="$PROJECT_DIR$/dao/orderBookDF.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/optionTrading/trading_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionTrading/trading_helper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/secreates/config.ini" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/sql/sqlite.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/sqlite.py" afterDir="false" />
@@ -65,11 +73,11 @@
       <recent name="$PROJECT_DIR$/metabase" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/dao" />
       <recent name="$PROJECT_DIR$/optionTrading" />
       <recent name="$PROJECT_DIR$/constants" />
       <recent name="$PROJECT_DIR$/bankNiftyTools" />
       <recent name="$PROJECT_DIR$/optionStrategies" />
-      <recent name="$PROJECT_DIR$/data" />
     </key>
   </component>
   <component name="RunManager" selected="Python.option_trading_main">
@@ -95,6 +103,27 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="nsepythonUtil" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="options" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/util" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/util/nsepythonUtil.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="nuvama_main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="options" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -108,27 +137,6 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/nuvama/nuvama_main.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="optionStrategyBuilder" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="options" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/optionStrategies" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/optionStrategies/optionStrategyBuilder.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -180,34 +188,29 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="trading_helper" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for option_trading_main.test" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="options" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/optionTrading" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/optionTrading/trading_helper.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;option_trading_main.test&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Python.option_trading_main" />
-        <item itemvalue="Python.icici_direct_main" />
+        <item itemvalue="Python.nsepythonUtil" />
+        <item itemvalue="Python tests.pytest for option_trading_main.test" />
         <item itemvalue="Python.nuvama_main" />
-        <item itemvalue="Python.optionStrategyBuilder" />
-        <item itemvalue="Python.trading_helper" />
+        <item itemvalue="Python.icici_direct_main" />
       </list>
     </recent_temporary>
   </component>
@@ -409,7 +412,14 @@
       <option name="project" value="LOCAL" />
       <updated>1707904448080</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="Added option break even calculations.">
+      <created>1708065009146</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1708065009146</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -472,17 +482,7 @@
     <MESSAGE value="Updated git ignore" />
     <MESSAGE value="Updated git ignore&#10;Added nuvama integration with other functions" />
     <MESSAGE value="Req file" />
-    <option name="LAST_COMMIT_MESSAGE" value="Req file" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/nuvama/nuvama_main.py</url>
-          <line>2</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="Added option break even calculations." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added option break even calculations." />
   </component>
 </project>

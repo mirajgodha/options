@@ -378,17 +378,20 @@ def get_ltp_option(stock_code, expiry_date, strike_price, right):
             right = 'P'
 
     try:
-        cursor_inner.execute("SELECT ltp FROM ltp  WHERE timestamp = "
-                             "(SELECT MAX(timestamp) FROM ltp WHERE "
-                             "stock = ? AND expiry = ? AND strike_price = ? AND right = ? ) "
-                             "and stock = ? AND expiry = ? AND strike_price = ? AND right = ?",
-                             (stock_code, expiry_date, strike_price, right, stock_code, expiry_date, strike_price,
+        cursor_inner.execute("SELECT ltp FROM ltp  WHERE id = "
+                             "(SELECT MAX(id) FROM ltp WHERE "
+                             "stock = ? AND upper(expiry) = ? AND strike_price = ? AND right = ? ) "
+                             "and stock = ? AND upper(expiry) = ? AND strike_price = ? AND right = ?",
+                             (stock_code, expiry_date.upper(), strike_price, right, stock_code, expiry_date.upper(), strike_price,
                               right))
         rows = cursor_inner.fetchall()
 
         # print(f'Got ltp for {stock_code} {expiry_date} {strike_price} {right} : {rows[0][0]]}')
         return rows[0][0]
 
+    except IndexError as e:
+        print(f"LTP does not exist in DB for {stock_code} {expiry_date} {strike_price} {right}")
+        return None
     except Exception as e:
         print(f"Error getting ltp data from SQL DB for {stock_code} {expiry_date} {strike_price} {right}")
         traceback.print_exc()

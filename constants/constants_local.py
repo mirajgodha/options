@@ -3,7 +3,7 @@ import datetime
 from dao.Option import Expiry
 
 # Option trading constants
-REFRESH_TIME_SECONDS = 30
+REFRESH_TIME_SECONDS = 300
 TEST_RUN = False
 
 MARGIN_DELAY_TIME = 10
@@ -35,4 +35,8 @@ ORDER_STATUS_OPEN = 'OPEN'
 ORDER_STATUS_COMPLETE = 'COMPLETE'
 ORDER_STATUS_CANCELLED = 'CANCELLED'
 ORDER_STATUS_REJECTED = 'REJECTED'
+
+#Date formats
+ICICI_DATE_FORMAT = "%Y-%m-%d"
+NUVAMA_DATE_FORMAT = "%m/%d/%Y"
 

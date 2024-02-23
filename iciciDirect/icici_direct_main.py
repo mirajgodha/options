@@ -5,16 +5,17 @@
 
 import traceback
 
-import iciciDirect.icici_helper
+import pandas as pd
+
 import iciciDirect.icici_helper as iciciDirectHelper
 from datetime import datetime
 import configparser
 import time
-from optionTrading.openPositionsDF import get_icici_option_open_positions_df
-from optionTrading.orderBookDF import get_icici_order_book_df
+from dao.openPositionsDF import get_icici_option_open_positions_df
+from dao.orderBookDF import get_icici_order_book_df
+from dao.historicalOrderBookDF import get_icici_order_history_df
 from optionTrading.trading_helper import is_market_open
 
-import optionTrading.openPositionsDF
 from constants import constants_local as constants
 from helper.colours import Colors
 
@@ -63,6 +64,24 @@ def get_order_book():
         return orders_df
 
 
+def get_historical_order_book(from_date, to_date):
+    response_historical_order_book = api.get_trade_list(from_date, to_date, exchange_code='NFO')
+
+    if response_historical_order_book['Status'] == 200:
+        response_historical_order_book = response_historical_order_book['Success']
+
+
+        response_historical_order_book_df = get_icici_order_history_df(response_historical_order_book)
+        return response_historical_order_book_df
+    else:
+        if response_historical_order_book['Status'] == 500:
+            print(f"{Colors.RED}Internal Server Error while getting portfolio position. "
+                  f"Status Code: {response_historical_order_book['Status']} received. {Colors.RESET}")
+        else:
+            print(f"{Colors.RED}Error while getting portfolio position: {response_historical_order_book}{Colors.RESET}")
+        return None
+
+
 # Main function to be executed in the main thread
 def main():
     # Your main code goes here
@@ -92,7 +111,7 @@ def main():
             iciciDirectHelper.get_mwpl(portfolio_positions_response=portfolio_positions_response)
 
             # Update the funds and limits available in a demat account hourly
-            iciciDirect.icici_helper.update_funds(api)
+            iciciDirectHelper.update_funds(api)
 
             time.sleep(constants.REFRESH_TIME_SECONDS)
     except Exception as e:
