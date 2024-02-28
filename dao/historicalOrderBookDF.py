@@ -3,7 +3,6 @@ from helper.stockCodes import get_icici_stock_code
 import constants.constants_local as c
 from datetime import datetime
 
-
 # ---------------------------------------------------------------------------------------------------------------------
 # Open Positions - Option Trading DataFrames
 # ---------------------------------------------------------------------------------------------------------------
@@ -21,7 +20,7 @@ from datetime import datetime
 option_historical_order_book_columns = ["broker", "stock", "broker_stock_code",
                                         "average_price", "quantity", "strike_price",
                                         "expiry_date", "right", "action",
-                                        'brokerage_amount','total_taxes','trade_date']
+                                        'brokerage_amount', 'total_taxes', 'trade_date']
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -66,7 +65,7 @@ def get_icici_order_history_df(historical_order_book):
                 "right": item['right'],
                 "action": item['action'],
                 "brokerage_amount": float(item['brokerage_amount']),
-                "total_taxes" : float(item['total_taxes']),
+                "total_taxes": float(item['total_taxes']),
                 "trade_date": datetime.strptime(item['trade_date'], '%d-%b-%Y')
             }
 
@@ -82,7 +81,7 @@ def get_nuvama_order_history_df(historical_order_book):
     df = pd.DataFrame(columns=option_historical_order_book_columns)
     for item in historical_order_book:
         # print(item)
-        if '-OPT-' in item['security'] :
+        if '-OPT-' in item['security']:
             # Sample DataFrame {"status": true, "data": {"totalRecords": 78, "transactionList": [{"accountCode":
             # "60278133", "security": "DLF-OPT-29Feb2024-PE-900-NSE", "transactionDate": "21-Feb-24", "txnType":
             # "NSE", "action": "Sell", "exchangeName": "NSE", "quantity": 1650.0, "transactionPrice": 21.65,
@@ -104,14 +103,14 @@ def get_nuvama_order_history_df(historical_order_book):
             # false, "splitAllowed": false, "scripIdentifier": 47691953, "cumulativeQuantity": -500.0, "netCharges":
             # 18.86, "assetType": null, "isin": null, "stax_GST": 2.32, "stt": 3.63, "tstax": 0.0}]}}
 
-            trdSym = item['security'] #DLF-OPT-29Feb2024-PE-900-NSE
+            trdSym = item['security']  # DLF-OPT-29Feb2024-PE-900-NSE
             stock = trdSym.split('-')[0]
 
             right = 'Put' if trdSym.split('-')[3] == 'PE' else 'Call'
             action = 'Sell' if item['action'].upper() == 'SELL' else 'Buy'
             average_price = float(item['transactionPrice'])
 
-            expiry_date = trdSym.split('-')[2] # get the expiry date in this format - 29Feb2024
+            expiry_date = trdSym.split('-')[2]  # get the expiry date in this format - 29Feb2024
             # Parse the date string
             date_obj = datetime.strptime(expiry_date, "%d%b%Y")
             # Format the date object to the desired format
@@ -136,10 +135,54 @@ def get_nuvama_order_history_df(historical_order_book):
                 "action": action,
                 "brokerage_amount": float(item['brokerage']),
                 "total_taxes": float(item['netCharges']),
-                "trade_date" : datetime.strptime(item['transactionDate'], '%d-%b-%y')
+                "trade_date": datetime.strptime(item['transactionDate'], '%d-%b-%y')
             }
 
             df = pd.concat([df, pd.DataFrame.from_records([pnl_data])], ignore_index=True)
 
     # print(df)
+    return df
+
+
+def convert_to_historical_df(todays_order_df):
+    # Converts the todays orders df compatable to historical order df
+    df = pd.DataFrame(columns=option_historical_order_book_columns)
+
+    if todays_order_df is None or len(todays_order_df) == 0:
+        return df
+
+    for index, item in todays_order_df.iterrows():
+        if item['order_status'] != 'COMPLETE':
+            continue
+
+        average_price = item['order_price']
+        quantity = item['quantity']
+        strike_price = item['strike_price']
+        right = item['right']
+        action = item['action']
+        expiry_date = item['expiry_date']
+
+        if action == 'SELL' and quantity > 0:
+            quantity = quantity * -1
+
+        # print(item)
+        order_data = {
+            "broker": item['broker'],
+            "stock": item['stock'],
+            "broker_stock_code": item['broker_stock_code'],
+            "average_price": average_price,
+            "quantity": quantity,
+            "strike_price": strike_price,
+            "expiry_date": expiry_date.upper(),
+            "right": right,
+            "action": action,
+            "brokerage_amount": 0,
+            "total_taxes": 0,
+            "trade_date": datetime.now()
+        }
+        df = pd.concat([df, pd.DataFrame.from_records([order_data])], ignore_index=True)
+
+    # print("Returning converted DF from todays order df")
+    # from tabulate import tabulate
+    # print(tabulate(df, headers='keys', tablefmt='psql'))
     return df

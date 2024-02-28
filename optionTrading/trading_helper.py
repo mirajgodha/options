@@ -8,12 +8,15 @@ import iciciDirect.icici_direct_main
 import sql.sqlite
 from helper import optionsMWPL, fuzzMatch
 import constants.constants_local as c
-from datetime import datetime,time,timedelta
+from datetime import datetime, time, timedelta
 
 from helper.colours import Colors
 import sql.sqlite as sqlt
 from tabulate import tabulate
 from profitnloss import Call, Put, Strategy
+
+from helper.stockCodes import get_nse_stock_code
+import nsepython as nse
 
 
 def is_market_open():
@@ -76,16 +79,12 @@ def profit_or_loss_threshold_reached(df):
     # Check if the profit or loss threshold is reached for each stock based on the excel def check_pnl_threshold(df):
 
     # Code to calculate PnL
-    print("\nCHECKING P&L Thresholds...")
-    print("\n\n#######################################")
 
     for index, data in df.iterrows():
         if float(data['pnl']) > float(data['profit_target']):
             print(f"{data['stock']}: Profit Target Reached Profit: {data['pnl']}, Target: {data['profit_target']}")
         if float(data['pnl']) < float(data['stop_loss']):
             print(f"{data['stock']}: Stop Loss Reached. Loss:{data['pnl']}, Target: {data['stop_loss']}")
-
-    print("\n\n#######################################")
 
 
 def contract_value(portfolio_positions_df, threshold):
@@ -138,16 +137,11 @@ def get_pnl_target(portfolio_positions_df):
     # get  the contracts to be sq_offed
     contract_value(portfolio_positions_df, c.CONTRACT_MIN_VALUE_TO_BE_SQ_OFFED)
 
-    print("\n\n#######################################")
-
     return df
 
 
 def calculate_margin_used(open_positions_df, api):
     # Calculate Margin Used for all open option positions
-    print("\n\n#######################################")
-
-    print("Calculating Margin Used: ")
 
     if open_positions_df is not None and len(open_positions_df) > 0:
 
@@ -169,6 +163,10 @@ def calculate_margin_used(open_positions_df, api):
                              "cover_sltp_price", "fresh_limit_rate", "open_quantity"])
 
                 for index, item in open_positions_df.iterrows():
+                    if item['action'] == 'NA':
+                        # Pending order, not yet executed.
+                        continue
+
                     if item['stock'] == stock and item['expiry_date'] == expiry_date:
                         # print(item)
                         quantity = int(item['quantity'])
@@ -196,10 +194,13 @@ def calculate_margin_used(open_positions_df, api):
 
                         df = pd.concat([df, pd.DataFrame.from_records([margin_data])], ignore_index=True)
                 # print(f"Margin Data: {stock} , {expiry_date}")
-                print(tabulate(df, headers='keys', tablefmt='psql'))
+                # print(tabulate(df, headers='keys', tablefmt='psql'))
+
+                if df.empty or len(df) == 0:  # All positions are sq offed
+                    continue
 
                 margin_response = api.margin_calculator(df.to_dict(orient='records'), "NFO")
-                print(f"Margin Response: {margin_response} ")
+                # print(f"Margin Response: {margin_response} ")
 
                 if margin_response['Status'] == 200:
                     sqlt.insert_margins_used(stock, expiry_date, margin_response['Success'])
@@ -213,8 +214,6 @@ def get_mwpl(portfolio_positions_df):
             datetime.now() - timedelta(minutes=c.MWPL_DELAY_TIME)):
         # Updated MWPL less than a hour ago, so not updating now.
         return
-
-    print("Getting MWPL")
 
     mwpl_list = []
 
@@ -293,15 +292,15 @@ def get_option_ltp(stock_code, expiry_date, strike_price, right):
 def order_list(orders_df):
     # Print them in different colour based on execution status.
     # print(orders)
-    print("Order Status: ")
+    print(f"{Colors.BOLD}{Colors.CYAN}Order Status: {Colors.RESET}")
     for index, item in orders_df.iterrows():
         if item['order_status'] == c.ORDER_STATUS_COMPLETE:
             print(f"{Colors.BLUE}Executed Order: {item['stock']} : {item['action']} : Price: {item['order_price']}  : "
-                  f"LTP: {item['ltp']} : Qty : {item['quantity']}")
+                  f"LTP: {item['ltp']} : Qty : {item['quantity']}{Colors.RESET}")
         if item['order_status'] == c.ORDER_STATUS_OPEN:
             print(
                 f"{Colors.CYAN}Pending Execution: {item['stock']} : {item['action']} : Price: {item['order_price']} : "
-                f"LTP: {item['ltp']}: Qty : {item['quantity']}")
+                f"LTP: {item['ltp']}: Qty : {item['quantity']}{Colors.RESET}")
 
         # insert the order status in to order status table
         sqlt.insert_order_status(orders_df)
@@ -314,63 +313,94 @@ def get_ltp_stock(portfolio_positions_df):
         print(f"{Colors.GREEN}No open portfolio positions found{Colors.RESET}")
         return
 
-    for stock in unique_stock_codes_portfolio:
-        # print(f"Getting LTP for {stock}")
-        api = iciciDirect.icici_direct_main.get_api_session()
+    ltp_df = pd.DataFrame(
+        columns=["stock", "ltp", 'ltt', 'best_bid_price',
+                 'best_bid_quantity', 'best_offer_price', 'best_offer_quantity', 'open',
+                 'high', 'low', 'previous_close', 'ltp_percent_change',
+                 'upper_circuit', 'lower_circuit', 'total_quantity_traded'])
 
-        # {'Success': [{'exchange_code': 'NSE', 'product_type': '', 'stock_code': 'MOTSUM', 'expiry_date': None,
-        # 'right': None, 'strike_price': 0.0, 'ltp': 114.05, 'ltt': '14-Feb-2024 15:29:58', 'best_bid_price': 0.0,
-        # 'best_bid_quantity': '0', 'best_offer_price': 0.0, 'best_offer_quantity': '0', 'open': 114.65,
-        # 'high': 114.75, 'low': 112.2, 'previous_close': 115.45, 'ltp_percent_change': 1.21264616717194,
-        # 'upper_circuit': 126.95, 'lower_circuit': 103.9, 'total_quantity_traded': '15946868', 'spot_price': None},
-        # {'exchange_code': 'BSE', 'product_type': '', 'stock_code': 'MOTSUM', 'expiry_date': None, 'right': None,
-        # 'strike_price': 0.0, 'ltp': 114.3, 'ltt': '14-Feb-2024 15:30:38', 'best_bid_price': 114.2,
-        # 'best_bid_quantity': '100', 'best_offer_price': 114.3, 'best_offer_quantity': '869', 'open': 114.25,
-        # 'high': 114.65, 'low': 112.2, 'previous_close': 115.55, 'ltp_percent_change': 1.08178277801817,
-        # 'upper_circuit': 127.1, 'lower_circuit': 104.0, 'total_quantity_traded': '1053974', 'spot_price': None}],
-        # 'Status': 200, 'Error': None}
+    try:
+        for stock in unique_stock_codes_portfolio:
+            # print(f"Getting LTP for {stock}")
+            if c.GET_LTP_FROM_ICICI:
+                # Not getting from ICICI due to call limit
+                api = iciciDirect.icici_direct_main.get_api_session()
 
-        ltp_df = pd.DataFrame(
-            columns=["stock", "ltp", 'ltt', 'best_bid_price',
-                     'best_bid_quantity', 'best_offer_price', 'best_offer_quantity', 'open',
-                     'high', 'low', 'previous_close', 'ltp_percent_change',
-                     'upper_circuit', 'lower_circuit', 'total_quantity_traded'])
-        try:
-            ltp = api.get_quotes(stock_code=stock, exchange_code='NSE', product_type='cash')
-            for item in ltp['Success']:
-                # data for each ltp response so that can crated a consolidated df
-                if ['exchange_code'] == 'BSE':  # No need to store the BSE traded price
-                    continue
-                # print(ltp['Success'])
-                ltp_data = {
-                    "stock": item['stock_code'],
-                    "ltp": float(item['ltp']),
-                    'ltt': datetime.strptime(item['ltt'], "%d-%b-%Y %H:%M:%S"),
-                    'best_bid_price': float(item['best_bid_price']),
-                    'best_bid_quantity': int(item['best_bid_quantity']),
-                    'best_offer_price': float(item['best_offer_price']),
-                    'best_offer_quantity': int(item['best_offer_quantity']),
-                    'open': float(item['open']),
-                    'high': float(item['high']),
-                    'low': float(item['low']),
-                    'previous_close': float(item['previous_close']),
-                    'ltp_percent_change': float(item['ltp_percent_change']),
-                    'upper_circuit': float(item['upper_circuit']),
-                    'lower_circuit': float(item['lower_circuit']),
-                    'total_quantity_traded': int(item['total_quantity_traded'])
-                }
-                ltp_df = pd.concat([ltp_df, pd.DataFrame.from_records([ltp_data])], ignore_index=True)
+                # {'Success': [{'exchange_code': 'NSE', 'product_type': '', 'stock_code': 'MOTSUM', 'expiry_date': None,
+                # 'right': None, 'strike_price': 0.0, 'ltp': 114.05, 'ltt': '14-Feb-2024 15:29:58', 'best_bid_price': 0.0,
+                # 'best_bid_quantity': '0', 'best_offer_price': 0.0, 'best_offer_quantity': '0', 'open': 114.65,
+                # 'high': 114.75, 'low': 112.2, 'previous_close': 115.45, 'ltp_percent_change': 1.21264616717194,
+                # 'upper_circuit': 126.95, 'lower_circuit': 103.9, 'total_quantity_traded': '15946868', 'spot_price': None},
+                # {'exchange_code': 'BSE', 'product_type': '', 'stock_code': 'MOTSUM', 'expiry_date': None, 'right': None,
+                # 'strike_price': 0.0, 'ltp': 114.3, 'ltt': '14-Feb-2024 15:30:38', 'best_bid_price': 114.2,
+                # 'best_bid_quantity': '100', 'best_offer_price': 114.3, 'best_offer_quantity': '869', 'open': 114.25,
+                # 'high': 114.65, 'low': 112.2, 'previous_close': 115.55, 'ltp_percent_change': 1.08178277801817,
+                # 'upper_circuit': 127.1, 'lower_circuit': 104.0, 'total_quantity_traded': '1053974', 'spot_price': None}],
+                # 'Status': 200, 'Error': None}
 
-            # convert the in a pandas DataFrame datetime64[ns] to python datetime
-            ltp_df['ltt'] = pd.to_datetime(ltp_df['ltt'])
-            ltp_df['ltt'] = ltp_df['ltt'].dt.strftime('%Y-%m-%d %H:%M:%S')
+                ltp = api.get_quotes(stock_code=stock, exchange_code='NSE', product_type='cash')
+                for item in ltp['Success']:
+                    # data for each ltp response so that can crated a consolidated df
+                    if ['exchange_code'] == 'BSE':  # No need to store the BSE traded price
+                        continue
+                    # print(ltp['Success'])
+                    ltp_data = {
+                        "stock": item['stock_code'],
+                        "ltp": float(item['ltp']),
+                        'ltt': datetime.strptime(item['ltt'], "%d-%b-%Y %H:%M:%S"),
+                        'best_bid_price': float(item['best_bid_price']),
+                        'best_bid_quantity': int(item['best_bid_quantity']),
+                        'best_offer_price': float(item['best_offer_price']),
+                        'best_offer_quantity': int(item['best_offer_quantity']),
+                        'open': float(item['open']),
+                        'high': float(item['high']),
+                        'low': float(item['low']),
+                        'previous_close': float(item['previous_close']),
+                        'ltp_percent_change': float(item['ltp_percent_change']),
+                        'upper_circuit': float(item['upper_circuit']),
+                        'lower_circuit': float(item['lower_circuit']),
+                        'total_quantity_traded': int(item['total_quantity_traded'])
+                    }
+                    ltp_df = pd.concat([ltp_df, pd.DataFrame.from_records([ltp_data])], ignore_index=True)
 
-        except Exception as e:
-            print(f"{Colors.RED}Exception while getting LTP for {stock}: {e}{Colors.RESET}")
-            traceback.print_exc()
-        finally:
-            ltp_df.to_sql(name="ltp_stock", con=sqlt.get_conn(), if_exists='append',
-                          index=False)
+                # convert the in a pandas DataFrame datetime64[ns] to python datetime
+                ltp_df['ltt'] = pd.to_datetime(ltp_df['ltt'])
+                ltp_df['ltt'] = ltp_df['ltt'].dt.strftime('%Y-%m-%d %H:%M:%S')
+
+            if c.GET_LTP_FROM_NSE:
+                try:
+                    nse_stock = get_nse_stock_code(stock)
+                    # print(f"Getting ltp for ..{nse_stock}..")
+                    ltp = nse.nsetools_get_quote(nse_stock)
+
+                    ltp_data = {
+                        "stock": stock,
+                        "ltp": ltp['lastPrice'],
+                        # 'ltt': datetime.strptime(item['ltt'], "%d-%b-%Y %H:%M:%S"),
+                        # 'best_bid_price': float(item['best_bid_price']),
+                        # 'best_bid_quantity': int(item['best_bid_quantity']),
+                        # 'best_offer_price': float(item['best_offer_price']),
+                        # 'best_offer_quantity': int(item['best_offer_quantity']),
+                        'open': ltp['open'],
+                        'high': ltp['dayHigh'],
+                        'low': ltp['dayLow'],
+                        'previous_close': ltp['previousClose'],
+                        'ltp_percent_change': ltp['pChange'],
+                        # 'upper_circuit': ltp['upperCP'],
+                        # 'lower_circuit': ltp['lowerCP']
+                        'total_quantity_traded': ltp['totalTradedVolume']
+                    }
+                    ltp_df = pd.concat([ltp_df, pd.DataFrame.from_records([ltp_data])], ignore_index=True)
+                except Exception as e:
+                    # This will help to persist the ltp which we are able to get from NSE
+                    print(f"{Colors.RED}Exception while getting LTP for {stock}: {e}{Colors.RESET}")
+                    traceback.print_exc()
+    except Exception as e:
+        print(f"{Colors.RED}Exception while getting LTP for {stock}: {e}{Colors.RESET}")
+        traceback.print_exc()
+    finally:
+        ltp_df.to_sql(name="ltp_stock", con=sqlt.get_conn(), if_exists='append',
+                      index=False)
 
 
 def get_strategy_breakeven(portfolio_positions_df):
@@ -402,26 +432,31 @@ def get_strategy_breakeven(portfolio_positions_df):
                     s.sell(Put(item['strike_price'], item['average_price'], item['quantity'] * -1))
                 if item['right'] == 'Put' and item['action'] == 'Buy':
                     s.buy(Put(item['strike_price'], item['average_price'], item['quantity']))
-            print(f"{Colors.PURPLE}Breakeven for {stock}, {s.break_evens()}{Colors.RESET}")
+            # print(f"{Colors.PURPLE}Breakeven for {stock}, {s.break_evens()}{Colors.RESET}")
             # print("max loss: %f, max gain: %f" % (s.max_loss(), s.max_gain()))
             # print("strikes and payoffs: " + str(list(zip(s.strikes(), s.payoffs(s.strikes())))))
             break_even_array = s.break_evens()
 
             lower_side = None
             higher_side = None
-
-            if break_even_array:
-                lower_side = break_even_array[0]
-
-            if break_even_array and len(break_even_array) > 1:
-                higher_side = break_even_array[1]
-
+            ltp = sqlt.get_ltp_stock(stock)
             lower_break_even_per = 0.0
             higher_break_even_per = 0.0
 
-            ltp = sqlt.get_ltp_stock(stock)
+            if break_even_array:
+                if len(break_even_array) == 1:
+                    if ltp is not None:
+                        if ltp > break_even_array[0]:
+                            lower_side = break_even_array[0]
+                        else:
+                            higher_side = break_even_array[0]
+                    else:
+                        lower_side = break_even_array[0]
+                elif len(break_even_array) > 1:
+                    lower_side = break_even_array[0]
+                    higher_side = break_even_array[1]
 
-            if break_even_array and ltp is not None:
+            if ltp is not None and lower_side is not None:
                 lower_break_even_per = (ltp - break_even_array[0]) / ltp
 
             if higher_side is not None and ltp is not None:
@@ -441,7 +476,7 @@ def get_strategy_breakeven(portfolio_positions_df):
                                       ignore_index=True)
 
             # s.plot()
-        print(tabulate(break_even_df))
+        # print(tabulate(break_even_df))
 
     except Exception as e:
         print(f"{Colors.RED}Exception while getting Breakeven for {stock}: {e}{Colors.RESET}")
@@ -456,16 +491,28 @@ def get_strategy_breakeven(portfolio_positions_df):
             pass
 
 
-def persist(portfolio_positions_df):
+def persist(portfolio_positions_df, table_name, if_exists='replace'):
     try:
         conn = sqlt.get_conn()
-        portfolio_positions_df.to_sql(name="portfolio_positions", con=conn, if_exists='replace',
-                             index=False)
+        portfolio_positions_df.to_sql(name=table_name, con=conn, if_exists=if_exists,
+                                      index=False)
         conn.commit()
     except:
         pass
 
+
+def get_table_as_df(table_name, where_clause=None):
+    conn = sqlt.get_conn()
+    sql = f"select * from {table_name}"
+    if where_clause is not None:
+        sql = f"{sql} where {where_clause}"
+    df = pd.read_sql(sql, conn)
+    return df
+
+
 def get_closed_pnl(df_order_history):
+    # print(tabulate(df_order_history))
+
     for index, row in df_order_history.iterrows():
         if row['action'] == 'Sell':
             row['quantity'] = -1 * float(row['quantity'])
@@ -473,10 +520,9 @@ def get_closed_pnl(df_order_history):
     df_order_history['quantity'] = df_order_history['quantity'].astype(float)
     df_order_history['strike_price'] = df_order_history['strike_price'].astype(float)
 
-
     # amount paid or received for the given contract
     df_order_history['amount'] = df_order_history['average_price'].astype(float) * \
-                                 df_order_history['quantity'].astype(float) * -1- \
+                                 df_order_history['quantity'].astype(float) * -1 - \
                                  df_order_history['brokerage_amount'].astype(float) - \
                                  df_order_history['total_taxes'].astype(float)
 
@@ -489,7 +535,6 @@ def get_closed_pnl(df_order_history):
     open_positions_dict = {}
     stock_pnl_booked_dict = {}
 
-    print("####################### Staring loop #########################")
     for index, row in df_order_history.iterrows():
         # if row['stock'] != 'BHAPET' or row['expiry_date'] != '29-FEB-2024':
         #     continue
@@ -499,7 +544,6 @@ def get_closed_pnl(df_order_history):
 
         key = (row['stock'], row['expiry_date'], row['right'], row['strike_price'])
 
-
         if key not in open_positions_dict:
             # New contract opened
             open_positions_dict[key] = row
@@ -508,60 +552,58 @@ def get_closed_pnl(df_order_history):
             if current_position['quantity'] + row['quantity'] == 0:
                 # contract sqred off, add its profit in stock_pnl_dict
                 # print(f"Profit realized: {current_position['amount'] + row['amount']}")
-                if (row['stock'],row['expiry_date']) in stock_pnl_booked_dict:
-                    stock_pnl_booked_dict[(row['stock'],row['expiry_date'])] += current_position['amount'] + row['amount']
+                if (row['stock'], row['expiry_date']) in stock_pnl_booked_dict:
+                    stock_pnl_booked_dict[(row['stock'], row['expiry_date'])] += current_position['amount'] + row[
+                        'amount']
                 else:
-                    stock_pnl_booked_dict[(row['stock'],row['expiry_date'])] = current_position['amount'] + row['amount']
+                    stock_pnl_booked_dict[(row['stock'], row['expiry_date'])] = current_position['amount'] + row[
+                        'amount']
                 # remove the key from closed_pnl_dict
                 del open_positions_dict[key]
             elif (current_position['quantity'] < 0 and row['quantity'] < 0) or \
-                        (current_position['quantity'] > 0 and row['quantity'] > 0):
-                    # Both are long or both are short
-                    current_position['quantity'] = current_position['quantity'] + row['quantity']
-                    current_position['amount'] = current_position['amount'] + row['amount']
-                    open_positions_dict[key] = current_position
+                    (current_position['quantity'] > 0 and row['quantity'] > 0):
+                # Both are long or both are short
+                current_position['quantity'] = current_position['quantity'] + row['quantity']
+                current_position['amount'] = current_position['amount'] + row['amount']
+                open_positions_dict[key] = current_position
             elif (current_position['quantity'] < 0 and row['quantity'] > 0) or \
-                        (current_position['quantity'] > 0 and row['quantity'] < 0):
-                    # partial sqzed off
-                    left_quantity = current_position['quantity'] + row['quantity']
-                    current_price = current_position['amount'] / abs(current_position['quantity'])
-                    row_price = row['amount'] / abs(row['quantity'])
-                    min_quantity = min(abs(current_position['quantity']), abs(row['quantity']))
-                    # Need to handle two situations:
-                    # If current holding quantity is less than the new order,the from short
-                    # we are moving to long or vice a versa. Else if current quantity is more than
-                    # new order than there is a partial sq off in the position.
-                    if min_quantity == abs(current_position['quantity']):
-                        pnl_booked = (current_price + row_price) * min_quantity
-                        amount_left = row_price * abs(left_quantity)
-                    else:
-                        pnl_booked = (current_price + row_price) * min_quantity
-                        amount_left = current_price * abs(left_quantity)
+                    (current_position['quantity'] > 0 and row['quantity'] < 0):
+                # partial sqzed off
+                left_quantity = current_position['quantity'] + row['quantity']
+                current_price = current_position['amount'] / abs(current_position['quantity'])
+                row_price = row['amount'] / abs(row['quantity'])
+                min_quantity = min(abs(current_position['quantity']), abs(row['quantity']))
+                # Need to handle two situations:
+                # If current holding quantity is less than the new order,the from short
+                # we are moving to long or vice a versa. Else if current quantity is more than
+                # new order than there is a partial sq off in the position.
+                if min_quantity == abs(current_position['quantity']):
+                    pnl_booked = (current_price + row_price) * min_quantity
+                    amount_left = row_price * abs(left_quantity)
+                else:
+                    pnl_booked = (current_price + row_price) * min_quantity
+                    amount_left = current_price * abs(left_quantity)
 
-                    # print(f"Min quantity: {min_quantity}, Current price: {current_price}, Row price: {row_price}, "
-                    #       f"Pnl booked: {pnl_booked}, Amount left: {amount_left}, Left quantity: {left_quantity}, "
-                    #       f"Current quantity: {current_position['quantity']}, Row quantity: {row['quantity']}")
+                # print(f"Min quantity: {min_quantity}, Current price: {current_price}, Row price: {row_price}, "
+                #       f"Pnl booked: {pnl_booked}, Amount left: {amount_left}, Left quantity: {left_quantity}, "
+                #       f"Current quantity: {current_position['quantity']}, Row quantity: {row['quantity']}")
 
-                    # contract partial sqred off, add its profit in stock_pnl_dict
-                    if (row['stock'],row['expiry_date']) in stock_pnl_booked_dict:
-                        stock_pnl_booked_dict[(row['stock'],row['expiry_date'])] += pnl_booked
-                    else:
-                        stock_pnl_booked_dict[(row['stock'],row['expiry_date'])] = pnl_booked
-                    # print(f"Profit realized: {pnl_booked}")
+                # contract partial sqred off, add its profit in stock_pnl_dict
+                if (row['stock'], row['expiry_date']) in stock_pnl_booked_dict:
+                    stock_pnl_booked_dict[(row['stock'], row['expiry_date'])] += pnl_booked
+                else:
+                    stock_pnl_booked_dict[(row['stock'], row['expiry_date'])] = pnl_booked
+                # print(f"Profit realized: {pnl_booked}")
 
-                    # Update the current position
-                    current_position['quantity'] = left_quantity
-                    current_position['amount'] = amount_left
-                    open_positions_dict[key] = current_position
+                # Update the current position
+                current_position['quantity'] = left_quantity
+                current_position['amount'] = amount_left
+                open_positions_dict[key] = current_position
 
-        # print("Stock pnl -- ", stock_pnl_dict)
-        # print(tabulate(closed_pnl_dict, headers='keys', tablefmt='pretty', showindex=True))
+    # print("Final closed pnl dict .........")
+    stock_pnl_booked_dict = {key: round(value, 0) for key, value in stock_pnl_booked_dict.items()}
 
-    print("Final closed pnl dict .........")
-    stock_pnl_booked_dict = {key: round(value,0) for key, value in stock_pnl_booked_dict.items()}
-
-
-    print(stock_pnl_booked_dict)
+    # print(stock_pnl_booked_dict)
     # Initialize an empty list to store data
     data_list = []
 
@@ -574,10 +616,7 @@ def get_closed_pnl(df_order_history):
 
     # Create a DataFrame from the list
     stock_pnl_booked_dict_df = pd.DataFrame(data_list)
-    print(stock_pnl_booked_dict_df)
-
-    # print("Final open positions dict .........")
-    # print(tabulate(open_positions_dict, headers='keys', tablefmt='pretty', showindex=True))
+    # print(stock_pnl_booked_dict_df)
 
     stock_pnl_booked_dict_df.to_sql('options_pnl_booked', sqlt.get_conn(), if_exists='replace')
     return stock_pnl_booked_dict_df

@@ -4,7 +4,7 @@ import traceback
 
 import pandas as pd
 from helper.colours import Colors
-from tabulate import tabulate
+import constants.constants_local as constants
 
 db_name = '../sql/stocks.db'
 
@@ -189,6 +189,22 @@ def create_tables():
                                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                                 status TEXT,
                                 timestamp dateTime NOT NULL DEFAULT (datetime('now','localtime'))
+                            )
+                            ''')
+
+    cursor_inner.execute(f'''
+                            CREATE TABLE if not exists {constants.ICICI_HISTORICAL_ORDERS_TABLE_NAME} (
+                                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                status TEXT,
+                                last_updated dateTime NOT NULL DEFAULT (datetime('now','localtime'))
+                            )
+                            ''')
+
+    cursor_inner.execute(f'''
+                            CREATE TABLE if not exists {constants.NUVAMA_HISTORICAL_ORDERS_TABLE_NAME} (
+                                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                status TEXT,
+                                last_updated dateTime NOT NULL DEFAULT (datetime('now','localtime'))
                             )
                             ''')
 
@@ -412,8 +428,8 @@ def get_ltp_stock(stock):
         return rows[0][0]
 
     except Exception as e:
-        print(f"Error getting ltp_stock data from SQL DB for {stock}")
-        traceback.print_exc()
+        print(f"{Colors.RED}Error getting ltp_stock data from SQL DB for {stock}{Colors.RESET}")
+        # traceback.print_exc()
         return None
 
 

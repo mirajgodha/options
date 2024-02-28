@@ -13,6 +13,21 @@ logging.basicConfig(level=logging.INFO)
 lot_sizes = pd.DataFrame()
 india_vix = 0
 
+# print(nsetools_get_quote("DLF"))
+# print(nsetools_get_quote("AARTIIND"))
+# print(nsetools_get_quote("GAIL"))
+# print(nsetools_get_quote("MOTHERSON"))
+# print(nsetools_get_quote("BOSCHLTD"))
+# print(nsetools_get_quote("BPCL"))
+# print(nsetools_get_quote("TATAPOWER"))
+
+def get_quote(symbol):
+    """
+    Get the quote for the given symbol
+    :param symbol:
+    :return:
+    """
+    return nsetools_get_quote(symbol)
 
 # ------------
 # Utility methods based on nsepython scraper utility

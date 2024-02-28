@@ -4,26 +4,29 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="44484f79-8743-4570-9b87-9e30e97b0f27" name="Changes" comment="Added option break even calculations.">
-      <change afterPath="$PROJECT_DIR$/nuvama/nuvama_helper.py" afterDir="false" />
+    <list default="true" id="44484f79-8743-4570-9b87-9e30e97b0f27" name="Changes" comment="Added code to calculate the current booked pnl, so that strategies can be made with correction.">
+      <change afterPath="$PROJECT_DIR$/data/nse_stock_codes.csv" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/secretes/config.ini" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/util/optionWriterUtil.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/csv-editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/csv-editor.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/constants/constants_local.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants/constants_local.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dao/historicalOrderBookDF.py" beforeDir="false" afterPath="$PROJECT_DIR$/dao/historicalOrderBookDF.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/output/2022-10-31.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/stock_symbols.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/stock_symbols.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/stock_symbols.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/icici_stock_codes.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/helper/colours.py" beforeDir="false" afterPath="$PROJECT_DIR$/helper/colours.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/helper/fuzzMatch.py" beforeDir="false" afterPath="$PROJECT_DIR$/helper/fuzzMatch.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/helper/stockCodes.py" beforeDir="false" afterPath="$PROJECT_DIR$/helper/stockCodes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/helper/strickPrices.py" beforeDir="false" afterPath="$PROJECT_DIR$/helper/strikePrices.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/iciciDirect/icici_direct_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/iciciDirect/icici_direct_main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/iciciDirect/icici_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/iciciDirect/icici_helper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/metabase/metabase.db.mv.db" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/metabase.db.mv.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nuvama/apiconnect.log" beforeDir="false" afterPath="$PROJECT_DIR$/dao/historicalOrderBookDF.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nuvama/nuvama_helper.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/nuvama/nuvama_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/nuvama/nuvama_main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/optionTrading/openPositionsDF.py" beforeDir="false" afterPath="$PROJECT_DIR$/dao/openPositionsDF.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/optionTrading/option_trading_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionTrading/option_trading_main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/optionTrading/orderBookDF.py" beforeDir="false" afterPath="$PROJECT_DIR$/dao/orderBookDF.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/optionTrading/trading_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionTrading/trading_helper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/secreates/config.ini" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/sql/sqlite.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/sqlite.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sql/stocks.db" beforeDir="false" afterPath="$PROJECT_DIR$/sql/stocks.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/nsepythonUtil.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/nsepythonUtil.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,13 +64,14 @@
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "com.google.cloudcode.ide_session_index": "20240215_0000",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "/Users/mirajgodha/PycharmProjects/options",
+    "last_opened_file_path": "/Users/mirajgodha/PycharmProjects/options/data",
     "run.code.analysis.last.selected.profile": "pProject Default",
     "settings.editor.selected.configurable": "google.ai.companion.settings"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/data" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/nuvama" />
       <recent name="$PROJECT_DIR$/metabase" />
@@ -81,20 +85,19 @@
     </key>
   </component>
   <component name="RunManager" selected="Python.option_trading_main">
-    <configuration name="icici_direct_main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="nsepyUtil" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="options" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="$PROJECT_DIR$/venv/bin/python" />
-      <option name="SDK_NAME" value="Python 3.9 (options)" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/iciciDirect" />
-      <option name="IS_MODULE_SDK" value="false" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/util" />
+      <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/iciciDirect/icici_direct_main.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/util/nsepyUtil.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -124,34 +127,10 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="nuvama_main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="options" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/nuvama" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/nuvama/nuvama_main.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="option_trading_main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="options" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/optionTrading" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -188,6 +167,25 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="option_trading_main.py" type="tests" factoryName="py.test" temporary="true">
+      <module name="options" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/optionTrading" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/optionTrading/option_trading_main.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
     <configuration name="pytest for option_trading_main.test" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="options" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -208,9 +206,9 @@
       <list>
         <item itemvalue="Python.option_trading_main" />
         <item itemvalue="Python.nsepythonUtil" />
+        <item itemvalue="Python tests.option_trading_main.py" />
+        <item itemvalue="Python.nsepyUtil" />
         <item itemvalue="Python tests.pytest for option_trading_main.test" />
-        <item itemvalue="Python.nuvama_main" />
-        <item itemvalue="Python.icici_direct_main" />
       </list>
     </recent_temporary>
   </component>
@@ -419,7 +417,14 @@
       <option name="project" value="LOCAL" />
       <updated>1708065009146</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="Added code to calculate the current booked pnl, so that strategies can be made with correction.">
+      <created>1708673015046</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1708673015046</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -483,6 +488,7 @@
     <MESSAGE value="Updated git ignore&#10;Added nuvama integration with other functions" />
     <MESSAGE value="Req file" />
     <MESSAGE value="Added option break even calculations." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added option break even calculations." />
+    <MESSAGE value="Added code to calculate the current booked pnl, so that strategies can be made with correction." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added code to calculate the current booked pnl, so that strategies can be made with correction." />
   </component>
 </project>

@@ -4,7 +4,7 @@ from helper.colours import Colors
 
 from helper import optionsMWPL
 
-stocker_list_file_path = "../data/stock_symbols.csv"
+stocker_list_file_path = "../data/icici_stock_codes.csv"
 threshold = 0.8
 
 
@@ -55,6 +55,8 @@ def get_stock_code_pairs_using_fuzzy_match(small_list, full_list):
             f"{Colors.BOLD}{Colors.RED}Not matched Stocks symbols between "
             f"broker1 and broker2 stock codes. "
             f"Length: {len(small_list) - len(matched_pairs)}, Remaining List: {remaining_list}{Colors.RESET}")
+        print(f"List Small list: {small_list}")
+        print(f"List Full list: {full_list}")
 
     # print(f"{Colors.BOLD}{Colors.GREEN}Matched Length: {len(matched_pairs)}, Matched List: {matched_pairs}{Colors.RESET}")
     return matched_pairs
@@ -75,3 +77,23 @@ def test_fuzzy_match():
 
 if __name__ == '__main__':
     test_fuzzy_match()
+
+# Full list List Full list: ['AARTIIND', 'ABB', 'ABBOTINDIA', 'ACC', 'ADANIENT', 'ADANIPORTS', 'AMBUJACEM',
+# 'APOLLOHOSP', 'APOLLOTYRE', 'ASHOKLEY', 'ASIANPAINT', 'ASTRAL', 'ATUL', 'AUROPHARMA', 'AXISBANK', 'BAJAJ-AUTO',
+# 'BAJAJFINSV', 'BAJFINANCE', 'BALKRISIND', 'BALRAMCHIN', 'BANKBARODA', 'BATAINDIA', 'BEL', 'BERGEPAINT',
+# 'BHARATFORG', 'BHARTIARTL', 'BHEL', 'BIOCON', 'BOSCHLTD', 'BPCL', 'BRITANNIA', 'ZYDUSLIFE', 'CANBK', 'CANFINHOME',
+# 'CHAMBLFERT', 'CHOLAFIN', 'CIPLA', 'COALINDIA', 'COLPAL', 'CONCOR', 'COROMANDEL', 'CUB', 'CUMMINSIND', 'DABUR',
+# 'DEEPAKNTR', 'DELTACORP', 'DIVISLAB', 'DLF', 'DRREDDY', 'EICHERMOT', 'ESCORTS', 'EXIDEIND', 'FEDERALBNK', 'GAIL',
+# 'GLENMARK', 'GMRINFRA', 'GNFC', 'GODREJCP', 'GODREJPROP', 'GRANULES', 'GRASIM', 'GUJGASLTD', 'HAVELLS', 'HCLTECH',
+# 'HDFCBANK', 'HEROMOTOCO', 'HINDALCO', 'HINDCOPPER', 'HINDPETRO', 'HINDUNILVR', 'ICICIBANK', 'IDEA', 'IDFC', 'IGL',
+# 'INDHOTEL', 'INDIACEM', 'INDUSINDBK', 'INDUSTOWER', 'INFY', 'IOC', 'IPCALAB', 'ITC', 'JINDALSTEL', 'JKCEMENT',
+# 'JSWSTEEL', 'JUBLFOOD', 'KOTAKBANK', 'BSOFT', 'L&TFH', 'LICHSGFIN', 'LT', 'LUPIN', 'M&M', 'M&MFIN', 'MANAPPURAM',
+# 'MARICO', 'MARUTI', 'MFSL', 'MCDOWELL-N', 'MCX', 'MOTHERSON', 'MPHASIS', 'MRF', 'MUTHOOTFIN', 'NATIONALUM',
+# 'NAUKRI', 'NAVINFLUOR', 'NESTLEIND', 'COFORGE', 'NMDC', 'NTPC', 'OBEROIRLTY', 'OFSS', 'ONGC', 'PAGEIND', 'PEL',
+# 'PERSISTENT', 'PETRONET', 'PFC', 'ABFRL', 'PIDILITIND', 'PIIND', 'PNB', 'POWERGRID', 'PVRINOX', 'RAMCOCEM',
+# 'RECLTD', 'RELIANCE', 'SAIL', 'SBIN', 'SHREECEM', 'SIEMENS', 'SRF', 'SHRIRAMFIN', 'VEDL', 'SUNPHARMA', 'SUNTV',
+# 'TATACHEM', 'TATACOMM', 'TATACONSUM', 'TATAMOTORS', 'TATAPOWER', 'TATASTEEL', 'TCS', 'TECHM', 'TITAN',
+# 'TORNTPHARM', 'TRENT', 'TVSMOTOR', 'UBL', 'ULTRACEMCO', 'UPL', 'VOLTAS', 'WIPRO', 'ZEEL', 'SYNGENE', 'INDIGO',
+# 'IDFCFIRSTB', 'LALPATHLAB', 'ALKEM', 'CROMPTON', 'MGL', 'LTIM', 'RBLBANK', 'LTTS', 'ICICIPRULI', 'LAURUSLABS',
+# 'AUBANK', 'DIXON', 'SBILIFE', 'ICICIGI', 'ABCAPITAL', 'IEX', 'HDFCLIFE', 'BANDHANBNK', 'HAL', 'HDFCAMC',
+# 'DALBHARAT', 'METROPOLIS', 'POLYCAB', 'INDIAMART', 'IRCTC', 'SBICARD']
