@@ -16,8 +16,23 @@ There are list of predifined strategies already been created
 - Short Put Condor
 - Short Straddle
 - Short Strangle
+- Naked Call
+- Naked Put
 
-For each of these strategies you will get a separate tab in excel sheet.
+When write to Excel is enalbled it will create an excel file. For each of these strategies you will get a separate tab in excel sheet.
+Whne write to SQL is enabled it will create a table for each strategy in DB and that can be visualized on Metabase
+
+Metabase Strategies looks like this:
+<img width="1356" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/b30698a0-654a-4f8f-b369-89c0d84da46e">
+
+<img width="1385" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/d1c2d70c-0a88-42db-a0d6-89635d24490b">
+All Strategies Profitable is a special case, which goes throught each of the above strategy and check if max loss is less than a given threashold and profit probablity is high. It scans for all stocks across all given strategies.
+
+<img width="1378" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/4fc94f21-285a-4db8-9878-b6c0837d0124">
+
+In constants file you can configure, how much strike difference it should look for these strategies. This is very usefull specially for Sort Strangle, Naked Call, Naked Put etc.
+
+
 
 The sample output file looks like this:
 
