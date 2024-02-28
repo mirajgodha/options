@@ -8,7 +8,7 @@ import logging
 from dao.Option import TranxType, OptionType
 from util.optionGreeksUtil import implied_volatility
 
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
 
 lot_sizes = pd.DataFrame()
 india_vix = 0
@@ -39,6 +39,14 @@ def get_atm_strike(option_chain_json):
     :param option_chain_json:
     :return:
     """
+    return get_strike(option_chain_json,0)
+
+def get_strike(option_chain_json,strike_diff_perc=0):
+    """
+    Get the strike price from the given option chain
+    :param option_chain_json:
+    :param strike_diff_perc:
+    """
     data = option_chain_json['filtered']['data']
     try:
         ltp = data[0]['PE']['underlyingValue']
@@ -48,10 +56,13 @@ def get_atm_strike(option_chain_json):
         except:
             ltp = data[1]['PE']['underlyingValue']
 
+    logger.debug(f"Got ltp: {ltp}")
+    ltp = ltp * (1 + strike_diff_perc/100)
+    logger.debug(f"Updated ltp with strike_diff_perc: {ltp} , strike_diff_perc: {strike_diff_perc}")
     strike_price_list = [x['strikePrice'] for x in data]
-    atm_strike = sorted([[round(abs(ltp - i), 2), i] for i in strike_price_list])[0][1]
-    return atm_strike
-
+    strike = sorted([[round(abs(ltp - i), 2), i] for i in strike_price_list])[0][1]
+    logger.debug(f"Got strike: {strike} in the list: {strike_price_list}")
+    return strike
 
 def get_fno_stocks():
     """

@@ -15,7 +15,7 @@ from util.utils import clear_df, concat_df, merge_dataframes
 from helper.colours import Colors
 
 # Expiry month for which we want to run the utility
-
+logger = logging.getLogger()
 
 excel_columns = ['Stock', 'PremiumCreditTotal', 'MaxProfit', 'MaxLoss', 'LTP',
                  'CE_sell_price', 'CE_sell_strike',
@@ -49,6 +49,10 @@ short_put_condor_df = pd.DataFrame(columns=excel_columns)
 short_straddle_df = pd.DataFrame(columns=excel_columns)
 short_strangle_df = pd.DataFrame(columns=excel_columns)
 concatenate_df = pd.DataFrame(columns=excel_columns)
+naked_call_df = pd.DataFrame(columns=excel_columns)
+naked_put_df = pd.DataFrame(columns=excel_columns)
+
+
 
 
 def write_data():
@@ -67,6 +71,8 @@ def write_data():
     global short_put_condor_df
     global short_straddle_df
     global short_strangle_df
+    global naked_call_df
+    global naked_put_df
     global concatenate_df
 
     long_call_condor_df = clear_df(long_call_condor_df)
@@ -101,6 +107,10 @@ def write_data():
             short_iron_butterfly_df.to_excel(writer, sheet_name="short_iron_butterfly_df")
             short_call_butterfly_df.to_excel(writer, sheet_name="short_call_butterfly_df")
             short_put_butterfly_df.to_excel(writer, sheet_name="short_put_butterfly_df")
+            naked_call_df.to_excel(writer, sheet_name="naked_call_df")
+            naked_put_df.to_excel(writer, sheet_name="naked_put_df")
+
+        logging.debug("Excel file created successfully")
     if c.OPTIONS_STRATEGIES_WRITE_TO_DB:
         conn_inner = sqlt.get_conn()
         try:
@@ -108,59 +118,67 @@ def write_data():
             # drop columns which create issues while inserting the data to db and of not much use.
             short_straddle_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             short_straddle_df.to_sql('os_short_straddle', conn_inner, if_exists='replace', index=False)
-            print("os_short_straddle table created successfully")
+            logging.debug("os_short_straddle table created successfully")
 
             short_strangle_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             short_strangle_df.to_sql('os_short_strangle', conn_inner, if_exists='replace', index=False)
-            print("os_short_strangle table created successfully")
+            logging.debug("os_short_strangle table created successfully")
 
             if concatenate_df is not None and not concatenate_df.empty:
                 concatenate_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
                 concatenate_df.to_sql('os_all_strategies_profitable', conn_inner, if_exists='replace', index=False)
-                print("concatenate_df table created successfully")
+                logging.debug("concatenate_df table created successfully")
 
             short_guts_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             short_guts_df.to_sql(name="os_short_guts", con=conn_inner, if_exists='replace', index=False)
-            print("short_guts_df table created successfully")
+            logging.debug("short_guts_df table created successfully")
 
             long_call_condor_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             long_call_condor_df.to_sql(name="os_long_call_condor", con=conn_inner, if_exists='replace', index=False)
-            print("long_call_condor_df table created successfully")
+            logging.debug("long_call_condor_df table created successfully")
 
             long_put_condor_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             long_put_condor_df.to_sql(name="os_long_put_condor", con=conn_inner, if_exists='replace', index=False)
-            print("long_put_condor_df table created successfully")
+            logging.debug("long_put_condor_df table created successfully")
 
             short_call_condor_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             short_call_condor_df.to_sql(name="os_short_call_condor", con=conn_inner, if_exists='replace', index=False)
-            print("short_call_condor_df table created successfully")
+            logging.debug("short_call_condor_df table created successfully")
 
             short_put_condor_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             short_put_condor_df.to_sql(name="os_short_put_condor", con=conn_inner, if_exists='replace', index=False)
-            print("short_put_condor_df table created successfully")
+            logging.debug("short_put_condor_df table created successfully")
 
             long_iron_butterfly_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             long_iron_butterfly_df.to_sql(name="os_long_iron_butterfly", con=conn_inner, if_exists='replace',
                                           index=False)
-            print("long_iron_butterfly_df table created successfully")
+            logging.debug("long_iron_butterfly_df table created successfully")
 
             short_iron_butterfly_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             short_iron_butterfly_df.to_sql(name="os_short_iron_butterfly", con=conn_inner, if_exists='replace',
                                            index=False)
-            print("short_iron_butterfly_df table created successfully")
+            logging.debug("short_iron_butterfly_df table created successfully")
 
             short_call_butterfly_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             short_call_butterfly_df.to_sql(name="os_short_call_butterfly", con=conn_inner, if_exists='replace',
                                            index=False)
-            print("short_call_butterfly_df table created successfully")
+            logging.debug("short_call_butterfly_df table created successfully")
 
             short_put_butterfly_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             short_put_butterfly_df.to_sql(name="os_short_put_butterfly", con=conn_inner, if_exists='replace',
                                           index=False)
-            print("short_put_butterfly_df table created successfully")
+            logging.debug("short_put_butterfly_df table created successfully")
+
+            naked_call_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
+            naked_call_df.to_sql(name="os_naked_call", con=conn_inner, if_exists='replace', index=False)
+            logging.debug("naked_call_df table created successfully")
+
+            naked_put_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
+            naked_put_df.to_sql(name="os_naked_put", con=conn_inner, if_exists='replace', index=False)
+            logging.debug("naked_put_df table created successfully")
 
         except Exception as e:
-            print(f"Error inserting data for options strategies {e}")
+            print(f"{Colors.RED}Error inserting data for options strategies {e}{Colors.RESET}")
             traceback.print_exc(file=sys.stdout)
         finally:
             try:
@@ -170,9 +188,16 @@ def write_data():
 
 
 def option_strategies_builder():
-    if sqlt.get_last_updated_time("os_status") > (
+    """
+    Function to build option strategies
+    :return:
+    """
+    os_last_update_time = sqlt.get_last_updated_time(c.OPTIONS_STRATEGIES_STATUS_TABLE_NAME
+                                                     , f"status = '{c.PROCESS_COMPLETED}'")
+    if os_last_update_time > (
             datetime.datetime.now() - datetime.timedelta(minutes=c.OPTION_STRATEGIES_DELAY_TIME)):
         # Updated MWPL less than a hour ago, so not updating now.
+        logger.debug(f"Option Strategies already updated at {os_last_update_time}, so not updating now.")
         return
 
     sqlt.insert_os_lastupdated("os_status", c.PROCESS_STARTED)
@@ -180,7 +205,9 @@ def option_strategies_builder():
     # Get the list of Fno stocks
     global long_call_condor_df, long_iron_butterfly_df, long_put_condor_df, short_call_butterfly_df, \
         short_call_condor_df, short_guts_df, short_iron_butterfly_df, short_put_butterfly_df, \
-        short_put_condor_df, short_straddle_df, short_strangle_df
+        short_put_condor_df, short_straddle_df, short_strangle_df,naked_call_df, naked_put_df
+
+
 
     if c.OPTIONS_STRATEGIES_TEST_RUN:
         fno_stock_list = get_fno_stocks()[:5]  # For running it for less stocks add [:2], it will run for 2 stocks
@@ -189,7 +216,7 @@ def option_strategies_builder():
 
     expiry_date = get_expiry_date(c.OPTIONS_STRATEGIES_EXPIRY_MONTH)
 
-    print("---Starting Option Trading Strategies----")
+    logging.info(f"{Colors.GREEN}---Starting Option Trading Strategies----{Colors.RESET}")
     i = 1
     try:
         for symbol in fno_stock_list:
@@ -207,12 +234,12 @@ def option_strategies_builder():
                 long_call_condor_df = concat_df(long_call_condor_df,
                                                 OptionStrategies.long_call_condor(symbol, option_chain_json,
                                                                                   expiry_date,
-                                                                                  strike_diff=2,
+                                                                                  strike_diff=c.OPTIONS_STRATEGIES_STRIKE_RANGE_PERCENTAGE,
                                                                                   timeout=20))
                 long_iron_butterfly_df = concat_df(long_iron_butterfly_df,
                                                    OptionStrategies.long_iron_butterfly(symbol, option_chain_json,
                                                                                         expiry_date,
-                                                                                        strike_diff=2,
+                                                                                        strike_diff=c.OPTIONS_STRATEGIES_STRIKE_RANGE_PERCENTAGE,
                                                                                         timeout=20))
                 long_put_condor_df = concat_df(long_put_condor_df,
                                                OptionStrategies.long_put_condor(symbol, option_chain_json, expiry_date,
@@ -248,7 +275,17 @@ def option_strategies_builder():
 
                 short_strangle_df = concat_df(short_strangle_df,
                                               OptionStrategies.short_strangle(symbol, option_chain_json, expiry_date,
-                                                                              strike_diff=c.OPTIONS_STRATEGIES_STRIKE_RANGE,
+                                                                              strike_diff=c.OPTIONS_STRATEGIES_STRIKE_RANGE_PERCENTAGE,
+                                                                              timeout=20))
+
+                naked_call_df = concat_df(naked_call_df,
+                                              OptionStrategies.naked_call(symbol, option_chain_json, expiry_date,
+                                                                              strike_diff=c.OPTIONS_STRATEGIES_STRIKE_RANGE_PERCENTAGE,
+                                                                              timeout=20))
+
+                naked_put_df = concat_df(naked_put_df,
+                                              OptionStrategies.naked_put(symbol, option_chain_json, expiry_date,
+                                                                              strike_diff=c.OPTIONS_STRATEGIES_STRIKE_RANGE_PERCENTAGE,
                                                                               timeout=20))
 
                 # Write all the outputs as exit in between misses all the data
@@ -257,6 +294,7 @@ def option_strategies_builder():
             except Exception as ex:
                 # Many times the nse website response gets stuck an results in whole program halts
                 logging.error(f"{Colors.WHITE}Error in processing {symbol} is:  {ex}{Colors.RESET}")
+                traceback.print_exc()
 
     except Exception as ex:
         logging.error(f"{Colors.RED}Error in creating option strategies is:  {ex} {Colors.RESET}")
@@ -270,4 +308,5 @@ def option_strategies_builder():
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    logger.setLevel(logging.INFO)
     option_strategies_builder()

@@ -499,9 +499,12 @@ def insert_funds(funds_response, margin_response):
             pass
 
 
-def get_last_updated_time(table_name):
+def get_last_updated_time(table_name, where_clause=None):
     cursor_inner = get_cursor()
-    cursor_inner.execute(f"SELECT max(timestamp) FROM {table_name}")
+    sql = f"SELECT max(timestamp) FROM {table_name}"
+    if where_clause is not None:
+        sql += f" WHERE {where_clause}"
+    cursor_inner.execute(sql)
     rows = cursor_inner.fetchall()
     for row in rows:
         if row[0] is None:

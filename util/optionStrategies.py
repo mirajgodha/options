@@ -247,3 +247,41 @@ class OptionStrategies:
         strategy = [Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike=-1 * strike_diff, lots=1, expiry_date=expiry_date),
                     Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=1 * strike_diff, lots=1, expiry_date=expiry_date)]
         return generate_strategy(strategy, symbol, option_chain_json)
+
+    @timeoutable()
+    def naked_call( symbol, option_chain_json, expiry_date, strike_diff):
+        """
+        Sell naked call option at strike diff % above the current price
+
+        Parameters
+        ----------
+        option_chain_json
+        expiry_date
+        strike_diff
+
+        Returns
+        -------
+
+        """
+        strategy = [Option(option_type=OptionType.CALL, tranx_type=TranxType.SELL, strike= strike_diff, lots=1,
+                           expiry_date=expiry_date)]
+        return generate_strategy(strategy, symbol, option_chain_json)
+
+    @timeoutable()
+    def naked_put(symbol, option_chain_json, expiry_date, strike_diff):
+        """
+        Sell naked put option at strike diff % below the current price
+
+        Parameters
+        ----------
+        option_chain_json
+        expiry_date
+        strike_diff
+
+        Returns
+        -------
+
+        """
+        strategy = [Option(option_type=OptionType.PUT, tranx_type=TranxType.SELL, strike=-1 * strike_diff, lots=1,
+                           expiry_date=expiry_date)]
+        return generate_strategy(strategy, symbol, option_chain_json)
