@@ -96,8 +96,9 @@ Now as the code is growing its helping me to visulize lot of things on a single 
 - Nice charts to view the PnL over time. Which is not possible in any of the brokers tools or apps.
 
 As a option trader when you create different strategies, on different stocks there is no way to keep track of profit and loss across different stock strategies. So to solve that problem, this dashboards, help in:
-- Getting nice charts to view the loss profit bar graphs across different strategies.
-  <img width="1273" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/c40c8a49-714d-4537-81bc-afebf932ef28">
+- Getting nice charts to view the loss profit bar graphs across different Stock strategies.
+  <img width="1356" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/dae464e0-c903-4721-9725-e80827281e67">
+
 
 - View the timeseries chart of PnL across each stock strategy.
 <img width="1277" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/0f9c76e0-eca1-4466-83f3-0fa18c56afae">
