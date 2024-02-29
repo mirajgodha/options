@@ -3,6 +3,8 @@
 import configparser
 import traceback
 from datetime import datetime
+from helper.logger import logger
+from helper.colours import Colors
 
 import pandas as pd
 from APIConnect.APIConnect import APIConnect
@@ -16,13 +18,6 @@ from dao.historicalOrderBookDF import get_icici_order_history_df
 from optionTrading.trading_helper import is_market_open,persist,get_table_as_df
 import constants.constants_local as constants
 
-# Create a ConfigParser object
-
-# Read the configuration file
-
-# Create a ConfigParser object
-
-# Read the configuration file
 
 # Create a ConfigParser object
 config = configparser.ConfigParser()
@@ -89,8 +84,13 @@ def get_historical_order_book(from_date, to_date):
 
 
 def get_portfolio_positions():
-    response = api_connect.NetPosition()
-    portfolio_positions = json.loads(response)
-    portfolio_positions_df = openPositionsDF.get_nuvama_option_open_positions_df(
-        portfolio_positions['eq']['data']['pos'])
-    return portfolio_positions_df
+    try:
+        response = api_connect.NetPosition()
+        portfolio_positions = json.loads(response)
+        portfolio_positions_df = openPositionsDF.get_nuvama_option_open_positions_df(
+            portfolio_positions['eq']['data']['pos'])
+        return portfolio_positions_df
+    except Exception as e:
+        logger.error(f"{Colors.RED}Nuvama login error, please check the api key and secret{Colors.RESET}")
+        logger.error(f"{Colors.RED}{e}{Colors.RESET}")
+        return None

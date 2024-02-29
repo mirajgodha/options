@@ -1,8 +1,7 @@
 import logging
 
 from dao.Option import Option, OptionType, TranxType
-from util.nsepythonUtil import get_strike_price_list, get_atm_strike, get_pe_price, get_ce_price, get_lot_size, get_ltp, \
-    get_strike
+from util.nsepythonUtil import get_strike_price_list, get_atm_strike, get_lot_size, get_ltp, get_strike, get_option_price
 from util.profitLossCalculator import calc_profit_loss, calc_greeks, get_iv
 from util.utils import get_nth_option, reduce_pl_strike_list
 
@@ -26,12 +25,10 @@ def generate_strategy(strategy: [Option], symbol, option_chain_json):
     for option in strategy:
         option.strike_price = get_strike(option_chain_json, option.strike)
 
-        if option.option_type == OptionType.PUT:
-            option.premium, option.iv = get_pe_price(option_chain_json, option.strike_price, option.tranx_type,
+        option.premium, option.iv = get_option_price(option_chain_json, option.strike_price,
+                                                     option.option_type ,option.tranx_type,
                                                      expiry_date=option.expiry_date)
-        else:
-            option.premium, option.iv = get_ce_price(option_chain_json, option.strike_price, option.tranx_type,
-                                                     expiry_date=option.expiry_date)
+
     ltp = get_ltp(option_chain_json)
 
     lot_size = get_lot_size(symbol)

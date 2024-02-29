@@ -1,8 +1,10 @@
 # Generate ISO8601 Date/DateTime String
 import datetime
 import traceback
-
 import pandas as pd
+
+from dao.Option import OptionType, TranxType
+from helper.logger import logger
 
 import iciciDirect.icici_direct_main
 import sql.sqlite
@@ -17,6 +19,7 @@ from profitnloss import Call, Put, Strategy
 
 from helper.stockCodes import get_nse_stock_code
 import nsepython as nse
+from util.nsepythonUtil import get_option_price, nse_optionchain_scrapper
 
 
 def is_market_open():
@@ -45,19 +48,19 @@ def calculate_pnl(portfolio_positions_df):
     else:  # If no positions are open
         pnl = None
 
-    print("Pnl Currently:\n")
+    logger.info("Pnl Currently:\n")
     total_pnl = df['pnl'].sum()
     if total_pnl > 0:
-        print(f"{Colors.BLUE}Total:: {Colors.GREEN}{total_pnl}{Colors.WHITE}")
+        logger.info(f"{Colors.BLUE}Total:: {Colors.GREEN}{total_pnl}{Colors.WHITE}")
     else:
-        print(f"{Colors.BLUE}Total:: {Colors.RED}{total_pnl}{Colors.WHITE}")
-    print("\n")
+        logger.info(f"{Colors.BLUE}Total:: {Colors.RED}{total_pnl}{Colors.WHITE}")
+    logger.info("\n")
 
     for index, data in df.iterrows():
         if data['pnl'] > 0:
-            print(f"{data['stock']}: {Colors.GREEN}{data['pnl']}{Colors.WHITE}")
+            logger.info(f"{data['stock']}: {Colors.GREEN}{data['pnl']}{Colors.WHITE}")
         if data['pnl'] < 0:
-            print(f"{data['stock']}: {Colors.RED}{data['pnl']}{Colors.WHITE}")
+            logger.info(f"{data['stock']}: {Colors.RED}{data['pnl']}{Colors.WHITE}")
 
     return df
 
@@ -82,16 +85,17 @@ def profit_or_loss_threshold_reached(df):
 
     for index, data in df.iterrows():
         if float(data['pnl']) > float(data['profit_target']):
-            print(f"{data['stock']}: Profit Target Reached Profit: {data['pnl']}, Target: {data['profit_target']}")
+            logger.info(
+                f"{data['stock']}: Profit Target Reached Profit: {data['pnl']}, Target: {data['profit_target']}")
         if float(data['pnl']) < float(data['stop_loss']):
-            print(f"{data['stock']}: Stop Loss Reached. Loss:{data['pnl']}, Target: {data['stop_loss']}")
+            logger.info(f"{data['stock']}: Stop Loss Reached. Loss:{data['pnl']}, Target: {data['stop_loss']}")
 
 
 def contract_value(portfolio_positions_df, threshold):
     # Code to calculate contract value and if it's less than threshold
     # it will make sense to sq of the contract
 
-    # print("\nCHECKING CONTRACT VALUE...")
+    logger.debug("CHECKING CONTRACT VALUE...")
     df_to_sq_off_contracts = pd.DataFrame(
         columns=["stock", "price_left", "pnl", "strike_price", "expiry_date", "right"])
 
@@ -106,14 +110,14 @@ def contract_value(portfolio_positions_df, threshold):
                     pd.concat([df_to_sq_off_contracts, pd.DataFrame.from_records(
                         [{'stock': item['stock'],
                           'price_left': value_left,
-                          'pnl': round((cost - ltp) * qty, 2),
+                          'pnl': round((cost - ltp) * qty * -1, 0),
                           'strike_price': item['strike_price'],
                           'expiry_date': item['expiry_date'],
                           'right': item['right']}])]
                               , ignore_index=True)
-    print("\n\n#######################################")
-    print("Contracts to sq off:")
-    print(f'{Colors.GREEN}{df_to_sq_off_contracts}{Colors.WHITE}')
+    logger.info("\n\n#######################################")
+    logger.info("Contracts to sq off:")
+    logger.info(f'{Colors.GREEN}{df_to_sq_off_contracts}{Colors.WHITE}')
 
     sqlt.insert_contracts_to_be_sq_off(df_to_sq_off_contracts)
 
@@ -130,8 +134,8 @@ def get_pnl_target(portfolio_positions_df):
 
     df = pd.merge(df_threshold, df_pnl, on='stock')
 
-    # print("Pnl Targets:")
-    # print(df)
+    logger.debug("Pnl Targets:")
+    logger.debug(df)
     # profit_or_loss_threshold_reached(df)
 
     # get  the contracts to be sq_offed
@@ -156,7 +160,7 @@ def calculate_margin_used(open_positions_df, api):
                     # print(f"Not calculating margin for {stock} as its was calculated less than 10 minutes ago")
                     continue
 
-                # print(f"Calculating margin for {stock}, {expiry_date}")
+                logger.debug(f"Calculating margin for {stock}, {expiry_date}")
                 df = pd.DataFrame(
                     columns=["strike_price", "quantity", "right", "product", "action", "price", "expiry_date",
                              "stock_code", "cover_order_flow", "fresh_order_type", "cover_limit_rate",
@@ -193,19 +197,19 @@ def calculate_margin_used(open_positions_df, api):
                         }
 
                         df = pd.concat([df, pd.DataFrame.from_records([margin_data])], ignore_index=True)
-                # print(f"Margin Data: {stock} , {expiry_date}")
-                # print(tabulate(df, headers='keys', tablefmt='psql'))
+                logger.debug(f"Margin Data: {stock} , {expiry_date}")
+                logger.debug(tabulate(df, headers='keys', tablefmt='psql'))
 
                 if df.empty or len(df) == 0:  # All positions are sq offed
                     continue
 
                 margin_response = api.margin_calculator(df.to_dict(orient='records'), "NFO")
-                # print(f"Margin Response: {margin_response} ")
+                logger.debug(f"Margin Response: {margin_response} ")
 
                 if margin_response['Status'] == 200:
                     sqlt.insert_margins_used(stock, expiry_date, margin_response['Success'])
                 else:
-                    print(
+                    logger.error(
                         f"{Colors.RED}Error calculating margin for {stock} , {expiry_date} - {margin_response}{Colors.RESET}")
 
 
@@ -238,7 +242,8 @@ def get_mwpl(portfolio_positions_df):
             for index, row in mwpl_df.iterrows():
                 if row['Symbol'].upper() == similar_code:
                     mwpl_list.append((row['Symbol'], row['Price'], row['Chg'], row['Cur.MWPL'], row['Pre.MWPL']))
-                    print(row['Symbol'], row['Price'], row['Chg'], row['Cur.MWPL'], row['Pre.MWPL'])
+                    logger.debug(
+                        f"MWPL: {row['Symbol']} , {row['Price']} , {row['Chg']} , {row['Cur.MWPL']} , {row['Pre.MWPL']} ")
                     break
 
     sqlt.insert_mwpl(mwpl_list)
@@ -266,39 +271,75 @@ def insert_ltp_for_positions(portfolio_positions_response):
 
 
 def get_option_ltp(stock_code, expiry_date, strike_price, right):
-    # Get LTP for all open option positions
-    api = iciciDirect.icici_direct_main.get_api_session()
-    try:
-        response = api.get_quotes(stock_code=stock_code, exchange_code='NFO', product_type='options',
-                                  expiry_date=expiry_date, strike_price=strike_price, right=right)
-        # print(f"LTP: {response}")
-        sqlt.insert_ltp(response['Success'])
-    except Exception as e:
-        print(f"{Colors.RED}Exception while getting LTP for {stock_code}, {expiry_date}, "
-              f"{strike_price}, {right}: {e} {Colors.RESET}")
-        ltp = sqlt.get_ltp_option(stock_code, expiry_date, strike_price, right)
-        if ltp:
+    if c.GET_LTP_FROM_ICICI:
+        # Get LTP for all open option positions
+        # Get LTP from ICICI
+        # calling icici multiple times is costly, so this is not used and using nsepy method
+        api = iciciDirect.icici_direct_main.get_api_session()
+        try:
+            response = api.get_quotes(stock_code=stock_code, exchange_code='NFO', product_type='options',
+                                      expiry_date=expiry_date, strike_price=strike_price, right=right)
+            logger.debug(f"LTP: {response}")
+            sqlt.insert_option_ltp(response['Success'])
+        except Exception as e:
+            logger.error(f"{Colors.RED}Exception while getting LTP from ICICI for {stock_code}, {expiry_date}, "
+                         f"{strike_price}, {right}: {e} {Colors.RESET}")
+            ltp = sqlt.get_ltp_option(stock_code, expiry_date, strike_price, right)
+            logger.info(
+                "Getting LTP from DB for stock: " + stock_code + ", expiry_date: " + expiry_date + ", strike_price: " +
+                strike_price + ", right: " + right + ", returning that.")
+            if ltp:
+                return ltp
+            return 0
+
+        if response['Status'] != 200:
+            logger.error(f"{Colors.RED}Error while getting LTP for {stock_code}, {expiry_date}, "
+                         f"{strike_price}, {right}: {response} - Status {response['Status']}{Colors.RESET}")
+            return 0
+
+        return response['Success'][0]['ltp']
+    if c.GET_LTP_FROM_NSE:
+        try:
+            stock_code_nse = get_nse_stock_code(stock_code)
+            if right.upper() == 'CALL':
+                option_type = OptionType.CALL
+            else:
+                option_type = 'PUT'
+
+            option_chain_json = nse_optionchain_scrapper(stock_code_nse)
+
+            ltp, iv = get_option_price(option_chain_json, strike_price, option_type, TranxType.ANY, expiry_date,
+                                       need_iv=False)
+            if ltp is not None or ltp != 0:
+                sqlt.get_conn().execute("INSERT INTO ltp (stock, expiry, right, strike_price, ltp) "
+                                        "VALUES (?, ?, ?, ?, ?)",
+                                        (stock_code, expiry_date, right, strike_price,
+                                         ltp))
             return ltp
-        return 0
-
-    if response['Status'] != 200:
-        print(f"{Colors.RED}Error while getting LTP for {stock_code}, {expiry_date}, "
-              f"{strike_price}, {right}: {response} - Status {response['Status']}{Colors.RESET}")
-        return 0
-
-    return response['Success'][0]['ltp']
+        except Exception as e:
+            logger.error(f"{Colors.RED}Exception while getting LTP from NSE for {stock_code}, {expiry_date}, "
+                         f"{strike_price}, {right}: {e} {Colors.RESET}")
+            ltp = sqlt.get_ltp_option(stock_code, expiry_date, strike_price, right)
+            logger.info(
+                "Getting LTP from DB for stock: " + stock_code + ", expiry_date: " + expiry_date + ", strike_price: " +
+                strike_price + ", right: " + right + ", returning that.")
+            if ltp:
+                return ltp
+            return 0
 
 
 def order_list(orders_df):
     # Print them in different colour based on execution status.
-    # print(orders)
-    print(f"{Colors.BOLD}{Colors.CYAN}Order Status: {Colors.RESET}")
+    logger.debug("Orders: ")
+    logger.debug(tabulate(orders_df))
+    logger.info(f"{Colors.BOLD}{Colors.CYAN}Order Status: {Colors.RESET}")
     for index, item in orders_df.iterrows():
         if item['order_status'] == c.ORDER_STATUS_COMPLETE:
-            print(f"{Colors.BLUE}Executed Order: {item['stock']} : {item['action']} : Price: {item['order_price']}  : "
-                  f"LTP: {item['ltp']} : Qty : {item['quantity']}{Colors.RESET}")
+            logger.info(
+                f"{Colors.BLUE}Executed Order: {item['stock']} : {item['action']} : Price: {item['order_price']}  : "
+                f"LTP: {item['ltp']} : Qty : {item['quantity']}{Colors.RESET}")
         if item['order_status'] == c.ORDER_STATUS_OPEN:
-            print(
+            logger.info(
                 f"{Colors.CYAN}Pending Execution: {item['stock']} : {item['action']} : Price: {item['order_price']} : "
                 f"LTP: {item['ltp']}: Qty : {item['quantity']}{Colors.RESET}")
 
@@ -310,7 +351,7 @@ def get_ltp_stock(portfolio_positions_df):
     if portfolio_positions_df is not None and len(portfolio_positions_df) > 0:
         unique_stock_codes_portfolio = set(portfolio_positions_df['stock'].values.flatten())
     else:
-        print(f"{Colors.GREEN}No open portfolio positions found{Colors.RESET}")
+        logger.info(f"{Colors.GREEN}No open portfolio positions found{Colors.RESET}")
         return
 
     ltp_df = pd.DataFrame(
@@ -321,7 +362,7 @@ def get_ltp_stock(portfolio_positions_df):
 
     try:
         for stock in unique_stock_codes_portfolio:
-            # print(f"Getting LTP for {stock}")
+            logger.debug(f"Getting LTP for {stock}")
             if c.GET_LTP_FROM_ICICI:
                 # Not getting from ICICI due to call limit
                 api = iciciDirect.icici_direct_main.get_api_session()
@@ -343,7 +384,7 @@ def get_ltp_stock(portfolio_positions_df):
                     # data for each ltp response so that can crated a consolidated df
                     if ['exchange_code'] == 'BSE':  # No need to store the BSE traded price
                         continue
-                    # print(ltp['Success'])
+                    logger.debug(ltp['Success'])
                     ltp_data = {
                         "stock": item['stock_code'],
                         "ltp": float(item['ltp']),
@@ -370,7 +411,7 @@ def get_ltp_stock(portfolio_positions_df):
             if c.GET_LTP_FROM_NSE:
                 try:
                     nse_stock = get_nse_stock_code(stock)
-                    # print(f"Getting ltp for ..{nse_stock}..")
+                    logger.debug(f"Getting ltp for NSE stock: {nse_stock}, Icici stock: {stock} from NSE....")
                     ltp = nse.nsetools_get_quote(nse_stock)
 
                     ltp_data = {
@@ -393,10 +434,10 @@ def get_ltp_stock(portfolio_positions_df):
                     ltp_df = pd.concat([ltp_df, pd.DataFrame.from_records([ltp_data])], ignore_index=True)
                 except Exception as e:
                     # This will help to persist the ltp which we are able to get from NSE
-                    print(f"{Colors.RED}Exception while getting LTP for {stock}: {e}{Colors.RESET}")
+                    logger.error(f"{Colors.RED}Exception while getting LTP for {stock}: {e}{Colors.RESET}")
                     traceback.print_exc()
     except Exception as e:
-        print(f"{Colors.RED}Exception while getting LTP for {stock}: {e}{Colors.RESET}")
+        logger.error(f"{Colors.RED}Exception while getting LTP for {stock}: {e}{Colors.RESET}")
         traceback.print_exc()
     finally:
         ltp_df.to_sql(name="ltp_stock", con=sqlt.get_conn(), if_exists='append',
@@ -408,7 +449,7 @@ def get_strategy_breakeven(portfolio_positions_df):
     if portfolio_positions_df is not None and len(portfolio_positions_df) > 0:
         unique_stock_codes_portfolio = set(portfolio_positions_df['stock'].values.flatten())
     else:
-        print(f"{Colors.GREEN}No open portfolio positions found{Colors.RESET}")
+        logger.info(f"{Colors.GREEN}No open portfolio positions found{Colors.RESET}")
         return
 
     break_even_df = pd.DataFrame(
@@ -432,9 +473,11 @@ def get_strategy_breakeven(portfolio_positions_df):
                     s.sell(Put(item['strike_price'], item['average_price'], item['quantity'] * -1))
                 if item['right'] == 'Put' and item['action'] == 'Buy':
                     s.buy(Put(item['strike_price'], item['average_price'], item['quantity']))
-            # print(f"{Colors.PURPLE}Breakeven for {stock}, {s.break_evens()}{Colors.RESET}")
-            # print("max loss: %f, max gain: %f" % (s.max_loss(), s.max_gain()))
-            # print("strikes and payoffs: " + str(list(zip(s.strikes(), s.payoffs(s.strikes())))))
+
+            logger.debug(f"{Colors.PURPLE}Breakeven for {stock}, {s.break_evens()}{Colors.RESET}")
+            logger.debug("max loss: %f, max gain: %f" % (s.max_loss(), s.max_gain()))
+            logger.debug("strikes and payoffs: " + str(list(zip(s.strikes(), s.payoffs(s.strikes())))))
+
             break_even_array = s.break_evens()
 
             lower_side = None
@@ -476,10 +519,10 @@ def get_strategy_breakeven(portfolio_positions_df):
                                       ignore_index=True)
 
             # s.plot()
-        # print(tabulate(break_even_df))
+        logger.debug(tabulate(break_even_df))
 
     except Exception as e:
-        print(f"{Colors.RED}Exception while getting Breakeven for {stock}: {e}{Colors.RESET}")
+        logger.error(f"{Colors.RED}Exception while getting Breakeven for {stock}: {e}{Colors.RESET}")
 
     finally:
         try:
@@ -511,7 +554,7 @@ def get_table_as_df(table_name, where_clause=None):
 
 
 def get_closed_pnl(df_order_history):
-    # print(tabulate(df_order_history))
+    logger.debug(tabulate(df_order_history))
 
     for index, row in df_order_history.iterrows():
         if row['action'] == 'Sell':
@@ -584,16 +627,16 @@ def get_closed_pnl(df_order_history):
                     pnl_booked = (current_price + row_price) * min_quantity
                     amount_left = current_price * abs(left_quantity)
 
-                # print(f"Min quantity: {min_quantity}, Current price: {current_price}, Row price: {row_price}, "
-                #       f"Pnl booked: {pnl_booked}, Amount left: {amount_left}, Left quantity: {left_quantity}, "
-                #       f"Current quantity: {current_position['quantity']}, Row quantity: {row['quantity']}")
+                logger.debug(f"Min quantity: {min_quantity}, Current price: {current_price}, Row price: {row_price}, "
+                             f"Pnl booked: {pnl_booked}, Amount left: {amount_left}, Left quantity: {left_quantity}, "
+                             f"Current quantity: {current_position['quantity']}, Row quantity: {row['quantity']}")
 
                 # contract partial sqred off, add its profit in stock_pnl_dict
                 if (row['stock'], row['expiry_date']) in stock_pnl_booked_dict:
                     stock_pnl_booked_dict[(row['stock'], row['expiry_date'])] += pnl_booked
                 else:
                     stock_pnl_booked_dict[(row['stock'], row['expiry_date'])] = pnl_booked
-                # print(f"Profit realized: {pnl_booked}")
+                logger.debug(f"Profit realized: {pnl_booked}")
 
                 # Update the current position
                 current_position['quantity'] = left_quantity

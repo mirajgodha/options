@@ -321,7 +321,7 @@ def insert_order_status(orders_df):
             pass
 
 
-def insert_ltp(ltp_response):
+def insert_option_ltp(ltp_response):
     # inserts the ltp response into the ltp table
     # print(ltp_response)
 

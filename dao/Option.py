@@ -9,6 +9,9 @@ class OptionType(Enum):
 class TranxType(Enum):
     SELL = 1
     BUY = 2
+    ANY = 3
+
+
 
 
 class Expiry(Enum):

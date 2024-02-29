@@ -1,5 +1,6 @@
 import csv
 from helper.colours import Colors
+from helper.logger import logger
 
 # CSV file containing stock codes
 # This file is used to get the icici specific stock code for a given stock code
@@ -34,7 +35,7 @@ def get_icici_stock_code(stock_code):
     for row in data:
         if stock_code.upper() in row:
             return row[0]
-    print(f"{Colors.RED}Stock code {stock_code} not found in {icici_csv_file}{Colors.RESET}")
+    logger.error(f"{Colors.RED}Stock code {stock_code} not found in {icici_csv_file}{Colors.RESET}. Update ICICI stock codes file.")
     return stock_code.upper()
 
 
@@ -49,5 +50,5 @@ def get_nse_stock_code(stock_code):
     for row in data:
         if stock_code.upper() in row:
             return row[0].replace(" ", "")
-    print(f"{Colors.RED}Stock code {stock_code} not found in {nse_csv_file}{Colors.RESET}")
+    logger.error(f"{Colors.RED}Stock code {stock_code} not found in {nse_csv_file}{Colors.RESET}. Update NSE stock codes file.")
     return stock_code.upper().replace(" ", "")

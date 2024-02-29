@@ -1,4 +1,4 @@
-import logging
+from helper.logger import logger
 from typing import List
 
 from util.nsepythonUtil import get_black_scholes_dexter, get_days_to_expiry
@@ -40,8 +40,8 @@ def calc_profit_loss(option_list: List[Option], lot_size, strike_price_list):
     :param strike_price_list:
     :return:
     """
-    logging.debug(f"option_list= {option_list}")
-    logging.debug(f"lot_size={lot_size}")
+    logger.debug(f"option_list= {option_list}")
+    logger.debug(f"lot_size={lot_size}")
 
     premium_received = 0.0
     for option in option_list:
@@ -52,7 +52,7 @@ def calc_profit_loss(option_list: List[Option], lot_size, strike_price_list):
             premium_received = (premium_received + option.premium) * option.lots
 
     premium_received = round(premium_received * lot_size, 0)
-    logging.debug(f"Premium received {premium_received}")
+    logger.debug(f"Premium received {premium_received}")
     max_profit = max(premium_received, 0)
     max_loss = min(premium_received, 0)
     pl_on_strikes = []
@@ -66,7 +66,7 @@ def calc_profit_loss(option_list: List[Option], lot_size, strike_price_list):
         max_loss = min(pl, max_loss)
         pl_on_strikes.append((round(pl / 10, 0) * 10, expiry_price))
 
-        logging.debug(f"P&L {pl} for expiry_price {expiry_price}")
+        logger.debug(f"P&L {pl} for expiry_price {expiry_price}")
 
     return round(max_profit / 10, 0) * 10, round(max_loss / 10, 0) * 10, premium_received, pl_on_strikes
 
@@ -84,14 +84,16 @@ def calc_greeks(option_list: List[Option], lot_size, ltp):
     delta, theta, total_delta, total_theta = 0.0, 0.0, 0.0, 0.0
     for option in option_list:
         # Calculate the greeks based on the transaction type
+        logger.debug("Calculating greeks for option: " )
+        logger.debug(f"Option: {option} and ltp: {ltp}")
 
         call_theta, put_theta, call_premium, put_premium, call_delta, put_delta, gamma, vega, call_rho, put_rho = \
             get_black_scholes_dexter(
                 ltp, option.strike_price, get_days_to_expiry(option.expiry_date),
                 option.iv, r=10, q=0.0, td=365)
 
-        logging.debug(f"For option: {option}")
-        logging.debug(f"Greeks are Call Theta: {call_theta:.3f}, Put Theta: {put_theta:.3f}, Call Premium: "
+        logger.debug(f"For option: {option}")
+        logger.debug(f"Greeks are Call Theta: {call_theta:.3f}, Put Theta: {put_theta:.3f}, Call Premium: "
                      f"{call_premium:.3f}, Put Premium: {put_premium:.3f}, Call Delta: {call_delta:.3f}, "
                      f"Put Delta: {put_delta:.3f}, Gamma: {gamma:.3f}, Vega: {vega:.3f}, "
                      f"Call Rho: {call_rho:.3f}, Put Rho: {put_rho:.3f}")

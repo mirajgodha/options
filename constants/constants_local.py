@@ -6,11 +6,18 @@ from dao.Option import Expiry
 REFRESH_TIME_SECONDS = 600
 TEST_RUN = False
 
+# All Times in mins
 MARGIN_DELAY_TIME = 10
 MWPL_DELAY_TIME = 60
 FUNDS_DELAY_TIME = 60
-OPTION_STRATEGIES_DELAY_TIME = 25
+OPTION_STRATEGIES_DELAY_TIME = 15
 
+# Value of the sold contract to be sq off
+# This is the minimum value of the contract which should be sq off, and will be visible on Sq off dashboard.
+# If the value of the contract is less than this value, it will be sq off
+# This value is in Rs.
+# This value is used in contract_value() method in trading_helper.py file
+# This value is used in get_pnl_target() method in trading_helper.py file
 CONTRACT_MIN_VALUE_TO_BE_SQ_OFFED = 2000
 
 # OPTION Strategies constants

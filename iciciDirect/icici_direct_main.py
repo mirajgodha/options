@@ -4,7 +4,7 @@
 # and get the api session key
 
 import traceback
-
+from helper.logger import logger
 import pandas as pd
 
 import iciciDirect.icici_helper as iciciDirectHelper
@@ -67,15 +67,19 @@ def get_order_book():
 def get_historical_order_book(from_date, to_date):
     where_clause = f"last_updated >= '{datetime.today()}'"
     historical_order_book = get_table_as_df(constants.ICICI_HISTORICAL_ORDERS_TABLE_NAME, where_clause)
-    if historical_order_book is not None and not historical_order_book.empty:
+    if historical_order_book is not None and not historical_order_book.empty and len(historical_order_book) > 0:
+        logger.info("Historical order book for ICICI Direct found in Db, returning it.")
         return historical_order_book
 
     # Historical order book did not persisted today in Db, so lets fetch from broker.
-    response_historical_order_book = api.get_trade_list(from_date, to_date, exchange_code='NFO')
+    logger.info("Getting historical order book from ICICI Direct for from_date: "
+                f"{from_date} and to_date: {to_date}")
+    response_historical_order_book = api.get_trade_list(from_date=from_date, to_date=to_date, exchange_code='NFO')
+    logger.info("Historical order book response from ICICI Direct:")
+    logger.info(historical_order_book)
 
     if response_historical_order_book['Status'] == 200:
         response_historical_order_book = response_historical_order_book['Success']
-
 
         response_historical_order_book_df = get_icici_order_history_df(response_historical_order_book)
 
@@ -86,11 +90,11 @@ def get_historical_order_book(from_date, to_date):
         return response_historical_order_book_df
     else:
         if response_historical_order_book['Status'] == 500:
-            print(f"{Colors.RED}Internal Server Error while getting portfolio position. "
+            logger.error(f"{Colors.RED}Internal Server Error while getting portfolio position. "
                   f"Status Code: {response_historical_order_book['Status']} received. {Colors.RESET}")
-            print(f"Error received from ICICI broker: {response_historical_order_book}")
+            logger.error(f"Error received from ICICI broker: {response_historical_order_book}")
         else:
-            print(f"{Colors.RED}Portfolio position response: {response_historical_order_book}{Colors.RESET}")
+            logger.error(f"{Colors.RED}Portfolio position response: {response_historical_order_book}{Colors.RESET}")
         return None
 
 

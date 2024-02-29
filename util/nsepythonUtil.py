@@ -3,23 +3,13 @@ from stopit import threading_timeoutable as timeoutable
 
 from nsepython import *
 import pandas as pd
-import logging
+from helper.logger import logger
 
 from dao.Option import TranxType, OptionType
 from util.optionGreeksUtil import implied_volatility
 
-logger = logging.getLogger()
-
 lot_sizes = pd.DataFrame()
 india_vix = 0
-
-# print(nsetools_get_quote("DLF"))
-# print(nsetools_get_quote("AARTIIND"))
-# print(nsetools_get_quote("GAIL"))
-# print(nsetools_get_quote("MOTHERSON"))
-# print(nsetools_get_quote("BOSCHLTD"))
-# print(nsetools_get_quote("BPCL"))
-# print(nsetools_get_quote("TATAPOWER"))
 
 def get_quote(symbol):
     """
@@ -163,56 +153,53 @@ def get_india_vix():
     return india_vix
 
 
-def get_pe_price(option_chain_json, strike_price, txType, expiry_date):
+def get_option_price(option_chain_json, strike_price, option_type, tranx_type, expiry_date,need_iv=True):
     """
     Returns the PE price for the given stirke price
-    :param option_chain_json:
-    :param strike_price:
-    :param txType: It is used to get the correct price at which trade can happen, as many times there is a huge
+    :param option_chain_json: get it like nse_optionchain_scrapper("DLF")
+    :param strike_price: int
+    :param tranx_type: TranxType.SELL or TranxType.BUY
+    :param option_type: OptionType.PUT or OptionType.CALL
+    It is used to get the correct price at which trade can happen, as many times there is a huge
                     difference between bid and ask price. So bid price is take when we want to sell and
                     ask price is considered when we want o buy
-    :param expiry_date:
-    :return:
+    :param expiry_date: 29-Feb-2024
+    :return: option price, option iv
+
     """
     for dictt in option_chain_json['records']['data']:
         if dictt['strikePrice'] == strike_price and dictt['expiryDate'] == expiry_date:
-            if txType == TranxType.SELL:
-                pe_price = dictt['PE']['bidprice']
-            else:
-                pe_price = dictt['PE']['askPrice']
-            pe_iv = dictt['PE']['impliedVolatility']
-            if pe_iv == 0:
-                pe_iv = implied_volatility(pe_price, get_ltp(option_chain_json), strike_price,
-                                           get_days_to_expiry(expiry_date), 10, OptionType.PUT, get_india_vix())
-            return pe_price, pe_iv
+            if tranx_type == TranxType.SELL:
+                if option_type == OptionType.PUT:
+                    option_price = dictt['PE']['bidprice']
+                else:
+                    option_price = dictt['CE']['bidprice']
+            elif tranx_type == TranxType.BUY:
+                if option_type == OptionType.PUT:
+                    option_price = dictt['PE']['askPrice']
+                else:
+                    option_price = dictt['CE']['askPrice']
+            elif tranx_type == TranxType.ANY:
+                # Get ltp, instead of bid or ask price
+                if option_type == OptionType.PUT:
+                    option_price = dictt['PE']['lastPrice']
+                else:
+                    option_price = dictt['CE']['lastPrice']
+
+            option_iv = 0
+            # Get iv only if needed.
+            if need_iv :
+                if option_type == OptionType.PUT:
+                    option_iv = dictt['PE']['impliedVolatility']
+                else:
+                    option_iv = dictt['CE']['impliedVolatility']
+
+                if option_iv == 0:
+                    option_iv = implied_volatility(option_price, get_ltp(option_chain_json), strike_price,
+                                               get_days_to_expiry(expiry_date), 10, OptionType.PUT, get_india_vix())
+            return option_price, option_iv
     else:
-        print(f"No instrument found with the given strike {strike_price}.")
-        return 0, 0
-
-
-
-def get_ce_price(option_chain_json, strike_price, txType, expiry_date):
-    """
-    Returns the CE price for the given details
-    :param option_chain_json:
-    :param strike_price:
-    :param txType:
-    :param expiry_date:
-    :return:
-    """
-    for dictt in option_chain_json['records']['data']:
-        if dictt['strikePrice'] == strike_price and dictt['expiryDate'] == expiry_date:
-            if txType == TranxType.SELL:
-                ce_price = dictt['CE']['bidprice']
-            else:
-                ce_price = dictt['CE']['askPrice']
-            ce_iv = dictt['CE']['impliedVolatility']
-            if ce_iv == 0:
-                ce_iv = implied_volatility(ce_price, get_ltp(option_chain_json), strike_price,
-                                           get_days_to_expiry(expiry_date), 10, OptionType.CALL, get_india_vix())
-            return ce_price, ce_iv
-    else:
-        print(f"No instrument found with the given strike {strike_price}.")
+        logger.debug(f"No instrument found with the given strike {strike_price} , will return price as 0.")
         return 0, 0
 
 
@@ -248,3 +235,7 @@ def get_black_scholes_dexter(S0, X, t, σ="", r=10, q=0.0, td=365):
 
     return call_theta, put_theta, call_premium, put_premium, call_delta, put_delta, gamma, vega, call_rho, put_rho
 
+
+# print(get_option_price(nse_optionchain_scrapper("DLF"),900,OptionType.PUT,TranxType.BUY,expiry_list("DLF","list")[0]))
+# print(expiry_list("DLF","list")[0])
+# print(nse_optionchain_scrapper("DLF"))

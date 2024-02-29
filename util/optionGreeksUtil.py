@@ -1,5 +1,4 @@
-import logging
-
+from helper.logger import logger
 from numpy import sqrt, log, exp, pi
 from scipy.stats import norm
 import numpy as np
@@ -93,22 +92,23 @@ def implied_volatility(option_price, S, K, T, r, option: OptionType, sigma):
     T = T / 365  # convert to years
     r = r / 100  # convert to decimals
     sigma = sigma / 100  # convert to decimals
-    logging.debug(np.array([['option_price', 'S', 'K', 'T', 'r', 'sigma'], [option_price, S, K, T, r, sigma]]))
+    logger.debug(np.array([['option_price', 'S', 'K', 'T', 'r', 'sigma'], [option_price, S, K, T, r, sigma]]))
     if option == OptionType.CALL:
         while sigma < 1:
             Price_implied = S * norm.cdf(d1(S, K, T, r, sigma)) - K * exp(-r * T) * norm.cdf(d2(S, K, T, r, sigma))
             if option_price - (Price_implied) < 0.001:
                 return round(sigma * 100, 2)
             sigma += 0.001
-        return "It could not find the right volatility of the call option."
+        logger.error("It could not find the right volatility of the call option.")
+        return 0
     else:
         while sigma < 1:
             Price_implied = K * exp(-r * T) - S + bs_call(S, K, T, r, sigma)
             if option_price - (Price_implied) < 0.001:
                 return round(sigma * 100, 2)
             sigma += 0.001
-        return "It could not find the right volatility of the put option."
-    return
+        logger.error("It could not find the right volatility of the put option.")
+        return 0
 
 
 def test_greek():

@@ -4,19 +4,30 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="44484f79-8743-4570-9b87-9e30e97b0f27" name="Changes" comment="Updated code to handle the historical and todays orders. As historical orders did not contains todays orders, so todays pnl booked was not getting properly reflected in Dashboards.">
+    <list default="true" id="44484f79-8743-4570-9b87-9e30e97b0f27" name="Changes" comment="Updated option strategies building, so that we can get % strike diff, rather than constant +/- diffs. Also, added two new strategies, naked call and naked put">
+      <change afterPath="$PROJECT_DIR$/helper/logger.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/secretes/config.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/constants/constants_local.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants/constants_local.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dao/Option.py" beforeDir="false" afterPath="$PROJECT_DIR$/dao/Option.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dao/openPositionsDF.py" beforeDir="false" afterPath="$PROJECT_DIR$/dao/openPositionsDF.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/icici_stock_codes.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/icici_stock_codes.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/nse_stock_codes.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/nse_stock_codes.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/output/2022-10-31.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/helper/stockCodes.py" beforeDir="false" afterPath="$PROJECT_DIR$/helper/stockCodes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/iciciDirect/icici_direct_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/iciciDirect/icici_direct_main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/metabase/metabase.db.mv.db" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/metabase.db.mv.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nuvama/nuvama_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/nuvama/nuvama_main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/optionStrategies/optionStrategyBuilder.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionStrategies/optionStrategyBuilder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/optionTrading/option_trading_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionTrading/option_trading_main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/optionTrading/trading_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionTrading/trading_helper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/secreates/config.ini" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/sql/sqlite.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/sqlite.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sql/stocks.db" beforeDir="false" afterPath="$PROJECT_DIR$/sql/stocks.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/util/OptionUtil.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/OptionUtil.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/util/nsepythonUtil.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/nsepythonUtil.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/optionStrategies.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/optionStrategies.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/optionGreeksUtil.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/optionGreeksUtil.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/profitLossCalculator.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/profitLossCalculator.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,7 +85,7 @@
       <recent name="$PROJECT_DIR$/optionStrategies" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.optionStrategyBuilder">
+  <component name="RunManager" selected="Python.option_trading_main">
     <configuration name="nsepyUtil" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="options" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -199,9 +210,9 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.optionStrategyBuilder" />
         <item itemvalue="Python.option_trading_main" />
         <item itemvalue="Python.nsepythonUtil" />
+        <item itemvalue="Python.optionStrategyBuilder" />
         <item itemvalue="Python tests.option_trading_main.py" />
         <item itemvalue="Python.nsepyUtil" />
       </list>
@@ -426,7 +437,14 @@
       <option name="project" value="LOCAL" />
       <updated>1709118400026</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="Updated option strategies building, so that we can get % strike diff, rather than constant +/- diffs. Also, added two new strategies, naked call and naked put">
+      <created>1709139327557</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1709139327557</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -492,6 +510,17 @@
     <MESSAGE value="Added option break even calculations." />
     <MESSAGE value="Added code to calculate the current booked pnl, so that strategies can be made with correction." />
     <MESSAGE value="Updated code to handle the historical and todays orders. As historical orders did not contains todays orders, so todays pnl booked was not getting properly reflected in Dashboards." />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated code to handle the historical and todays orders. As historical orders did not contains todays orders, so todays pnl booked was not getting properly reflected in Dashboards." />
+    <MESSAGE value="Updated option strategies building, so that we can get % strike diff, rather than constant +/- diffs. Also, added two new strategies, naked call and naked put" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated option strategies building, so that we can get % strike diff, rather than constant +/- diffs. Also, added two new strategies, naked call and naked put" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/util/profitLossCalculator.py</url>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

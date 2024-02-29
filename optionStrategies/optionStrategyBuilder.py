@@ -1,5 +1,5 @@
 import datetime
-import logging
+from helper.logger import logger
 import sys
 import traceback
 
@@ -14,8 +14,6 @@ from util.optionStrategies import OptionStrategies
 from util.utils import clear_df, concat_df, merge_dataframes
 from helper.colours import Colors
 
-# Expiry month for which we want to run the utility
-logger = logging.getLogger()
 
 excel_columns = ['Stock', 'PremiumCreditTotal', 'MaxProfit', 'MaxLoss', 'LTP',
                  'CE_sell_price', 'CE_sell_strike',
@@ -110,7 +108,7 @@ def write_data():
             naked_call_df.to_excel(writer, sheet_name="naked_call_df")
             naked_put_df.to_excel(writer, sheet_name="naked_put_df")
 
-        logging.debug("Excel file created successfully")
+        logger.debug("Excel file created successfully")
     if c.OPTIONS_STRATEGIES_WRITE_TO_DB:
         conn_inner = sqlt.get_conn()
         try:
@@ -118,64 +116,68 @@ def write_data():
             # drop columns which create issues while inserting the data to db and of not much use.
             short_straddle_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             short_straddle_df.to_sql('os_short_straddle', conn_inner, if_exists='replace', index=False)
-            logging.debug("os_short_straddle table created successfully")
+            logger.debug("os_short_straddle table created successfully")
 
             short_strangle_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             short_strangle_df.to_sql('os_short_strangle', conn_inner, if_exists='replace', index=False)
-            logging.debug("os_short_strangle table created successfully")
-
-            if concatenate_df is not None and not concatenate_df.empty:
-                concatenate_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
-                concatenate_df.to_sql('os_all_strategies_profitable', conn_inner, if_exists='replace', index=False)
-                logging.debug("concatenate_df table created successfully")
+            logger.debug("os_short_strangle table created successfully")
 
             short_guts_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             short_guts_df.to_sql(name="os_short_guts", con=conn_inner, if_exists='replace', index=False)
-            logging.debug("short_guts_df table created successfully")
+            logger.debug("short_guts_df table created successfully")
 
             long_call_condor_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             long_call_condor_df.to_sql(name="os_long_call_condor", con=conn_inner, if_exists='replace', index=False)
-            logging.debug("long_call_condor_df table created successfully")
+            logger.debug("long_call_condor_df table created successfully")
 
             long_put_condor_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             long_put_condor_df.to_sql(name="os_long_put_condor", con=conn_inner, if_exists='replace', index=False)
-            logging.debug("long_put_condor_df table created successfully")
+            logger.debug("long_put_condor_df table created successfully")
 
             short_call_condor_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             short_call_condor_df.to_sql(name="os_short_call_condor", con=conn_inner, if_exists='replace', index=False)
-            logging.debug("short_call_condor_df table created successfully")
+            logger.debug("short_call_condor_df table created successfully")
 
             short_put_condor_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             short_put_condor_df.to_sql(name="os_short_put_condor", con=conn_inner, if_exists='replace', index=False)
-            logging.debug("short_put_condor_df table created successfully")
+            logger.debug("short_put_condor_df table created successfully")
 
             long_iron_butterfly_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             long_iron_butterfly_df.to_sql(name="os_long_iron_butterfly", con=conn_inner, if_exists='replace',
                                           index=False)
-            logging.debug("long_iron_butterfly_df table created successfully")
+            logger.debug("long_iron_butterfly_df table created successfully")
 
             short_iron_butterfly_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             short_iron_butterfly_df.to_sql(name="os_short_iron_butterfly", con=conn_inner, if_exists='replace',
                                            index=False)
-            logging.debug("short_iron_butterfly_df table created successfully")
+            logger.debug("short_iron_butterfly_df table created successfully")
 
             short_call_butterfly_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             short_call_butterfly_df.to_sql(name="os_short_call_butterfly", con=conn_inner, if_exists='replace',
                                            index=False)
-            logging.debug("short_call_butterfly_df table created successfully")
+            logger.debug("short_call_butterfly_df table created successfully")
 
             short_put_butterfly_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             short_put_butterfly_df.to_sql(name="os_short_put_butterfly", con=conn_inner, if_exists='replace',
                                           index=False)
-            logging.debug("short_put_butterfly_df table created successfully")
+            logger.debug("short_put_butterfly_df table created successfully")
 
             naked_call_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             naked_call_df.to_sql(name="os_naked_call", con=conn_inner, if_exists='replace', index=False)
-            logging.debug("naked_call_df table created successfully")
+            logger.debug("naked_call_df table created successfully")
 
             naked_put_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             naked_put_df.to_sql(name="os_naked_put", con=conn_inner, if_exists='replace', index=False)
-            logging.debug("naked_put_df table created successfully")
+            logger.debug("naked_put_df table created successfully")
+
+            if concatenate_df is not None and not concatenate_df.empty and len(concatenate_df) > 0:
+                # check if df has columns then only drop them
+                if 'pl_on_strikes' in concatenate_df.columns:
+                    concatenate_df.drop(columns=['pl_on_strikes'], inplace=True)
+                if 'Strikes' in concatenate_df.columns:
+                    concatenate_df.drop(columns=['Strikes'], inplace=True)
+                concatenate_df.to_sql('os_all_strategies_profitable', conn_inner, if_exists='replace', index=False)
+                logger.debug("concatenate_df table created successfully")
 
         except Exception as e:
             print(f"{Colors.RED}Error inserting data for options strategies {e}{Colors.RESET}")
@@ -216,19 +218,19 @@ def option_strategies_builder():
 
     expiry_date = get_expiry_date(c.OPTIONS_STRATEGIES_EXPIRY_MONTH)
 
-    logging.info(f"{Colors.GREEN}---Starting Option Trading Strategies----{Colors.RESET}")
+    logger.info(f"{Colors.GREEN}---Starting Option Trading Strategies----{Colors.RESET}")
     i = 1
     try:
         for symbol in fno_stock_list:
             try:
-                logging.info(f"{i}. Running for {symbol}")
+                logger.info(f"{i}. Running for {symbol}")
                 option_chain_json = get_optionchain(symbol, timeout=20)
                 if option_chain_json is None:
                     raise Exception("Timed Out")
-                logging.debug(f"Got option chain for {symbol}")
+                logger.debug(f"Got option chain for {symbol}")
 
                 i += 1
-                logging.debug(option_chain_json)
+                logger.debug(option_chain_json)
 
                 # Add the new row to the DataFrame with index=0
                 long_call_condor_df = concat_df(long_call_condor_df,
@@ -293,11 +295,11 @@ def option_strategies_builder():
 
             except Exception as ex:
                 # Many times the nse website response gets stuck an results in whole program halts
-                logging.error(f"{Colors.WHITE}Error in processing {symbol} is:  {ex}{Colors.RESET}")
+                logger.error(f"{Colors.WHITE}Error in processing {symbol} is:  {ex}{Colors.RESET}")
                 traceback.print_exc()
 
     except Exception as ex:
-        logging.error(f"{Colors.RED}Error in creating option strategies is:  {ex} {Colors.RESET}")
+        logger.error(f"{Colors.RED}Error in creating option strategies is:  {ex} {Colors.RESET}")
         sqlt.insert_os_lastupdated("os_status", c.PROCESS_FAILED)
 
     finally:  # Required as not to miss the data which is already fetched and save it
@@ -308,5 +310,4 @@ def option_strategies_builder():
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    logger.setLevel(logging.INFO)
     option_strategies_builder()

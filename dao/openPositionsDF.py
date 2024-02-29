@@ -1,6 +1,7 @@
 import pandas as pd
 from helper.stockCodes import get_icici_stock_code
 import constants.constants_local as c
+from helper.logger import logger
 
 # ---------------------------------------------------------------------------------------------------------------------
 # Open Positions - Option Trading DataFrames
@@ -33,7 +34,11 @@ def get_icici_option_open_positions_df(portfolio_positions_response):
     for item in portfolio_positions_response:
         # print(item)
         if item['segment'] == 'fno':
-            # print(item)
+            logger.debug("Icici direct open position: ")
+            logger.debug(item)
+            if item['action'] == 'NA':
+                # Order is not yet executed, so ignore it.
+                continue
             # Sample ICICI DataFrame
             # {'segment': 'fno', 'product_type': 'Options', 'exchange_code': 'NFO',
             # 'stock_code': 'TATPOW', 'expiry_date': '29-Feb-2024', 'strike_price': '370',
