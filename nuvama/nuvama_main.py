@@ -2,7 +2,7 @@
 
 import configparser
 import traceback
-from datetime import datetime
+from datetime import datetime, timedelta
 from helper.logger import logger
 from helper.colours import Colors
 
@@ -53,10 +53,13 @@ def get_order_book():
 
 def get_historical_order_book(from_date, to_date):
     try:
-        where_clause = f"last_updated >= '{datetime.today()}'"
+        where_clause = f"last_updated >= '{datetime.today() - timedelta(hours=8)}'"
         historical_order_book = get_table_as_df(constants.NUVAMA_HISTORICAL_ORDERS_TABLE_NAME, where_clause)
         if historical_order_book is not None and len(historical_order_book) > 0:
+            logger.debug("Getting historical order book from database for Nuvama so using it")
             return historical_order_book
+
+        logger.debug("Getting historical order book from nuvama as no historical order book found in the database")
 
         json_data = api_connect.GetAllTransactionHistory(segment=SegmentTypeEnum.EQUITY, fromDate=from_date, toDate=to_date)
         # print(json_data)

@@ -168,39 +168,44 @@ def get_option_price(option_chain_json, strike_price, option_type, tranx_type, e
 
     """
     for dictt in option_chain_json['records']['data']:
-        if dictt['strikePrice'] == strike_price and dictt['expiryDate'] == expiry_date:
-            if tranx_type == TranxType.SELL:
-                if option_type == OptionType.PUT:
-                    option_price = dictt['PE']['bidprice']
-                else:
-                    option_price = dictt['CE']['bidprice']
-            elif tranx_type == TranxType.BUY:
-                if option_type == OptionType.PUT:
-                    option_price = dictt['PE']['askPrice']
-                else:
-                    option_price = dictt['CE']['askPrice']
-            elif tranx_type == TranxType.ANY:
-                # Get ltp, instead of bid or ask price
-                if option_type == OptionType.PUT:
-                    option_price = dictt['PE']['lastPrice']
-                else:
-                    option_price = dictt['CE']['lastPrice']
+        try:
+            if dictt['strikePrice'] == strike_price and dictt['expiryDate'] == expiry_date:
+                if tranx_type == TranxType.SELL:
+                    if option_type == OptionType.PUT:
+                        option_price = dictt['PE']['bidprice']
+                    else:
+                        option_price = dictt['CE']['bidprice']
+                elif tranx_type == TranxType.BUY:
+                    if option_type == OptionType.PUT:
+                        option_price = dictt['PE']['askPrice']
+                    else:
+                        option_price = dictt['CE']['askPrice']
+                elif tranx_type == TranxType.ANY:
+                    # Get ltp, instead of bid or ask price
+                    if option_type == OptionType.PUT:
+                        option_price = dictt['PE']['lastPrice']
+                    else:
+                        option_price = dictt['CE']['lastPrice']
 
-            option_iv = 0
-            # Get iv only if needed.
-            if need_iv :
-                if option_type == OptionType.PUT:
-                    option_iv = dictt['PE']['impliedVolatility']
-                else:
-                    option_iv = dictt['CE']['impliedVolatility']
+                option_iv = 0
+                # Get iv only if needed.
+                if need_iv :
+                    if option_type == OptionType.PUT:
+                        option_iv = dictt['PE']['impliedVolatility']
+                    else:
+                        option_iv = dictt['CE']['impliedVolatility']
 
-                if option_iv == 0:
-                    option_iv = implied_volatility(option_price, get_ltp(option_chain_json), strike_price,
-                                               get_days_to_expiry(expiry_date), 10, OptionType.PUT, get_india_vix())
-            return option_price, option_iv
-    else:
-        logger.debug(f"No instrument found with the given strike {strike_price} , will return price as 0.")
-        return 0, 0
+                    if option_iv == 0:
+                        option_iv = implied_volatility(option_price, get_ltp(option_chain_json), strike_price,
+                                                   get_days_to_expiry(expiry_date), 10, OptionType.PUT, get_india_vix())
+                return option_price, option_iv
+        except KeyError as ke:
+            logger.debug(f"Key error {ke}")
+        except Exception as e:
+            logger.debug(e)
+
+    logger.debug(f"No instrument found with the given strike {strike_price} , will return price as 0.")
+    return 0, 0
 
 
 def get_black_scholes_dexter(S0, X, t, σ="", r=10, q=0.0, td=365):

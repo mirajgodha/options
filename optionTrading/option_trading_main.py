@@ -32,7 +32,7 @@ last_month_start_date = datetime(current_date.year if current_date.month != 1 el
 def main():
     # Your main code goes here
     try:
-        while trading_helper.is_market_open() :
+        while trading_helper.is_market_open():
             logger.info(f"{Colors.ORANGE}Options Trading Dashboarding Toolbox Running at {datetime.today()}{Colors.WHITE}")
             api = iciciDirect.get_api_session()
 
@@ -56,7 +56,7 @@ def main():
             logger.info("#####################################################################################")
             logger.info(f"{Colors.PURPLE}Starting to get the LTP for the open positions ...{Colors.WHITE}")
             # Get ltp for the stocks and its change prices, so that its easy to track all positions.
-            trading_helper.get_ltp_stock(portfolio_positions_df)
+            trading_helper.get_and_persist_ltp_stock(portfolio_positions_df)
             logger.debug(f"{Colors.PURPLE}Finished getting the LTP for the open positions ...{Colors.WHITE}")
 
             # # Update the LTP for the open positions so that we can plot the LTP chart
@@ -159,13 +159,13 @@ def main():
 def test():
     # Your main code goes here
     try:
-        icici_order_history = iciciDirect.get_historical_order_book(
-            from_date=last_month_start_date.strftime(constants.ICICI_DATE_FORMAT),
-            to_date=today_date.strftime(constants.ICICI_DATE_FORMAT))
+        icici_order_history = iciciDirect.get_historical_order_book('2024-02-20','2024-02-28','NSE')
+            # from_date=last_month_start_date.strftime(constants.ICICI_DATE_FORMAT),
+            # to_date=today_date.strftime(constants.ICICI_DATE_FORMAT))
 
 
 
-        logger.debug(tabulate(icici_order_history, headers='keys', tablefmt='psql'))
+        logger.info(tabulate(icici_order_history, headers='keys', tablefmt='psql'))
 
 
 

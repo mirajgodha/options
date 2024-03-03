@@ -17,13 +17,6 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="/data/stock_symbols.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
         <entry key="/nuvama/mfInstruments/mfInstruments.csv">
           <value>
             <Attribute>

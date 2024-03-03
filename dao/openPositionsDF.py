@@ -36,9 +36,13 @@ def get_icici_option_open_positions_df(portfolio_positions_response):
         if item['segment'] == 'fno':
             logger.debug("Icici direct open position: ")
             logger.debug(item)
-            if item['action'] == 'NA':
-                # Order is not yet executed, so ignore it.
-                continue
+
+            # Commented the below code as this helps the ordered stocks also visible
+            # in the MWPL and helps to cancel the order fast, if stock is going to MWPL
+            # if item['action'] == 'NA':
+            #     # Order is not yet executed, so ignore it.
+            #     continue
+
             # Sample ICICI DataFrame
             # {'segment': 'fno', 'product_type': 'Options', 'exchange_code': 'NFO',
             # 'stock_code': 'TATPOW', 'expiry_date': '29-Feb-2024', 'strike_price': '370',

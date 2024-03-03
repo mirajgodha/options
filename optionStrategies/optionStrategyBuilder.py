@@ -223,7 +223,7 @@ def option_strategies_builder():
     try:
         for symbol in fno_stock_list:
             try:
-                logger.info(f"{i}. Running for {symbol}")
+                logger.debug(f"{i}. {Colors.GREEN}Running for {symbol}{Colors.RESET}")
                 option_chain_json = get_optionchain(symbol, timeout=20)
                 if option_chain_json is None:
                     raise Exception("Timed Out")

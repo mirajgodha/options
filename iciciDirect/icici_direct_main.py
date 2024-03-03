@@ -8,7 +8,7 @@ from helper.logger import logger
 import pandas as pd
 
 import iciciDirect.icici_helper as iciciDirectHelper
-from datetime import datetime
+from datetime import datetime, timedelta
 import configparser
 import time
 from dao.openPositionsDF import get_icici_option_open_positions_df
@@ -64,19 +64,18 @@ def get_order_book():
         return orders_df
 
 
-def get_historical_order_book(from_date, to_date):
-    where_clause = f"last_updated >= '{datetime.today()}'"
+def get_historical_order_book(from_date, to_date,exchange_code='NFO'):
+    where_clause = f"last_updated >= '{datetime.today() - timedelta(hours=8)}'"
     historical_order_book = get_table_as_df(constants.ICICI_HISTORICAL_ORDERS_TABLE_NAME, where_clause)
     if historical_order_book is not None and not historical_order_book.empty and len(historical_order_book) > 0:
-        logger.info("Historical order book for ICICI Direct found in Db, returning it.")
+        logger.debug("Historical order book for ICICI Direct found in Db, returning it.")
         return historical_order_book
 
-    # Historical order book did not persisted today in Db, so lets fetch from broker.
-    logger.info("Getting historical order book from ICICI Direct for from_date: "
+    # Historical order book did not persisted today in Db, so let's fetch from broker.
+    logger.debug("Getting historical order book from ICICI Direct for from_date: "
                 f"{from_date} and to_date: {to_date}")
-    response_historical_order_book = api.get_trade_list(from_date=from_date, to_date=to_date, exchange_code='NFO')
-    logger.info("Historical order book response from ICICI Direct:")
-    logger.info(historical_order_book)
+    response_historical_order_book = api.get_trade_list(from_date=from_date, to_date=to_date, exchange_code=exchange_code)
+    logger.debug(f"Historical order book response from ICICI Direct: {response_historical_order_book}")
 
     if response_historical_order_book['Status'] == 200:
         response_historical_order_book = response_historical_order_book['Success']

@@ -99,7 +99,7 @@ def implied_volatility(option_price, S, K, T, r, option: OptionType, sigma):
             if option_price - (Price_implied) < 0.001:
                 return round(sigma * 100, 2)
             sigma += 0.001
-        logger.error("It could not find the right volatility of the call option.")
+        logger.debug("It could not find the right volatility of the call option.")
         return 0
     else:
         while sigma < 1:
@@ -107,7 +107,7 @@ def implied_volatility(option_price, S, K, T, r, option: OptionType, sigma):
             if option_price - (Price_implied) < 0.001:
                 return round(sigma * 100, 2)
             sigma += 0.001
-        logger.error("It could not find the right volatility of the put option.")
+        logger.debug("It could not find the right volatility of the put option.")
         return 0
 
 

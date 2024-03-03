@@ -214,7 +214,7 @@ def calculate_margin_used(open_positions_df, api):
 
 
 def get_mwpl(portfolio_positions_df):
-    if sqlt.get_last_updated_time("mwpl") > (
+    if sqlt.get_last_updated_time(c.MWLP_TABLE_NAME) > (
             datetime.now() - timedelta(minutes=c.MWPL_DELAY_TIME)):
         # Updated MWPL less than a hour ago, so not updating now.
         return
@@ -318,11 +318,11 @@ def get_option_ltp(stock_code, expiry_date, strike_price, right):
             return ltp
         except Exception as e:
             logger.error(f"{Colors.RED}Exception while getting LTP from NSE for {stock_code}, {expiry_date}, "
-                         f"{strike_price}, {right}: {e} {Colors.RESET}")
+                         f"{str(strike_price)}, {right}: {e} {Colors.RESET}")
             ltp = sqlt.get_ltp_option(stock_code, expiry_date, strike_price, right)
-            logger.info(
-                "Getting LTP from DB for stock: " + stock_code + ", expiry_date: " + expiry_date + ", strike_price: " +
-                strike_price + ", right: " + right + ", returning that.")
+            logger.debug(
+                f"Getting LTP from DB for stock: {stock_code}, expiry_date: {str(expiry_date)}, "
+                f"strike_price: {str(strike_price)} ,right: {right} , returning that.")
             if ltp:
                 return ltp
             return 0
@@ -347,7 +347,7 @@ def order_list(orders_df):
         sqlt.insert_order_status(orders_df)
 
 
-def get_ltp_stock(portfolio_positions_df):
+def get_and_persist_ltp_stock(portfolio_positions_df):
     if portfolio_positions_df is not None and len(portfolio_positions_df) > 0:
         unique_stock_codes_portfolio = set(portfolio_positions_df['stock'].values.flatten())
     else:
@@ -414,24 +414,26 @@ def get_ltp_stock(portfolio_positions_df):
                     logger.debug(f"Getting ltp for NSE stock: {nse_stock}, Icici stock: {stock} from NSE....")
                     ltp = nse.nsetools_get_quote(nse_stock)
 
-                    ltp_data = {
-                        "stock": stock,
-                        "ltp": ltp['lastPrice'],
-                        # 'ltt': datetime.strptime(item['ltt'], "%d-%b-%Y %H:%M:%S"),
-                        # 'best_bid_price': float(item['best_bid_price']),
-                        # 'best_bid_quantity': int(item['best_bid_quantity']),
-                        # 'best_offer_price': float(item['best_offer_price']),
-                        # 'best_offer_quantity': int(item['best_offer_quantity']),
-                        'open': ltp['open'],
-                        'high': ltp['dayHigh'],
-                        'low': ltp['dayLow'],
-                        'previous_close': ltp['previousClose'],
-                        'ltp_percent_change': ltp['pChange'],
-                        # 'upper_circuit': ltp['upperCP'],
-                        # 'lower_circuit': ltp['lowerCP']
-                        'total_quantity_traded': ltp['totalTradedVolume']
-                    }
-                    ltp_df = pd.concat([ltp_df, pd.DataFrame.from_records([ltp_data])], ignore_index=True)
+                    if ltp is not None:
+
+                        ltp_data = {
+                            "stock": stock,
+                            "ltp": ltp['lastPrice'],
+                            # 'ltt': datetime.strptime(item['ltt'], "%d-%b-%Y %H:%M:%S"),
+                            # 'best_bid_price': float(item['best_bid_price']),
+                            # 'best_bid_quantity': int(item['best_bid_quantity']),
+                            # 'best_offer_price': float(item['best_offer_price']),
+                            # 'best_offer_quantity': int(item['best_offer_quantity']),
+                            'open': ltp['open'],
+                            'high': ltp['dayHigh'],
+                            'low': ltp['dayLow'],
+                            'previous_close': ltp['previousClose'],
+                            'ltp_percent_change': ltp['pChange'],
+                            # 'upper_circuit': ltp['upperCP'],
+                            # 'lower_circuit': ltp['lowerCP']
+                            'total_quantity_traded': ltp['totalTradedVolume']
+                        }
+                        ltp_df = pd.concat([ltp_df, pd.DataFrame.from_records([ltp_data])], ignore_index=True)
                 except Exception as e:
                     # This will help to persist the ltp which we are able to get from NSE
                     logger.error(f"{Colors.RED}Exception while getting LTP for {stock}: {e}{Colors.RESET}")
@@ -549,12 +551,13 @@ def get_table_as_df(table_name, where_clause=None):
     sql = f"select * from {table_name}"
     if where_clause is not None:
         sql = f"{sql} where {where_clause}"
+    logger.debug(f"Going to execute sql: {sql}")
     df = pd.read_sql(sql, conn)
     return df
 
 
 def get_closed_pnl(df_order_history):
-    logger.debug(tabulate(df_order_history))
+    logger.debug(tabulate(df_order_history, headers='keys', tablefmt='psql'))
 
     for index, row in df_order_history.iterrows():
         if row['action'] == 'Sell':
@@ -574,6 +577,7 @@ def get_closed_pnl(df_order_history):
     # Create a hash map sorted by trade date and keep inserting recorsds into it
     # keys of the hash map will be stock, expiry_date, right, strike_price
     # and for each key, we will have a list of records
+    df_order_history['trade_date'] = pd.to_datetime(df_order_history['trade_date'])
     df_order_history = df_order_history.sort_values(by='trade_date', ascending=True)
     open_positions_dict = {}
     stock_pnl_booked_dict = {}
