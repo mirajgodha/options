@@ -1,7 +1,7 @@
 import pandas as pd
 from helper.logger import logger
 import iciciDirect.icici_helper
-import iciciDirect.icici_helper as iciciDirectHelper
+
 import iciciDirect.icici_direct_main as iciciDirect
 import nuvama.nuvama_main as nuvama
 from datetime import datetime, timedelta
@@ -43,9 +43,10 @@ def main():
             # print(icici_portfolio_positions)
             # print(nuvama_portfolio_positions)
             portfolio_positions_df = pd.concat([icici_portfolio_positions, nuvama_portfolio_positions])
+            portfolio_positions_df.reset_index(drop=True, inplace=True)
 
             logger.info(f"{Colors.PURPLE}Going to persist the Portfolio Positions ...{Colors.WHITE}")
-            trading_helper.persist(portfolio_positions_df, constants.PROTFOLIO_POSITIONS_TABLE_NAME)
+            trading_helper.persist_portfolio_positions_df(portfolio_positions_df)
 
             logger.info("#####################################################################################")
             logger.info(f"{Colors.PURPLE}Starting to calculate the PnL for the open positions ...{Colors.WHITE}")
@@ -81,6 +82,7 @@ def main():
             # print(icici_orders)
             # print(nuvama_orders)
             order_book_df = pd.concat([icici_orders, nuvama_orders])
+            order_book_df.reset_index(drop=True, inplace=True)
 
             trading_helper.order_list(order_book_df)
             logger.debug(f"{Colors.PURPLE}Finished updating todays Order List ...{Colors.WHITE}")
@@ -110,6 +112,7 @@ def main():
             nuvama_order_history = pd.concat([nuvama_order_history, nuvama_orders_today])
 
             order_history = pd.concat([icici_order_history, nuvama_order_history])
+            order_history.reset_index(drop=True, inplace=True)
 
             pnl_df = trading_helper.get_closed_pnl(order_history)
 
@@ -132,7 +135,8 @@ def main():
             logger.debug("#####################################################################################")
             logger.debug(f"{Colors.PURPLE}Starting getting ICICI Funds and Limits...{Colors.WHITE}")
             # # Update the funds and limits available in a demat account hourly
-            iciciDirectHelper.update_funds(api)
+            iciciDirect.update_funds()
+            nuvama.update_funds()
             logger.debug(f"{Colors.PURPLE}Finished getting ICICI Funds and Limits...{Colors.WHITE}")
 
             logger.info("#####################################################################################")
@@ -159,27 +163,7 @@ def main():
 def test():
     # Your main code goes here
     try:
-        icici_order_history = iciciDirect.get_historical_order_book('2024-02-20','2024-02-28','NSE')
-            # from_date=last_month_start_date.strftime(constants.ICICI_DATE_FORMAT),
-            # to_date=today_date.strftime(constants.ICICI_DATE_FORMAT))
-
-
-
-        logger.info(tabulate(icici_order_history, headers='keys', tablefmt='psql'))
-
-
-
-        # # Get portfolio positions from all brokers accounts.
-        # icici_portfolio_positions = iciciDirect.get_portfolio_positions()
-        # nuvama_portfolio_positions = nuvama.get_portfolio_positions()
-        # # print(icici_portfolio_positions)
-        # # print(nuvama_portfolio_positions)
-        # portfolio_positions_df = pd.concat([icici_portfolio_positions, nuvama_portfolio_positions])
-        #
-        # # trading_helper.persist(portfolio_positions_df)
-        #
-        #
-        # trading_helper.get_strategy_breakeven(portfolio_positions_df)
+       iciciDirect.update_funds()
 
     except Exception as e:
         logger.error(f"{Colors.RED}Error in test{Colors.WHITE}")

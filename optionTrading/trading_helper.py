@@ -6,7 +6,7 @@ import pandas as pd
 from dao.Option import OptionType, TranxType
 from helper.logger import logger
 
-import iciciDirect.icici_direct_main
+import iciciDirect.icici_direct_main as icici_direct_main
 import sql.sqlite
 from helper import optionsMWPL, fuzzMatch
 import constants.constants_local as c
@@ -275,7 +275,7 @@ def get_option_ltp(stock_code, expiry_date, strike_price, right):
         # Get LTP for all open option positions
         # Get LTP from ICICI
         # calling icici multiple times is costly, so this is not used and using nsepy method
-        api = iciciDirect.icici_direct_main.get_api_session()
+        api = icici_direct_main.get_api_session()
         try:
             response = api.get_quotes(stock_code=stock_code, exchange_code='NFO', product_type='options',
                                       expiry_date=expiry_date, strike_price=strike_price, right=right)
@@ -365,7 +365,7 @@ def get_and_persist_ltp_stock(portfolio_positions_df):
             logger.debug(f"Getting LTP for {stock}")
             if c.GET_LTP_FROM_ICICI:
                 # Not getting from ICICI due to call limit
-                api = iciciDirect.icici_direct_main.get_api_session()
+                api = icici_direct_main.get_api_session()
 
                 # {'Success': [{'exchange_code': 'NSE', 'product_type': '', 'stock_code': 'MOTSUM', 'expiry_date': None,
                 # 'right': None, 'strike_price': 0.0, 'ltp': 114.05, 'ltt': '14-Feb-2024 15:29:58', 'best_bid_price': 0.0,
@@ -415,7 +415,6 @@ def get_and_persist_ltp_stock(portfolio_positions_df):
                     ltp = nse.nsetools_get_quote(nse_stock)
 
                     if ltp is not None:
-
                         ltp_data = {
                             "stock": stock,
                             "ltp": ltp['lastPrice'],
@@ -536,10 +535,10 @@ def get_strategy_breakeven(portfolio_positions_df):
             pass
 
 
-def persist(portfolio_positions_df, table_name, if_exists='replace'):
+def persist(df, table_name, if_exists='replace'):
     try:
         conn = sqlt.get_conn()
-        portfolio_positions_df.to_sql(name=table_name, con=conn, if_exists=if_exists,
+        df.to_sql(name=table_name, con=conn, if_exists=if_exists,
                                       index=False)
         conn.commit()
     except:
@@ -667,3 +666,52 @@ def get_closed_pnl(df_order_history):
 
     stock_pnl_booked_dict_df.to_sql('options_pnl_booked', sqlt.get_conn(), if_exists='replace')
     return stock_pnl_booked_dict_df
+
+
+def persist_portfolio_positions_df(portfolio_positions_df):
+    # duplicate the df to a new df
+    portfolio_positions_df_copy = portfolio_positions_df.copy()
+
+    try:
+
+        # Replace column name ltp to option_ltp
+        portfolio_positions_df_copy.rename(columns={'ltp': 'option_ltp'}, inplace=True)
+
+        # Rename the column Average price to trade price
+        portfolio_positions_df_copy.rename(columns={'average_price': 'order_price'}, inplace=True)
+
+        portfolio_positions_df_copy['stock_ltp'] = 0
+        portfolio_positions_df_copy['decay_left'] = 0
+
+        # Update the ltp in the dataframe
+        for index, row in portfolio_positions_df_copy.iterrows():
+            ltp = sqlt.get_ltp_stock(row['stock'])
+            if ltp is None:
+                ltp = 0
+            logger.debug("Got the ltp of stock {0} as {1}  for index {2}".format(row['stock'], ltp, index))
+            # Update the ltp in the dataframe
+            portfolio_positions_df_copy.at[index, 'stock_ltp'] = ltp
+
+        logger.debug("Going to print the portfolio positions dataframe")
+        logger.debug(tabulate(portfolio_positions_df_copy, headers='keys', tablefmt='psql'))
+
+        # Update the decay left in the dataframe
+        for index, row in portfolio_positions_df_copy.iterrows():
+            # Figure out the total decay left in the option price.
+            if row['right'].upper() == 'CALL':
+                if row['strike_price'] >= row['stock_ltp']:
+                    portfolio_positions_df_copy.at[index,'decay_left'] = row['option_ltp']
+                else:
+                    portfolio_positions_df_copy.at[index,'decay_left'] = row['option_ltp'] - (row['stock_ltp'] - row['strike_price'])
+            elif row['right'].upper() == 'PUT':
+                if row['strike_price'] <= row['stock_ltp']:
+                    portfolio_positions_df_copy.at[index,'decay_left'] = row['option_ltp']
+                else:
+                    portfolio_positions_df_copy.at[index,'decay_left'] = row['option_ltp'] - (row['strike_price'] - row['stock_ltp'])
+
+        logger.debug("Going to persist the portfolio positions dataframe")
+        logger.debug(tabulate(portfolio_positions_df_copy, headers='keys', tablefmt='psql'))
+
+        persist(portfolio_positions_df_copy,c.PROTFOLIO_POSITIONS_TABLE_NAME)
+    except Exception as e:
+        logger.error(f"Error in persisting portfolio positions dataframe.. {e}")

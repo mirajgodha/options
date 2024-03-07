@@ -7,9 +7,9 @@ REFRESH_TIME_SECONDS = 300
 TEST_RUN = False
 
 # All Times in mins
-MARGIN_DELAY_TIME = 10
+MARGIN_DELAY_TIME = 15
 MWPL_DELAY_TIME = 60
-FUNDS_DELAY_TIME = 60
+FUNDS_DELAY_TIME = 15
 OPTION_STRATEGIES_DELAY_TIME = 15
 
 # Value of the sold contract to be sq off
@@ -25,7 +25,10 @@ OPTIONS_STRATEGIES_EXPIRY_MONTH = Expiry.CURRENT
 OPTIONS_STRATEGIES_TEST_RUN = False
 OPTIONS_STRATEGIES_WRITE_TO_FILE = False
 OPTIONS_STRATEGIES_WRITE_TO_DB = True
-OPTIONS_STRATEGIES_STRIKE_RANGE_PERCENTAGE = 10
+# Percent up and down from the current price it will consider while selecting the strikes
+# for building different option strategies.
+# Percent has to be given in absolute number like to give 8% give 8 as input.
+OPTIONS_STRATEGIES_STRIKE_RANGE_PERCENTAGE = 7
 OPTIONS_STRATEGIES_EXEL_FILE = output_file = '../data/output/' + datetime.datetime.now().strftime("%Y-%m-%d") + '.xlsx'
 
 PROCESS_STARTED = 'Started'

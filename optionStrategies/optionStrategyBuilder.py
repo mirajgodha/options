@@ -14,7 +14,6 @@ from util.optionStrategies import OptionStrategies
 from util.utils import clear_df, concat_df, merge_dataframes
 from helper.colours import Colors
 
-
 excel_columns = ['Stock', 'PremiumCreditTotal', 'MaxProfit', 'MaxLoss', 'LTP',
                  'CE_sell_price', 'CE_sell_strike',
                  'PE_sell_price', 'PE_sell_strike',
@@ -49,8 +48,6 @@ short_strangle_df = pd.DataFrame(columns=excel_columns)
 concatenate_df = pd.DataFrame(columns=excel_columns)
 naked_call_df = pd.DataFrame(columns=excel_columns)
 naked_put_df = pd.DataFrame(columns=excel_columns)
-
-
 
 
 def write_data():
@@ -122,6 +119,16 @@ def write_data():
             short_strangle_df.to_sql('os_short_strangle', conn_inner, if_exists='replace', index=False)
             logger.debug("os_short_strangle table created successfully")
 
+            naked_call_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
+            from tabulate import  tabulate
+            logger.debug(tabulate(naked_call_df, headers='keys', tablefmt='psql'))
+            naked_call_df.to_sql(name="os_naked_call", con=conn_inner, if_exists='replace', index=False)
+            logger.debug("naked_call_df table created successfully")
+
+            naked_put_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
+            naked_put_df.to_sql(name="os_naked_put", con=conn_inner, if_exists='replace', index=False)
+            logger.debug("naked_put_df table created successfully")
+
             short_guts_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
             short_guts_df.to_sql(name="os_short_guts", con=conn_inner, if_exists='replace', index=False)
             logger.debug("short_guts_df table created successfully")
@@ -162,14 +169,6 @@ def write_data():
                                           index=False)
             logger.debug("short_put_butterfly_df table created successfully")
 
-            naked_call_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
-            naked_call_df.to_sql(name="os_naked_call", con=conn_inner, if_exists='replace', index=False)
-            logger.debug("naked_call_df table created successfully")
-
-            naked_put_df.drop(columns=['pl_on_strikes', 'Strikes'], inplace=True)
-            naked_put_df.to_sql(name="os_naked_put", con=conn_inner, if_exists='replace', index=False)
-            logger.debug("naked_put_df table created successfully")
-
             if concatenate_df is not None and not concatenate_df.empty and len(concatenate_df) > 0:
                 # check if df has columns then only drop them
                 if 'pl_on_strikes' in concatenate_df.columns:
@@ -207,9 +206,7 @@ def option_strategies_builder():
     # Get the list of Fno stocks
     global long_call_condor_df, long_iron_butterfly_df, long_put_condor_df, short_call_butterfly_df, \
         short_call_condor_df, short_guts_df, short_iron_butterfly_df, short_put_butterfly_df, \
-        short_put_condor_df, short_straddle_df, short_strangle_df,naked_call_df, naked_put_df
-
-
+        short_put_condor_df, short_straddle_df, short_strangle_df, naked_call_df, naked_put_df
 
     if c.OPTIONS_STRATEGIES_TEST_RUN:
         fno_stock_list = get_fno_stocks()[:5]  # For running it for less stocks add [:2], it will run for 2 stocks
@@ -281,14 +278,14 @@ def option_strategies_builder():
                                                                               timeout=20))
 
                 naked_call_df = concat_df(naked_call_df,
-                                              OptionStrategies.naked_call(symbol, option_chain_json, expiry_date,
-                                                                              strike_diff=c.OPTIONS_STRATEGIES_STRIKE_RANGE_PERCENTAGE,
-                                                                              timeout=20))
+                                          OptionStrategies.naked_call(symbol, option_chain_json, expiry_date,
+                                                                      strike_diff=c.OPTIONS_STRATEGIES_STRIKE_RANGE_PERCENTAGE,
+                                                                      timeout=20))
 
                 naked_put_df = concat_df(naked_put_df,
-                                              OptionStrategies.naked_put(symbol, option_chain_json, expiry_date,
-                                                                              strike_diff=c.OPTIONS_STRATEGIES_STRIKE_RANGE_PERCENTAGE,
-                                                                              timeout=20))
+                                         OptionStrategies.naked_put(symbol, option_chain_json, expiry_date,
+                                                                    strike_diff=c.OPTIONS_STRATEGIES_STRIKE_RANGE_PERCENTAGE,
+                                                                    timeout=20))
 
                 # Write all the outputs as exit in between misses all the data
                 # write_to_excel()
@@ -307,7 +304,6 @@ def option_strategies_builder():
         write_data()
         sqlt.insert_os_lastupdated("os_status", c.PROCESS_COMPLETED)
 
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    option_strategies_builder()
+# # Press the green button in the gutter to run the script.
+# if __name__ == '__main__':
+#     option_strategies_builder()

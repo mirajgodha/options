@@ -1,23 +1,6 @@
 # Generate ISO8601 Date/DateTime String
-import datetime
-import pandas as pd
 
-import sql.sqlite
-from helper import optionsMWPL, fuzzMatch
-from constants import constants_local
-
-from helper.colours import Colors
-import sql.sqlite as sqlt
 from tabulate import tabulate
-
-
-def get_secreates():
-    # Specify the path to your Excel file
-    csv_file_path = '../secretes/secretes.csv'
-    # Read the Excel file into a pandas DataFrame
-    df = pd.read_csv(csv_file_path)
-
-    return df
 
 
 def get_closed_open_pnl(df_order_history):
@@ -88,18 +71,3 @@ def get_closed_open_pnl(df_order_history):
 
 
 
-def update_funds(api):
-    if sqlt.get_last_updated_time("funds") > (
-            datetime.datetime.now() - datetime.timedelta(minutes=constants_local.FUNDS_DELAY_TIME)):
-        return
-    funds_response = api.get_funds()
-    if funds_response['Status'] != 200:
-        print(f"{Colors.RED}Error while getting funds: {funds_response}{Colors.RESET}")
-        return
-
-    margin_response = api.get_margin('nfo')
-    if margin_response['Status'] != 200:
-        print(f"{Colors.RED}Error while getting margin: {margin_response}{Colors.RESET}")
-        return
-
-    sqlt.insert_funds(funds_response['Success'], margin_response['Success'])

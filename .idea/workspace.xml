@@ -4,27 +4,36 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="44484f79-8743-4570-9b87-9e30e97b0f27" name="Changes" comment="Updated getting option ltp from nse python, instead of icici as it was costly. Also update other things.">
-      <change afterPath="$PROJECT_DIR$/iciciDirect/liveFeed.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/secretes/config.ini" afterDir="false" />
+    <list default="true" id="44484f79-8743-4570-9b87-9e30e97b0f27" name="Changes" comment="Updated option strategies building, so that we can get % strike diff, rather than constant +/- diffs. Also, added two new strategies, naked call and naked put">
       <change beforePath="$PROJECT_DIR$/.idea/csv-editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/csv-editor.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/options.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/options.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/constants/constants_local.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants/constants_local.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dao/openPositionsDF.py" beforeDir="false" afterPath="$PROJECT_DIR$/dao/openPositionsDF.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/icici_stock_codes.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/icici_stock_codes.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/nse_stock_codes.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/nse_stock_codes.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/output/2022-10-31.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/helper/logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/helper/logger.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/iciciDirect/icici_direct_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/iciciDirect/icici_direct_main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/iciciDirect/icici_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/iciciDirect/icici_helper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/metabase/metabase.db.mv.db" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/metabase.db.mv.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metabase/plugins/bigquery-cloud-sdk.metabase-driver.jar" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/plugins/bigquery-cloud-sdk.metabase-driver.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metabase/plugins/druid.metabase-driver.jar" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/plugins/druid.metabase-driver.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metabase/plugins/mongo.metabase-driver.jar" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/plugins/mongo.metabase-driver.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metabase/plugins/oracle.metabase-driver.jar" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/plugins/oracle.metabase-driver.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metabase/plugins/presto-jdbc.metabase-driver.jar" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/plugins/presto-jdbc.metabase-driver.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metabase/plugins/redshift.metabase-driver.jar" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/plugins/redshift.metabase-driver.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metabase/plugins/snowflake.metabase-driver.jar" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/plugins/snowflake.metabase-driver.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metabase/plugins/sparksql.metabase-driver.jar" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/plugins/sparksql.metabase-driver.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metabase/plugins/sqlite.metabase-driver.jar" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/plugins/sqlite.metabase-driver.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metabase/plugins/sqlserver.metabase-driver.jar" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/plugins/sqlserver.metabase-driver.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/metabase/plugins/vertica.metabase-driver.jar" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/plugins/vertica.metabase-driver.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/nuvama/nuvama_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/nuvama/nuvama_main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/optionStrategies/optionStrategyBuilder.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionStrategies/optionStrategyBuilder.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/optionTrading/option_trading_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionTrading/option_trading_main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/optionTrading/trading_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionTrading/trading_helper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secreates/config.ini" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/secreates/config.ini" beforeDir="false" afterPath="$PROJECT_DIR$/secretes/config.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/sqlite.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/sqlite.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sql/stocks.db" beforeDir="false" afterPath="$PROJECT_DIR$/sql/stocks.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/nsepythonUtil.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/nsepythonUtil.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/util/optionGreeksUtil.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/optionGreeksUtil.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,26 +58,37 @@
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="ProjectErrors" />
   </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
   <component name="ProjectId" id="2RE0BONInBEa1wopMLqadP4465a" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ACTIVE_CLOUD_PROJECT_ACCOUNT": "miraj.godha@adara.com",
+    "ACTIVE_CLOUD_PROJECT_ID": "aat-sandbox",
+    "ACTIVE_CLOUD_PROJECT_NAME": "aat-sandbox",
+    "ACTIVE_CLOUD_PROJECT_NUMBER": "156291868885",
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Python.nuvama_main.executor": "Run",
+    "Python.option_trading_main.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "com.google.cloudcode.ide_session_index": "20240303_0000",
+    "com.google.cloudcode.ide_session_index": "20240306_0001",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "/Users/mirajgodha/PycharmProjects/options/data",
+    "last_opened_file_path": "/Users/roopal/Documents/code/options/sql",
     "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PythonContentEntriesConfigurable"
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/sql" />
       <recent name="$PROJECT_DIR$/data" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/nuvama" />
@@ -85,6 +105,7 @@
   <component name="RunManager" selected="Python.option_trading_main">
     <configuration name="liveFeed" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="options" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -106,6 +127,7 @@
     </configuration>
     <configuration name="nsepythonUtil" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="options" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -125,19 +147,20 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="optionStrategyBuilder" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="nuvama_main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="options" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/optionStrategies" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/nuvama" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/optionStrategies/optionStrategyBuilder.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/nuvama/nuvama_main.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -148,6 +171,7 @@
     </configuration>
     <configuration name="option_trading_main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="options" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -168,13 +192,13 @@
       <method v="2" />
     </configuration>
     <configuration name="sqlite" type="PythonConfigurationType" factoryName="Python" singleton="true" nameIsGenerated="true">
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="$PROJECT_DIR$/venv/bin/python" />
-      <option name="SDK_NAME" value="Python 3.9 (options)" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/sql" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -191,6 +215,7 @@
     </configuration>
     <configuration name="pytest for option_trading_main.test" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="options" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
@@ -205,15 +230,30 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
+    <list>
+      <item itemvalue="Python.sqlite" />
+      <item itemvalue="Python.liveFeed" />
+      <item itemvalue="Python.nsepythonUtil" />
+      <item itemvalue="Python.nuvama_main" />
+      <item itemvalue="Python.option_trading_main" />
+      <item itemvalue="Python tests.pytest for option_trading_main.test" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.option_trading_main" />
+        <item itemvalue="Python.nuvama_main" />
         <item itemvalue="Python.liveFeed" />
         <item itemvalue="Python tests.pytest for option_trading_main.test" />
         <item itemvalue="Python.nsepythonUtil" />
-        <item itemvalue="Python.optionStrategyBuilder" />
       </list>
     </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-d68999036c7f-d3b881c8e49f-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-233.14475.56" />
+      </set>
+    </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -452,6 +492,7 @@
     <servers />
   </component>
   <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.csv" />
     <option featureType="com.intellij.fileTypeFactory" implementationName="*.ini" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

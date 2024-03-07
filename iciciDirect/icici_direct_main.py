@@ -3,21 +3,19 @@
 # Login : https://api.icicidirect.com/apiuser/home
 # and get the api session key
 
-import traceback
-from helper.logger import logger
-import pandas as pd
-
-import iciciDirect.icici_helper as iciciDirectHelper
-from datetime import datetime, timedelta
 import configparser
-import time
-from dao.openPositionsDF import get_icici_option_open_positions_df
-from dao.orderBookDF import get_icici_order_book_df
-from dao.historicalOrderBookDF import get_icici_order_history_df
-from optionTrading.trading_helper import is_market_open,persist,get_table_as_df
+from datetime import datetime, timedelta
 
 from constants import constants_local as constants
+from dao.historicalOrderBookDF import get_icici_order_history_df
+from dao.openPositionsDF import get_icici_option_open_positions_df
+from dao.orderBookDF import get_icici_order_book_df
 from helper.colours import Colors
+from helper.logger import logger
+from optionTrading.trading_helper import persist, get_table_as_df
+import sql.sqlite as sqlt
+import constants.constants_local as c
+
 
 # Create a ConfigParser object
 config = configparser.ConfigParser()
@@ -98,54 +96,20 @@ def get_historical_order_book(from_date, to_date,exchange_code='NFO'):
 
 
 # Main function to be executed in the main thread
-def main():
-    # Your main code goes here
-    try:
-        while is_market_open() | constants.TEST_RUN:
-            print(f"{Colors.PURPLE}ICICI Direct {datetime.today()}{Colors.WHITE}")
-            portfolio_positions_response = api.get_portfolio_positions()
-            if portfolio_positions_response['Status'] == 200:
-                portfolio_positions_response = portfolio_positions_response['Success']
-                # print(response)
+def update_funds():
+    if sqlt.get_last_updated_time("icici_funds") < (
+            datetime.now() - timedelta(minutes=c.FUNDS_DELAY_TIME)):
+        funds_response = api.get_funds()
+        if funds_response['Status'] != 200:
+            logger.error(f"{Colors.RED}Error while getting funds: {funds_response}{Colors.RESET}")
+            return
 
-            # Call the icici direct functions
+        margin_response = api.get_margin('nfo')
+        if margin_response['Status'] != 200:
+            logger.error(f"{Colors.RED}Error while getting margin: {margin_response}{Colors.RESET}")
+            return
 
-            # Calculates the real time PnL for the option open positions in the account
-            iciciDirectHelper.get_pnl_target(portfolio_positions_response)
-
-            # Update the LTP for the open positions so that we can plot the LTP chart
-            iciciDirectHelper.insert_ltp_for_positions(portfolio_positions_response)
-
-            # Calculate margin used for all open option positions and update in margin table
-            iciciDirectHelper.calculate_margin_used(portfolio_positions_response, api)
-
-            # Get the order status real time, also gets and update the ltp for traders and update the ltp in ltp table
-            iciciDirectHelper.order_list(api, from_date=today_date, to_date=today_date)
-
-            # Update the Market wide open positions in mwpl table, for the stocks options in the portfolio
-            iciciDirectHelper.get_mwpl(portfolio_positions_response=portfolio_positions_response)
-
-            # Update the funds and limits available in a demat account hourly
-            iciciDirectHelper.update_funds(api)
-
-            time.sleep(constants.REFRESH_TIME_SECONDS)
-    except Exception as e:
-        print(f"{Colors.RED}Error in main{Colors.WHITE}")
-        traceback.print_exc()
-    finally:
-        if is_market_open() | constants.TEST_RUN:
-            time.sleep(constants.REFRESH_TIME_SECONDS)
-            main()
-        else:
-            if not is_market_open():
-                print(f"{Colors.PURPLE}Market Closed{Colors.WHITE}")
-
-
-# Main function to be executed in the main thread
-
-
-if __name__ == "__main__":
-    # Call the main function to start the program
-    print(f"{Colors.PURPLE}Starting ICICI Direct{Colors.WHITE}")
-    iciciDirectHelper.order_list(api, from_date=today_date, to_date=today_date)
-    # main()
+        if funds_response is not None and margin_response is not None:
+            funds_response = funds_response['Success']
+            margin_response = margin_response['Success']
+            sqlt.insert_icici_funds(funds_response, margin_response)

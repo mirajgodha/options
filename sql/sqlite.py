@@ -5,6 +5,7 @@ import traceback
 import pandas as pd
 from helper.colours import Colors
 import constants.constants_local as constants
+from helper.logger import logger
 
 db_name = '../sql/stocks.db'
 
@@ -166,7 +167,7 @@ def create_tables():
                     ''')
 
     cursor_inner.execute('''
-                        CREATE TABLE if not exists funds(
+                        CREATE TABLE if not exists icici_funds(
                             id INTEGER PRIMARY KEY AUTOINCREMENT,
                             total_bank_balance float,
                             allocated_equity float,
@@ -179,6 +180,31 @@ def create_tables():
                             limit_used float,
                             limit_available float,
                             limit_total float,
+                            timestamp dateTime NOT NULL DEFAULT (datetime('now','localtime'))
+                        )
+                        ''')
+
+    cursor_inner.execute('''
+                        CREATE TABLE if not exists nuvama_funds(
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            adhoc_margin float,
+                            day_open_balance float,
+                            funds_added float,
+                            margin_available float,
+                            stock_collateral_value float,
+                            blocked_released_for_delivery float,
+                            funds_withdrawn float,
+                            margin_utilized float,
+                            premium_paid_received float,
+                            realized_pnl float,
+                            unrealized_mark_to_market float,
+                            mtom_margin float,
+                            nvl float,
+                            nvl_percent float,
+                            dpcharges float,
+                            dpdues float,
+                            fnopenality float,
+                            ist float,
                             timestamp dateTime NOT NULL DEFAULT (datetime('now','localtime'))
                         )
                         ''')
@@ -207,6 +233,17 @@ def create_tables():
                                 last_updated dateTime NOT NULL DEFAULT (datetime('now','localtime'))
                             )
                             ''')
+
+    cursor_inner.execute('''
+                            DROP VIEW IF EXISTS last_ltp_stock
+                        ''')
+
+    cursor_inner.execute('''
+                            CREATE VIEW last_ltp_stock AS 
+                            SELECT ltp, stock 
+                            FROM ltp_stock 
+                            WHERE id = (SELECT MAX(id) FROM ltp_stock)
+                        ''')
 
     # Commit the changes to the database
     conn.commit()
@@ -304,7 +341,7 @@ def insert_order_status(orders_df):
                                  "(broker, stock, expiry, ltp, order_price, order_status, order_time, action, quantity,"
                                  "right, strike_price, pending_quantity) "
                                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                                 (item['broker'],item['stock'], item['expiry_date'], item['ltp'], item['order_price'],
+                                 (item['broker'], item['stock'], item['expiry_date'], item['ltp'], item['order_price'],
                                   item['order_status'],
                                   item['order_time'],
                                   item['action'], item['quantity'],
@@ -398,7 +435,8 @@ def get_ltp_option(stock_code, expiry_date, strike_price, right):
                              "(SELECT MAX(id) FROM ltp WHERE "
                              "stock = ? AND upper(expiry) = ? AND strike_price = ? AND right = ? ) "
                              "and stock = ? AND upper(expiry) = ? AND strike_price = ? AND right = ?",
-                             (stock_code, expiry_date.upper(), strike_price, right, stock_code, expiry_date.upper(), strike_price,
+                             (stock_code, expiry_date.upper(), strike_price, right, stock_code, expiry_date.upper(),
+                              strike_price,
                               right))
         rows = cursor_inner.fetchall()
 
@@ -431,8 +469,6 @@ def get_ltp_stock(stock):
         print(f"{Colors.RED}Error getting ltp_stock data from SQL DB for {stock}{Colors.RESET}")
         # traceback.print_exc()
         return None
-
-
 
 
 def insert_mwpl(mwpl_list):
@@ -468,11 +504,11 @@ def insert_contracts_to_be_sq_off(contracts: pd.DataFrame):
             pass
 
 
-def insert_funds(funds_response, margin_response):
+def insert_icici_funds(funds_response, margin_response):
     conn_inner = get_conn()
     cursor_inner = get_cursor()
     try:
-        cursor_inner.execute("INSERT INTO funds "
+        cursor_inner.execute("INSERT INTO icici_funds "
                              "(total_bank_balance,allocated_equity, "
                              "allocated_fno, block_by_trade_equity, "
                              "block_by_trade_fno, block_by_trade_balance,"
@@ -488,10 +524,49 @@ def insert_funds(funds_response, margin_response):
                                   margin_response['cash_limit'])
                               ))
     except sqlite3.OperationalError as e:
-        if e.args[0] == 'no such table: contracts_to_be_sq_off':
-            print("Table not found - contracts_to_be_sq_off")
+        if e.args[0] == 'no such table: icici_funds':
+            logger.error("Table not found - icici_funds")
         else:
-            print(f"Error inserting data into funds {e}")
+            logger.error(f"Error inserting data into icici_funds table {e}")
+    finally:
+        try:
+            conn_inner.commit()
+        except:
+            pass
+
+
+def nuvama_funds(nuvama_funds):
+    conn_inner = get_conn()
+    cursor_inner = get_cursor()
+    try:
+        cursor_inner.execute("INSERT INTO nuvama_funds "
+                             "(adhoc_margin,day_open_balance,funds_added,margin_available,"
+                             "stock_collateral_value,"
+                             "blocked_released_for_delivery,funds_withdrawn,"
+                             "margin_utilized,premium_paid_received,"
+                             "realized_pnl,unrealized_mark_to_market,"
+                             "mtom_margin,nvl,nvl_percent, dpcharges, dpdues, fnopenality, ist) "
+                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                             (nuvama_funds['mrgAvl']['adMrg'], nuvama_funds['mrgAvl']['dayOpenBal'],
+                              nuvama_funds['mrgAvl']['fndAdd'], nuvama_funds['mrgAvl']['mrgAvl'],
+                              nuvama_funds['mrgAvl']['stkColVal'],
+                              nuvama_funds['mrgUtd']['blkRelDlvry'], nuvama_funds['mrgUtd']['fndWthdrwn'],
+                              nuvama_funds['mrgUtd']['mrgUtd'], nuvama_funds['mrgUtd']['prmPdRcd'],
+                              nuvama_funds['mrgUtd']['rlPnl'], nuvama_funds['mrgUtd']['unRlMtm'],
+                              nuvama_funds['mtmMg'], nuvama_funds['nvl'], nuvama_funds['nvlPer'],
+                              nuvama_funds['unPstdChrgs']['ntUnPstdChrg']['dpcharges'],
+                              nuvama_funds['unPstdChrgs']['ntUnPstdChrg']['dpdues'],
+                              nuvama_funds['unPstdChrgs']['ntUnPstdChrg']['fnopenality'],
+                              nuvama_funds['unPstdChrgs']['ntUnPstdChrg']['ist']
+                              ))
+    except sqlite3.OperationalError as e:
+        if e.args[0] == 'no such table: nuvama_funds':
+            logger.error("Table not found - nuvama_funds")
+        else:
+            logger.error(f"Error inserting data into nuvama_funds table {e}")
+    except Exception as e:
+        traceback.print_exc()
+        logger.error(f"Error inserting data into nuvama_funds table {e}")
     finally:
         try:
             conn_inner.commit()
