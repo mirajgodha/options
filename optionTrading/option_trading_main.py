@@ -9,7 +9,7 @@ import traceback
 import time
 from tabulate import tabulate
 
-from constants import constants_local as constants
+from constants import constants_local as c
 
 from helper.colours import Colors
 import trading_helper as trading_helper
@@ -32,13 +32,13 @@ last_month_start_date = datetime(current_date.year if current_date.month != 1 el
 def main():
     # Your main code goes here
     try:
-        while trading_helper.is_market_open():
+        while trading_helper.is_market_open() :
             logger.info(f"{Colors.ORANGE}Options Trading Dashboarding Toolbox Running at {datetime.today()}{Colors.WHITE}")
             api = iciciDirect.get_api_session()
 
             logger.info(f"{Colors.PURPLE}Getting Portfolio Positions ...{Colors.WHITE}")
             # Get portfolio positions from all brokers accounts.
-            icici_portfolio_positions = iciciDirect.get_portfolio_positions()
+            icici_portfolio_positions = iciciDirect.get_portfolio_positions(timeout=c.TIMEOUT_SECONDS)
             nuvama_portfolio_positions = nuvama.get_portfolio_positions()
             # print(icici_portfolio_positions)
             # print(nuvama_portfolio_positions)
@@ -77,7 +77,7 @@ def main():
             # # Get the order status real time, also gets and update the ltp
             # for traders and update the ltp in ltp table
             # Get portfolio positions from all brokers accounts.
-            icici_orders = iciciDirect.get_order_book()
+            icici_orders = iciciDirect.get_order_book(timeout=c.TIMEOUT_SECONDS)
             nuvama_orders = nuvama.get_order_book()
             # print(icici_orders)
             # print(nuvama_orders)
@@ -95,12 +95,12 @@ def main():
             logger.info(f"{Colors.PURPLE}Starting Historical Pnl Booked for closed positions ...{Colors.WHITE}")
             # Used to figure out historical pnl booked on positions.
             icici_order_history = iciciDirect.get_historical_order_book(
-                from_date=last_month_start_date.strftime(constants.ICICI_DATE_FORMAT),
-                to_date=yesterday_date.strftime(constants.ICICI_DATE_FORMAT))
+                from_date=last_month_start_date.strftime(c.ICICI_DATE_FORMAT),
+                to_date=yesterday_date.strftime(c.ICICI_DATE_FORMAT),timeout=c.TIMEOUT_SECONDS)
 
             nuvama_order_history = nuvama.get_historical_order_book(
-                from_date=last_month_start_date.strftime(constants.ICICI_DATE_FORMAT),
-                to_date=yesterday_date.strftime(constants.ICICI_DATE_FORMAT))
+                from_date=last_month_start_date.strftime(c.ICICI_DATE_FORMAT),
+                to_date=yesterday_date.strftime(c.ICICI_DATE_FORMAT))
 
             # As todays executed orders does not comes in order history, we will also use the todays order book
             # Concat the todays order book executed orders with order history, to calculate the
@@ -135,7 +135,7 @@ def main():
             logger.debug("#####################################################################################")
             logger.debug(f"{Colors.PURPLE}Starting getting ICICI Funds and Limits...{Colors.WHITE}")
             # # Update the funds and limits available in a demat account hourly
-            iciciDirect.update_funds()
+            iciciDirect.update_funds(timeout=c.TIMEOUT_SECONDS)
             nuvama.update_funds()
             logger.debug(f"{Colors.PURPLE}Finished getting ICICI Funds and Limits...{Colors.WHITE}")
 
@@ -146,14 +146,14 @@ def main():
             logger.debug(f"{Colors.PURPLE}Finished building option strategies...{Colors.WHITE}")
 
             logger.info("\n#######################################")
-            logger.info(f"{Colors.ORANGE}All done going to sleep for {constants.REFRESH_TIME_SECONDS} sec. {Colors.WHITE}")
-            time.sleep(constants.REFRESH_TIME_SECONDS)
+            logger.info(f"{Colors.ORANGE}All done going to sleep for {c.REFRESH_TIME_SECONDS} sec. {Colors.WHITE}")
+            time.sleep(c.REFRESH_TIME_SECONDS)
     except Exception as e:
         logger.error(f"{Colors.RED}Error in main{Colors.WHITE}")
         traceback.print_exc()
     finally:
-        if trading_helper.is_market_open() | constants.TEST_RUN:
-            time.sleep(constants.REFRESH_TIME_SECONDS)
+        if trading_helper.is_market_open() | c.TEST_RUN:
+            time.sleep(c.REFRESH_TIME_SECONDS)
             main()
         else:
             if not trading_helper.is_market_open():
@@ -163,7 +163,7 @@ def main():
 def test():
     # Your main code goes here
     try:
-       iciciDirect.update_funds()
+       iciciDirect.update_funds(timeout=c.TIMEOUT_SECONDS)
 
     except Exception as e:
         logger.error(f"{Colors.RED}Error in test{Colors.WHITE}")
@@ -177,7 +177,7 @@ def test():
 if __name__ == "__main__":
     # Call the main function to start the program
     logger.info(f"{Colors.ORANGE}Starting Options Trading Dashboarding Toolbox {Colors.WHITE}")
-    if constants.TEST_RUN:
+    if c.TEST_RUN:
         logger.info(f"{Colors.ORANGE}Test run Started{Colors.WHITE}")
         test()
     else:

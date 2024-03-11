@@ -1,15 +1,122 @@
+# Using this class majorly to get ltp and option prices
 from datetime import datetime, date
+
+import nsepython
 from stopit import threading_timeoutable as timeoutable
 
 from nsepython import *
 import pandas as pd
 from helper.logger import logger
+import numpy as np
+import statistics
 
 from dao.Option import TranxType, OptionType
 from util.optionGreeksUtil import implied_volatility
 
 lot_sizes = pd.DataFrame()
 india_vix = 0
+
+
+def get_daily_volatility(symbol, series, start_date, end_date):
+    """
+    Calculate daily volatility for the given stock
+    :param symbol: "RELIANCE"
+    :param series: "EQ"
+    :param start_date: "07-03-2023"
+    :param end_date: "07-03-2024"
+    :return:
+    """
+    # Fetch historical stock prices
+    historical_data = equity_history(symbol, series, start_date, end_date)
+
+    # equity_history Retruns values like this:
+    """Index(['_id', 'CH_SYMBOL', 'CH_SERIES', 'CH_MARKET_TYPE', 'CH_TIMESTAMP',
+       'TIMESTAMP', 'CH_TRADE_HIGH_PRICE', 'CH_TRADE_LOW_PRICE',
+       'CH_OPENING_PRICE', 'CH_CLOSING_PRICE', 'CH_LAST_TRADED_PRICE',
+       'CH_PREVIOUS_CLS_PRICE', 'CH_TOT_TRADED_QTY', 'CH_TOT_TRADED_VAL',
+       'CH_52WEEK_HIGH_PRICE', 'CH_52WEEK_LOW_PRICE', 'CH_TOTAL_TRADES',
+       'CH_ISIN', 'createdAt', 'updatedAt', '__v', 'SLBMH_TOT_VAL', 'VWAP',
+       'mTIMESTAMP'],
+      dtype='object')
+                                _id CH_SYMBOL  ...    VWAP   mTIMESTAMP
+        0  65e1c37e5c02be27622f9779      SBIN  ...  763.20  01-Mar-2024
+        1  65e3a21042d7e8ee3d2e7d71      SBIN  ...  774.03  02-Mar-2024
+        2  65e5b7ffb33976f8b974ccb2      SBIN  ...  772.72  04-Mar-2024
+        3  65e7097fa0e4c105af47e302      SBIN  ...  782.20  05-Mar-2024
+        4  65e85aff3d619fdb6b8a19bd      SBIN  ...  783.81  06-Mar-2024
+        """
+
+    # Calculate daily returns
+    daily_returns = historical_data['CH_CLOSING_PRICE'].pct_change().dropna()
+
+    # Calculate daily volatility (standard deviation of daily returns)
+    daily_volatility = daily_returns.std()
+
+    # Number of trading days in a year
+    trading_days_per_year = 252
+    annualized_volatility = daily_volatility * np.sqrt(trading_days_per_year)
+
+    return daily_volatility,annualized_volatility
+
+
+def get_weekly_volatility(symbol, series, start_date, end_date):
+    """
+    Calculate daily volatility for the given stock
+    :param symbol: "RELIANCE"
+    :param series: "EQ"
+    :param start_date: "07-03-2023"
+    :param end_date: "07-03-2024"
+    :return:
+    """
+    # Fetch historical stock prices
+    historical_data = equity_history(symbol, series, start_date, end_date)
+
+    # equity_history Retruns values like this:
+    """Index(['_id', 'CH_SYMBOL', 'CH_SERIES', 'CH_MARKET_TYPE', 'CH_TIMESTAMP',
+       'TIMESTAMP', 'CH_TRADE_HIGH_PRICE', 'CH_TRADE_LOW_PRICE',
+       'CH_OPENING_PRICE', 'CH_CLOSING_PRICE', 'CH_LAST_TRADED_PRICE',
+       'CH_PREVIOUS_CLS_PRICE', 'CH_TOT_TRADED_QTY', 'CH_TOT_TRADED_VAL',
+       'CH_52WEEK_HIGH_PRICE', 'CH_52WEEK_LOW_PRICE', 'CH_TOTAL_TRADES',
+       'CH_ISIN', 'createdAt', 'updatedAt', '__v', 'SLBMH_TOT_VAL', 'VWAP',
+       'mTIMESTAMP'],
+      dtype='object')
+                                _id CH_SYMBOL  ...    VWAP   mTIMESTAMP
+        0  65e1c37e5c02be27622f9779      SBIN  ...  763.20  01-Mar-2024
+        1  65e3a21042d7e8ee3d2e7d71      SBIN  ...  774.03  02-Mar-2024
+        2  65e5b7ffb33976f8b974ccb2      SBIN  ...  772.72  04-Mar-2024
+        3  65e7097fa0e4c105af47e302      SBIN  ...  782.20  05-Mar-2024
+        4  65e85aff3d619fdb6b8a19bd      SBIN  ...  783.81  06-Mar-2024
+        """
+
+    # Assuming df is your DataFrame containing the data
+    # Convert 'mTIMESTAMP' column to datetime format
+    historical_data['mTIMESTAMP'] = pd.to_datetime(historical_data['mTIMESTAMP'], format='%d-%b-%Y')
+
+    # Set 'mTIMESTAMP' as the index
+    historical_data.set_index('mTIMESTAMP', inplace=True)
+
+    # Resample the DataFrame on a weekly frequency (W) and select the closing price
+    weekly_df = historical_data.resample('W').last()  # Select the last value in each week
+
+    # Keep only 'CH_CLOSING_PRICE' column
+    weekly_df = weekly_df[['CH_CLOSING_PRICE']]
+
+    # Reset index to make 'mTIMESTAMP' a column again
+    weekly_df.reset_index(inplace=True)
+
+    # Calculate daily returns
+    weekly_returns = weekly_df['CH_CLOSING_PRICE'].pct_change().dropna()
+
+    # Calculate daily volatility (standard deviation of daily returns)
+    weekly_volatility = weekly_returns.std()
+
+    # Number of weeks in a year
+    weeks_per_year = 52
+
+    annualized_volatility = weekly_volatility * np.sqrt(weeks_per_year)
+
+    return weekly_volatility,annualized_volatility
+
 
 def get_quote(symbol):
     """
@@ -18,6 +125,7 @@ def get_quote(symbol):
     :return:
     """
     return nsetools_get_quote(symbol)
+
 
 # ------------
 # Utility methods based on nsepython scraper utility
@@ -29,9 +137,10 @@ def get_atm_strike(option_chain_json):
     :param option_chain_json:
     :return:
     """
-    return get_strike(option_chain_json,0)
+    return get_strike(option_chain_json, 0)
 
-def get_strike(option_chain_json,strike_diff_perc=0):
+
+def get_strike(option_chain_json, strike_diff_perc=0):
     """
     Get the strike price from the given option chain
     :param option_chain_json:
@@ -47,12 +156,13 @@ def get_strike(option_chain_json,strike_diff_perc=0):
             ltp = data[1]['PE']['underlyingValue']
 
     logger.debug(f"Got ltp: {ltp}")
-    ltp = ltp * (1 + strike_diff_perc/100)
+    ltp = ltp * (1 + strike_diff_perc / 100)
     logger.debug(f"Updated ltp with strike_diff_perc: {ltp} , strike_diff_perc: {strike_diff_perc}")
     strike_price_list = [x['strikePrice'] for x in data]
     strike = sorted([[round(abs(ltp - i), 2), i] for i in strike_price_list])[0][1]
     logger.debug(f"Got strike: {strike} in the list: {strike_price_list}")
     return strike
+
 
 def get_fno_stocks():
     """
@@ -153,7 +263,7 @@ def get_india_vix():
     return india_vix
 
 
-def get_option_price(option_chain_json, strike_price, option_type, tranx_type, expiry_date,need_iv=True):
+def get_option_price(option_chain_json, strike_price, option_type, tranx_type, expiry_date, need_iv=True):
     """
     Returns the PE price for the given stirke price
     :param option_chain_json: get it like nse_optionchain_scrapper("DLF")
@@ -189,7 +299,7 @@ def get_option_price(option_chain_json, strike_price, option_type, tranx_type, e
 
                 option_iv = 0
                 # Get iv only if needed.
-                if need_iv :
+                if need_iv:
                     if option_type == OptionType.PUT:
                         option_iv = dictt['PE']['impliedVolatility']
                     else:
@@ -197,7 +307,8 @@ def get_option_price(option_chain_json, strike_price, option_type, tranx_type, e
 
                     if option_iv == 0:
                         option_iv = implied_volatility(option_price, get_ltp(option_chain_json), strike_price,
-                                                   get_days_to_expiry(expiry_date), 10, OptionType.PUT, get_india_vix())
+                                                       get_days_to_expiry(expiry_date), 10, OptionType.PUT,
+                                                       get_india_vix())
                 return option_price, option_iv
         except KeyError as ke:
             logger.debug(f"Key error {ke}")
@@ -239,7 +350,6 @@ def get_black_scholes_dexter(S0, X, t, σ="", r=10, q=0.0, td=365):
     put_rho = (-1 / 100) * X * t * math.exp(-r * t) * norm.cdf(-d2)
 
     return call_theta, put_theta, call_premium, put_premium, call_delta, put_delta, gamma, vega, call_rho, put_rho
-
 
 # print(get_option_price(nse_optionchain_scrapper("DLF"),900,OptionType.PUT,TranxType.BUY,expiry_list("DLF","list")[0]))
 # print(expiry_list("DLF","list")[0])

@@ -4,19 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="44484f79-8743-4570-9b87-9e30e97b0f27" name="Changes" comment="Updated option strategies building, so that we can get % strike diff, rather than constant +/- diffs. Also, added two new strategies, naked call and naked put">
-      <change beforePath="$PROJECT_DIR$/.idea/csv-editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/csv-editor.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/options.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/options.iml" afterDir="false" />
+    <list default="true" id="44484f79-8743-4570-9b87-9e30e97b0f27" name="Changes" comment="config">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/constants/constants_local.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants/constants_local.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/icici_stock_codes.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/icici_stock_codes.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/nse_stock_codes.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/nse_stock_codes.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/iciciDirect/icici_direct_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/iciciDirect/icici_direct_main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/iciciDirect/icici_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/iciciDirect/icici_helper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/metabase/metabase.db.mv.db" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/metabase.db.mv.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/metabase/plugins/bigquery-cloud-sdk.metabase-driver.jar" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/plugins/bigquery-cloud-sdk.metabase-driver.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/metabase/plugins/druid.metabase-driver.jar" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/plugins/druid.metabase-driver.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/metabase/plugins/mongo.metabase-driver.jar" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/plugins/mongo.metabase-driver.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/metabase/plugins/oracle.metabase-driver.jar" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/plugins/oracle.metabase-driver.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/metabase/plugins/presto-jdbc.metabase-driver.jar" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/plugins/presto-jdbc.metabase-driver.jar" afterDir="false" />
@@ -26,14 +22,15 @@
       <change beforePath="$PROJECT_DIR$/metabase/plugins/sqlite.metabase-driver.jar" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/plugins/sqlite.metabase-driver.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/metabase/plugins/sqlserver.metabase-driver.jar" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/plugins/sqlserver.metabase-driver.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/metabase/plugins/vertica.metabase-driver.jar" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/plugins/vertica.metabase-driver.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nuvama/nuvama_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/nuvama/nuvama_main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/optionStrategies/optionStrategyBuilder.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionStrategies/optionStrategyBuilder.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/optionTrading/option_trading_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionTrading/option_trading_main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/optionTrading/trading_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionTrading/trading_helper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/secreates/config.ini" beforeDir="false" afterPath="$PROJECT_DIR$/secretes/config.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/secretes/config.ini" beforeDir="false" afterPath="$PROJECT_DIR$/secretes/config.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/schema.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sql/sqlite.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/sqlite.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sql/stocks.db" beforeDir="false" afterPath="$PROJECT_DIR$/sql/stocks.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/nsepyUtil.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/nsepythonUtil.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/nsepythonUtil.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,8 +71,11 @@
     "ACTIVE_CLOUD_PROJECT_NAME": "aat-sandbox",
     "ACTIVE_CLOUD_PROJECT_NUMBER": "156291868885",
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Python.nsepyUtil.executor": "Run",
+    "Python.nsepythonUtil.executor": "Run",
     "Python.nuvama_main.executor": "Run",
     "Python.option_trading_main.executor": "Run",
+    "Python.test.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
@@ -103,7 +103,7 @@
     </key>
   </component>
   <component name="RunManager" selected="Python.option_trading_main">
-    <configuration name="liveFeed" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="nsepyUtil" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="options" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -112,11 +112,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/iciciDirect" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/util" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/iciciDirect/liveFeed.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/util/nsepyUtil.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -213,38 +213,43 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for option_trading_main.test" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="options" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/optionTrading" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/helper" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_parameters" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;option_trading_main.test&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/helper/test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
     <list>
       <item itemvalue="Python.sqlite" />
-      <item itemvalue="Python.liveFeed" />
+      <item itemvalue="Python.nsepyUtil" />
+      <item itemvalue="Python.test" />
       <item itemvalue="Python.nsepythonUtil" />
       <item itemvalue="Python.nuvama_main" />
       <item itemvalue="Python.option_trading_main" />
-      <item itemvalue="Python tests.pytest for option_trading_main.test" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.option_trading_main" />
-        <item itemvalue="Python.nuvama_main" />
-        <item itemvalue="Python.liveFeed" />
-        <item itemvalue="Python tests.pytest for option_trading_main.test" />
+        <item itemvalue="Python.test" />
         <item itemvalue="Python.nsepythonUtil" />
+        <item itemvalue="Python.nsepyUtil" />
+        <item itemvalue="Python.nuvama_main" />
       </list>
     </recent_temporary>
   </component>
@@ -488,7 +493,23 @@
       <option name="project" value="LOCAL" />
       <updated>1709200250418</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="Updated caculations of premium left and other small things.">
+      <option name="closed" value="true" />
+      <created>1709786455627</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1709786455627</updated>
+    </task>
+    <task id="LOCAL-00034" summary="config">
+      <option name="closed" value="true" />
+      <created>1709786522373</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1709786522373</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -557,7 +578,9 @@
     <MESSAGE value="Updated code to handle the historical and todays orders. As historical orders did not contains todays orders, so todays pnl booked was not getting properly reflected in Dashboards." />
     <MESSAGE value="Updated option strategies building, so that we can get % strike diff, rather than constant +/- diffs. Also, added two new strategies, naked call and naked put" />
     <MESSAGE value="Updated getting option ltp from nse python, instead of icici as it was costly. Also update other things." />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated getting option ltp from nse python, instead of icici as it was costly. Also update other things." />
+    <MESSAGE value="Updated caculations of premium left and other small things." />
+    <MESSAGE value="config" />
+    <option name="LAST_COMMIT_MESSAGE" value="config" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

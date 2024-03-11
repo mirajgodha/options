@@ -28,7 +28,7 @@ OPTIONS_STRATEGIES_WRITE_TO_DB = True
 # Percent up and down from the current price it will consider while selecting the strikes
 # for building different option strategies.
 # Percent has to be given in absolute number like to give 8% give 8 as input.
-OPTIONS_STRATEGIES_STRIKE_RANGE_PERCENTAGE = 7
+OPTIONS_STRATEGIES_STRIKE_RANGE_PERCENTAGE = 5
 OPTIONS_STRATEGIES_EXEL_FILE = output_file = '../data/output/' + datetime.datetime.now().strftime("%Y-%m-%d") + '.xlsx'
 
 PROCESS_STARTED = 'Started'
@@ -61,3 +61,6 @@ ICICI_HISTORICAL_ORDERS_TABLE_NAME = 'icici_historical_orders'
 NUVAMA_HISTORICAL_ORDERS_TABLE_NAME = 'nuvama_historical_orders'
 OPTIONS_STRATEGIES_STATUS_TABLE_NAME = 'os_status'
 MWLP_TABLE_NAME = 'mwpl'
+
+#Timeout seconds, if there is no response from external API, method will be timedout
+TIMEOUT_SECONDS = 20

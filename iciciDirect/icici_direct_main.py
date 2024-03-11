@@ -15,6 +15,7 @@ from helper.logger import logger
 from optionTrading.trading_helper import persist, get_table_as_df
 import sql.sqlite as sqlt
 import constants.constants_local as c
+from stopit import threading_timeoutable as timeoutable
 
 
 # Create a ConfigParser object
@@ -42,7 +43,7 @@ def get_api_session():
 
 
 # Get the portfolio positions
-
+@timeoutable()
 def get_portfolio_positions():
     portfolio_positions_response = api.get_portfolio_positions()
     if portfolio_positions_response['Status'] == 200:
@@ -51,7 +52,7 @@ def get_portfolio_positions():
         # print(portfolio_positions_df)
         return portfolio_positions_df
 
-
+@timeoutable()
 def get_order_book():
     orders = api.get_order_list('NFO', from_date=today_date, to_date=today_date)
     if orders['Status'] == 200:
@@ -61,7 +62,7 @@ def get_order_book():
         # print(orders_df)
         return orders_df
 
-
+@timeoutable()
 def get_historical_order_book(from_date, to_date,exchange_code='NFO'):
     where_clause = f"last_updated >= '{datetime.today() - timedelta(hours=8)}'"
     historical_order_book = get_table_as_df(constants.ICICI_HISTORICAL_ORDERS_TABLE_NAME, where_clause)
@@ -95,7 +96,7 @@ def get_historical_order_book(from_date, to_date,exchange_code='NFO'):
         return None
 
 
-# Main function to be executed in the main thread
+@timeoutable()
 def update_funds():
     if sqlt.get_last_updated_time("icici_funds") < (
             datetime.now() - timedelta(minutes=c.FUNDS_DELAY_TIME)):

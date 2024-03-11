@@ -234,58 +234,58 @@ def option_strategies_builder():
                                                 OptionStrategies.long_call_condor(symbol, option_chain_json,
                                                                                   expiry_date,
                                                                                   strike_diff=c.OPTIONS_STRATEGIES_STRIKE_RANGE_PERCENTAGE,
-                                                                                  timeout=20))
+                                                                                  timeout=c.TIMEOUT_SECONDS))
                 long_iron_butterfly_df = concat_df(long_iron_butterfly_df,
                                                    OptionStrategies.long_iron_butterfly(symbol, option_chain_json,
                                                                                         expiry_date,
                                                                                         strike_diff=c.OPTIONS_STRATEGIES_STRIKE_RANGE_PERCENTAGE,
-                                                                                        timeout=20))
+                                                                                        timeout=c.TIMEOUT_SECONDS))
                 long_put_condor_df = concat_df(long_put_condor_df,
                                                OptionStrategies.long_put_condor(symbol, option_chain_json, expiry_date,
-                                                                                timeout=20))
+                                                                                timeout=c.TIMEOUT_SECONDS))
 
                 short_call_butterfly_df = concat_df(short_call_butterfly_df,
                                                     OptionStrategies.short_call_butterfly(symbol, option_chain_json,
                                                                                           expiry_date,
-                                                                                          timeout=20))
+                                                                                          timeout=c.TIMEOUT_SECONDS))
                 short_call_condor_df = concat_df(short_call_condor_df,
                                                  OptionStrategies.short_call_condor(symbol, option_chain_json,
                                                                                     expiry_date,
-                                                                                    timeout=20))
+                                                                                    timeout=c.TIMEOUT_SECONDS))
                 short_guts_df = concat_df(short_guts_df,
                                           OptionStrategies.short_guts(symbol, option_chain_json, expiry_date,
-                                                                      timeout=20))
+                                                                      timeout=c.TIMEOUT_SECONDS))
 
                 short_iron_butterfly_df = concat_df(short_iron_butterfly_df,
                                                     OptionStrategies.short_iron_butterfly(symbol, option_chain_json,
                                                                                           expiry_date,
-                                                                                          timeout=20))
+                                                                                          timeout=c.TIMEOUT_SECONDS))
                 short_put_butterfly_df = concat_df(short_put_butterfly_df,
                                                    OptionStrategies.short_put_butterfly(symbol, option_chain_json,
                                                                                         expiry_date,
-                                                                                        timeout=20))
+                                                                                        timeout=c.TIMEOUT_SECONDS))
                 short_put_condor_df = concat_df(short_put_condor_df,
                                                 OptionStrategies.short_put_condor(symbol, option_chain_json,
                                                                                   expiry_date,
-                                                                                  timeout=20))
+                                                                                  timeout=c.TIMEOUT_SECONDS))
                 short_straddle_df = concat_df(short_straddle_df,
                                               OptionStrategies.short_straddle(symbol, option_chain_json, expiry_date,
-                                                                              timeout=20))
+                                                                              timeout=c.TIMEOUT_SECONDS))
 
                 short_strangle_df = concat_df(short_strangle_df,
                                               OptionStrategies.short_strangle(symbol, option_chain_json, expiry_date,
                                                                               strike_diff=c.OPTIONS_STRATEGIES_STRIKE_RANGE_PERCENTAGE,
-                                                                              timeout=20))
+                                                                              timeout=c.TIMEOUT_SECONDS))
 
                 naked_call_df = concat_df(naked_call_df,
                                           OptionStrategies.naked_call(symbol, option_chain_json, expiry_date,
                                                                       strike_diff=c.OPTIONS_STRATEGIES_STRIKE_RANGE_PERCENTAGE,
-                                                                      timeout=20))
+                                                                      timeout=c.TIMEOUT_SECONDS))
 
                 naked_put_df = concat_df(naked_put_df,
                                          OptionStrategies.naked_put(symbol, option_chain_json, expiry_date,
                                                                     strike_diff=c.OPTIONS_STRATEGIES_STRIKE_RANGE_PERCENTAGE,
-                                                                    timeout=20))
+                                                                    timeout=c.TIMEOUT_SECONDS))
 
                 # Write all the outputs as exit in between misses all the data
                 # write_to_excel()

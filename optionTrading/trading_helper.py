@@ -682,6 +682,7 @@ def persist_portfolio_positions_df(portfolio_positions_df):
 
         portfolio_positions_df_copy['stock_ltp'] = 0
         portfolio_positions_df_copy['decay_left'] = 0
+        portfolio_positions_df_copy['in_the_money'] = False
 
         # Update the ltp in the dataframe
         for index, row in portfolio_positions_df_copy.iterrows():
@@ -703,11 +704,14 @@ def persist_portfolio_positions_df(portfolio_positions_df):
                     portfolio_positions_df_copy.at[index,'decay_left'] = row['option_ltp']
                 else:
                     portfolio_positions_df_copy.at[index,'decay_left'] = row['option_ltp'] - (row['stock_ltp'] - row['strike_price'])
+                    portfolio_positions_df_copy.at[index,'in_the_money'] = True
+
             elif row['right'].upper() == 'PUT':
                 if row['strike_price'] <= row['stock_ltp']:
                     portfolio_positions_df_copy.at[index,'decay_left'] = row['option_ltp']
                 else:
                     portfolio_positions_df_copy.at[index,'decay_left'] = row['option_ltp'] - (row['strike_price'] - row['stock_ltp'])
+                    portfolio_positions_df_copy.at[index, 'in_the_money'] = True
 
         logger.debug("Going to persist the portfolio positions dataframe")
         logger.debug(tabulate(portfolio_positions_df_copy, headers='keys', tablefmt='psql'))
