@@ -15,6 +15,7 @@ yfinance = "*"
 nsepython = "*"
 stopit = "*"
 func-timeout = "*"
+pywhatkit = "*"
 
 [dev-packages]
 

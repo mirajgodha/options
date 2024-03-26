@@ -159,18 +159,39 @@ CREATE TABLE if not exists nuvama_historical_orders (
     last_updated dateTime NOT NULL DEFAULT (datetime('now','localtime'))
 );
 
-DROP VIEW IF EXISTS last_ltp_stock;
 
-CREATE VIEW last_ltp_stock AS
+CREATE VIEW if not exists last_ltp_stock AS
 SELECT ltp, stock
 FROM ltp_stock
 WHERE id = (SELECT MAX(id) FROM ltp_stock);
 
---DELETE  view if exists view_icici_funds;
---CREATE view view_icici_funds as
---select * from icici_funds if2 where id = (select max(id) from icici_funds if3 );
---
---DELETE  view if exists view_nuvama_funds;
---CREATE view view_nuvama_funds as
---select * from nuvama_funds where id = (select max(id) from nuvama_funds);
+CREATE view if not exists view_icici_funds as
+select * from icici_funds where id = (select max(id) from icici_funds);
 
+CREATE view if not exists view_nuvama_funds as
+select * from nuvama_funds where id = (select max(id) from nuvama_funds);
+
+-- portfolio_holdings definition
+
+CREATE TABLE if not exists "portfolio_holdings" (
+  "broker" TEXT,
+  "stock" TEXT,
+  "broker_stock_code" TEXT,
+  "average_price" REAL,
+  "quantity" INTEGER,
+  "ltp" REAL,
+  "change_percentage" REAL,
+  "timestamp" TIMESTAMP
+);
+
+create view if not exists view_icici_portfolio_holdings as
+select *,  round((ltp-average_price )* quantity,0) as profit , ROUND(average_price * quantity,0) as invested_amount,
+ROUND(ltp* quantity,0) as current_value  from portfolio_holdings where timestamp =
+(select  max(timestamp) from portfolio_holdings where  broker = 'ICICI' )
+and   broker = 'ICICI';
+
+create view if not exists view_nuvama_portfolio_holdings as
+select *,  round((ltp-average_price )* quantity,0) as profit , ROUND(average_price * quantity,0) as invested_amount,
+ROUND(ltp* quantity,0) as current_value  from portfolio_holdings where timestamp =
+(select  max(timestamp) from portfolio_holdings where  broker = 'NUVAMA' )
+and   broker = 'NUVAMA';

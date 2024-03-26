@@ -20,6 +20,7 @@ from profitnloss import Call, Put, Strategy
 from helper.stockCodes import get_nse_stock_code
 import nsepython as nse
 from util.nsepythonUtil import get_option_price, nse_optionchain_scrapper
+from messagning.slack_messaging import send_message
 
 
 def is_market_open():
@@ -213,7 +214,22 @@ def calculate_margin_used(open_positions_df, api):
                         f"{Colors.RED}Error calculating margin for {stock} , {expiry_date} - {margin_response}{Colors.RESET}")
 
 
-def get_mwpl(portfolio_positions_df):
+def get_and_update_mwpl(portfolio_positions_df):
+    '''
+    Get the stocks market wide position limit
+    In case the mwpl is going above 85%, it will be highlighed on the metabase charts,
+    setting to hightlight is there in metabase itself.
+
+    In case if the limit is increased beyound 85% it will send the slack notification too on mwpl channel.
+    Parameters
+    ----------
+    portfolio_positions_df: stokcs for which it has to check the mwpl
+
+    Returns
+    -------
+
+    '''
+
     if sqlt.get_last_updated_time(c.MWLP_TABLE_NAME) > (
             datetime.now() - timedelta(minutes=c.MWPL_DELAY_TIME)):
         # Updated MWPL less than a hour ago, so not updating now.
@@ -245,6 +261,16 @@ def get_mwpl(portfolio_positions_df):
                     logger.debug(
                         f"MWPL: {row['Symbol']} , {row['Price']} , {row['Chg']} , {row['Cur.MWPL']} , {row['Pre.MWPL']} ")
                     break
+
+
+    for item in mwpl_list:
+        # Assuming mwpl_list contains tuples in the format (Symbol, Price, Chg, Cur.MWPL, Pre.MWPL)
+        symbol, price, chg, cur_mwpl, pre_mwpl = item
+
+        if float(cur_mwpl.replace("%", "")) > 80:
+            logger.debug(f"Symbols where Cur.MWPL is greater than 85 is {symbol} : {cur_mwpl}")
+            send_message(f"Stock might go to ban {symbol}, Current: {cur_mwpl}, Prev: {pre_mwpl}, Change: {chg}", c.MWPL_CHANNEL)
+
 
     sqlt.insert_mwpl(mwpl_list)
 
@@ -536,6 +562,7 @@ def get_strategy_breakeven(portfolio_positions_df):
 
 
 def persist(df, table_name, if_exists='replace'):
+    # if_exists: replace, append
     try:
         conn = sqlt.get_conn()
         df.to_sql(name=table_name, con=conn, if_exists=if_exists,

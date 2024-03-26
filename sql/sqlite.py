@@ -403,8 +403,12 @@ def get_last_updated_time(table_name, where_clause=None):
         if row[0] is None:
             return datetime.datetime.strptime('1970-01-01 00:00:00', '%Y-%m-%d %H:%M:%S')
         else:
-            # print(datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S"))
-            return datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
+            try:
+                last_updated = datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
+            except ValueError as e:
+                last_updated = datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S.%f")
+
+            return last_updated
 
 
 # Create the tables when the module is imported, and if the tables are not created

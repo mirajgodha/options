@@ -13,6 +13,7 @@ from util.nsepythonUtil import get_fno_stocks, get_optionchain, get_expiry_date
 from util.optionStrategies import OptionStrategies
 from util.utils import clear_df, concat_df, merge_dataframes
 from helper.colours import Colors
+from stopit import threading_timeoutable as timeoutable
 
 excel_columns = ['Stock', 'PremiumCreditTotal', 'MaxProfit', 'MaxLoss', 'LTP',
                  'CE_sell_price', 'CE_sell_strike',
@@ -187,7 +188,7 @@ def write_data():
             except:
                 pass
 
-
+@timeoutable()
 def option_strategies_builder():
     """
     Function to build option strategies

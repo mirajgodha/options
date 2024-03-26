@@ -1,4 +1,6 @@
 import pandas as pd
+# from urllib3.exceptions import NotOpenSSLWarning
+
 from helper.logger import logger
 import iciciDirect.icici_helper
 
@@ -15,6 +17,11 @@ from helper.colours import Colors
 import trading_helper as trading_helper
 import optionStrategies.optionStrategyBuilder as optionStrategyBuilder
 from dao.historicalOrderBookDF import convert_to_historical_df
+import warnings
+
+# Filter out FutureWarnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+# warnings.filterwarnings("ignore", category=NotOpenSSLWarning)
 
 
 today_date = datetime.today().date()
@@ -123,7 +130,7 @@ def main():
             logger.info("#####################################################################################")
             logger.info(f"{Colors.PURPLE}Starting Getting MWPL for open positions ...{Colors.WHITE}")
             # # Update the Market wide open positions in mwpl table, for the stocks options in the portfolio
-            trading_helper.get_mwpl(portfolio_positions_df=portfolio_positions_df)
+            trading_helper.get_and_update_mwpl(portfolio_positions_df=portfolio_positions_df)
             logger.debug(f"{Colors.PURPLE}Finished Getting MWPL for open positions ...{Colors.WHITE}")
 
             logger.info("#####################################################################################")
@@ -140,13 +147,23 @@ def main():
             logger.debug(f"{Colors.PURPLE}Finished getting ICICI Funds and Limits...{Colors.WHITE}")
 
             logger.info("#####################################################################################")
-            logger.info(f"{Colors.PURPLE}Starting building option strategies...{Colors.WHITE}")
+            logger.info(f"{Colors.PURPLE}Starting building option strategies {datetime.today()}...{Colors.WHITE}")
             # Build option strategies
-            optionStrategyBuilder.option_strategies_builder()
+            optionStrategyBuilder.option_strategies_builder(timeout=300)
             logger.debug(f"{Colors.PURPLE}Finished building option strategies...{Colors.WHITE}")
 
-            logger.info("\n#######################################")
-            logger.info(f"{Colors.ORANGE}All done going to sleep for {c.REFRESH_TIME_SECONDS} sec. {Colors.WHITE}")
+            logger.info("\n###################################################################################")
+            logger.info(f"{Colors.PURPLE}Getting Portfolio Positions ...{Colors.WHITE}")
+            # Get portfolio positions from all brokers accounts.
+            # icici_portfolio_holdings = iciciDirect.get_portfolio_holdings(timeout=c.TIMEOUT_SECONDS)
+            # nuvama_portfolio_holdings = nuvama.get_portfolio_holdings(timeout=c.TIMEOUT_SECONDS)
+            # if icici_portfolio_holdings is not None or nuvama_portfolio_holdings is not None:
+            #     portfolio_holdings_df = pd.concat([icici_portfolio_holdings, nuvama_portfolio_holdings])
+            #     portfolio_holdings_df.reset_index(drop=True, inplace=True)
+            #     trading_helper.persist(portfolio_holdings_df, c.PORTFOLIO_HOLDINGS_TABLE_NAME, if_exists='append')
+
+            logger.info("\n###################################################################################")
+            logger.info(f"{Colors.ORANGE}All done going to sleep for {c.REFRESH_TIME_SECONDS} sec at {datetime.today()}. {Colors.WHITE}")
             time.sleep(c.REFRESH_TIME_SECONDS)
     except Exception as e:
         logger.error(f"{Colors.RED}Error in main{Colors.WHITE}")
@@ -163,7 +180,16 @@ def main():
 def test():
     # Your main code goes here
     try:
-       iciciDirect.update_funds(timeout=c.TIMEOUT_SECONDS)
+        logger.info(f"{Colors.PURPLE}Getting Portfolio Positions ...{Colors.WHITE}")
+        # Get portfolio positions from all brokers accounts.
+        icici_portfolio_holdings = iciciDirect.get_portfolio_holdings(timeout=c.TIMEOUT_SECONDS)
+        nuvama_portfolio_holdings = nuvama.get_portfolio_holdings(timeout=c.TIMEOUT_SECONDS)
+        if icici_portfolio_holdings is not None or nuvama_portfolio_holdings is not None:
+            portfolio_holdings_df = pd.concat([icici_portfolio_holdings, nuvama_portfolio_holdings])
+            portfolio_holdings_df.reset_index(drop=True, inplace=True)
+            trading_helper.persist(portfolio_holdings_df,c.PORTFOLIO_HOLDINGS_TABLE_NAME, if_exists='append')
+
+
 
     except Exception as e:
         logger.error(f"{Colors.RED}Error in test{Colors.WHITE}")

@@ -3,6 +3,8 @@
 import configparser
 import traceback
 from datetime import datetime, timedelta
+
+from dao import portfolioHoldingsDF
 from helper.logger import logger
 from helper.colours import Colors
 
@@ -19,6 +21,7 @@ from optionTrading.trading_helper import persist, get_table_as_df
 import constants.constants_local as constants
 import sql.sqlite as sqlt
 import constants.constants_local as c
+from stopit import threading_timeoutable as timeoutable
 
 
 # Read the configuration file
@@ -117,3 +120,20 @@ def update_funds():
                 sqlt.nuvama_funds(funds)
     except Exception as e:
         print(e)
+
+@timeoutable()
+def get_portfolio_holdings():
+    if sqlt.get_last_updated_time(c.NUVAMA_PORTFOLIO_HONDINGS_VIEW_NAME) < (
+            datetime.now() - timedelta(minutes=c.PORTFOLIO_DELAY_TIME)):
+        try:
+            response = api_connect.Holdings()
+            logger.debug("Nuavala Portfolio Holdings Response: " + response)
+            portfolio_holdings = json.loads(response)
+            portfolio_holdings = portfolio_holdings['eq']['data']['rmsHdg']
+            portfolio_holdings_df = portfolioHoldingsDF.get_nuvama_portfolio_holdings_df(portfolio_holdings)
+            return portfolio_holdings_df
+        except Exception as e:
+            logger.error(e)
+            return None
+    else:
+        return None

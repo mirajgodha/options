@@ -91,8 +91,8 @@ def get_nuvama_option_open_positions_df(portfolio_positions_response):
 
     for item in portfolio_positions_response:
         # print(item)
-        if item['exc'] == 'NFO':
-            # print(item)
+        if item['exc'] == 'NFO' : #and item['ntQty'] != 0 :
+            # logger.info(item)
             # Sample DataFrame
             # {'asTyp': 'OPTSTK', 'dpInsTyp': '', 'dpName': 'AARTIIND', 'exc': 'NFO',
             # 'ltSz': '1000', 'ltp': '21.85', 'sym': '73200_NFO', 'tkSz': '0.05',
