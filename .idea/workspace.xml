@@ -7,6 +7,8 @@
     <list default="true" id="44484f79-8743-4570-9b87-9e30e97b0f27" name="Changes" comment="Added slack support to send instant messages, getting slack messages for stocks going to ban. Also added portfolio holdings">
       <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/.idea/.gitignore 2" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/output/2022-10-31.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/output/2022-11-10.xlsx" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/metabase/metabase.db.mv.db" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/metabase.db.mv.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/secretes/config.ini" beforeDir="false" afterPath="$PROJECT_DIR$/secretes/config.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sql/stocks.db" beforeDir="false" afterPath="$PROJECT_DIR$/sql/stocks.db" afterDir="false" />
@@ -493,7 +495,15 @@
       <option name="project" value="LOCAL" />
       <updated>1710178698441</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="Added slack support to send instant messages, getting slack messages for stocks going to ban. Also added portfolio holdings">
+      <option name="closed" value="true" />
+      <created>1711475563832</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1711475563832</updated>
+    </task>
+    <option name="localTasksCounter" value="37" />
     <servers />
   </component>
   <component name="UnknownFeatures">
