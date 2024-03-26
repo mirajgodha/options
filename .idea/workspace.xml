@@ -4,35 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="44484f79-8743-4570-9b87-9e30e97b0f27" name="Changes" comment="Schema updates, stock codes, handling API timeouts etc.">
+    <list default="true" id="44484f79-8743-4570-9b87-9e30e97b0f27" name="Changes" comment="Added slack support to send instant messages, getting slack messages for stocks going to ban. Also added portfolio holdings">
       <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/.idea/.gitignore 2" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/copyright/Open_Source.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings 2.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc 2.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules 2.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/options 2.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace 2.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dao/portfolioHoldingsDF.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/messagning/slack_messaging.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/options.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/options.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Pipfile" beforeDir="false" afterPath="$PROJECT_DIR$/Pipfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/constants/constants_local.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants/constants_local.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dao/openPositionsDF.py" beforeDir="false" afterPath="$PROJECT_DIR$/dao/openPositionsDF.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/icici_stock_codes.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/icici_stock_codes.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/nse_stock_codes.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/nse_stock_codes.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/iciciDirect/icici_direct_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/iciciDirect/icici_direct_main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/metabase/metabase.db.mv.db" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/metabase.db.mv.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nuvama/nuvama_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/nuvama/nuvama_main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/optionStrategies/optionStrategyBuilder.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionStrategies/optionStrategyBuilder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/optionTrading/option_trading_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionTrading/option_trading_main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/optionTrading/trading_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionTrading/trading_helper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/secretes/config.ini" beforeDir="false" afterPath="$PROJECT_DIR$/secretes/config.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/schema.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/sqlite.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/sqlite.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sql/stocks.db" beforeDir="false" afterPath="$PROJECT_DIR$/sql/stocks.db" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -67,30 +43,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ACTIVE_CLOUD_PROJECT_ACCOUNT&quot;: &quot;miraj.godha@adara.com&quot;,
-    &quot;ACTIVE_CLOUD_PROJECT_ID&quot;: &quot;aat-sandbox&quot;,
-    &quot;ACTIVE_CLOUD_PROJECT_NAME&quot;: &quot;aat-sandbox&quot;,
-    &quot;ACTIVE_CLOUD_PROJECT_NUMBER&quot;: &quot;156291868885&quot;,
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Python tests.pytest in option_trading_main.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python.icici_direct_main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.nsepyUtil.executor&quot;: &quot;Run&quot;,
-    &quot;Python.nsepythonUtil.executor&quot;: &quot;Run&quot;,
-    &quot;Python.nuvama_main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.option_trading_main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;com.google.cloudcode.ide_session_index&quot;: &quot;20240322_0000&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/mirajgodha/Library/Mobile Documents/com~apple~CloudDocs/Documents/code/options&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ACTIVE_CLOUD_PROJECT_ACCOUNT": "miraj.godha@adara.com",
+    "ACTIVE_CLOUD_PROJECT_ID": "aat-sandbox",
+    "ACTIVE_CLOUD_PROJECT_NAME": "aat-sandbox",
+    "ACTIVE_CLOUD_PROJECT_NUMBER": "156291868885",
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Python tests.pytest in option_trading_main.py.executor": "Run",
+    "Python.icici_direct_main.executor": "Run",
+    "Python.nsepyUtil.executor": "Run",
+    "Python.nsepythonUtil.executor": "Run",
+    "Python.nuvama_main.executor": "Run",
+    "Python.option_trading_main.executor": "Run",
+    "Python.test.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "com.google.cloudcode.ide_session_index": "20240326_0000",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "/Users/mirajgodha/Library/Mobile Documents/com~apple~CloudDocs/Documents/code/options",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/sql" />
@@ -589,7 +565,8 @@
     <MESSAGE value="Updated caculations of premium left and other small things." />
     <MESSAGE value="config" />
     <MESSAGE value="Schema updates, stock codes, handling API timeouts etc." />
-    <option name="LAST_COMMIT_MESSAGE" value="Schema updates, stock codes, handling API timeouts etc." />
+    <MESSAGE value="Added slack support to send instant messages, getting slack messages for stocks going to ban. Also added portfolio holdings" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added slack support to send instant messages, getting slack messages for stocks going to ban. Also added portfolio holdings" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
