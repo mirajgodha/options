@@ -7,10 +7,17 @@
     <list default="true" id="44484f79-8743-4570-9b87-9e30e97b0f27" name="Changes" comment="Added slack support to send instant messages, getting slack messages for stocks going to ban. Also added portfolio holdings">
       <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/.idea/.gitignore 2" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/constants/constants_local.py" beforeDir="false" afterPath="$PROJECT_DIR$/constants/constants_local.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/icici_stock_codes.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/icici_stock_codes.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/nse_stock_codes.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/nse_stock_codes.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/output/2022-10-31.xlsx" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/data/output/2022-11-10.xlsx" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/metabase/metabase.db.mv.db" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/metabase.db.mv.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/optionStrategies/optionStrategyBuilder.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionStrategies/optionStrategyBuilder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/optionTrading/option_trading_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionTrading/option_trading_main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/secretes/config.ini" beforeDir="false" afterPath="$PROJECT_DIR$/secretes/config.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/sql/schema.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sql/stocks.db" beforeDir="false" afterPath="$PROJECT_DIR$/sql/stocks.db" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -66,7 +73,7 @@
     "git-widget-placeholder": "master",
     "last_opened_file_path": "/Users/mirajgodha/Library/Mobile Documents/com~apple~CloudDocs/Documents/code/options",
     "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "preferences.pluginManager"
+    "settings.editor.selected.configurable": "preferences.keymap"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -503,7 +510,15 @@
       <option name="project" value="LOCAL" />
       <updated>1711475563832</updated>
     </task>
-    <option name="localTasksCounter" value="37" />
+    <task id="LOCAL-00037" summary="Added slack support to send instant messages, getting slack messages for stocks going to ban. Also added portfolio holdings">
+      <option name="closed" value="true" />
+      <created>1711475825206</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1711475825206</updated>
+    </task>
+    <option name="localTasksCounter" value="38" />
     <servers />
   </component>
   <component name="UnknownFeatures">

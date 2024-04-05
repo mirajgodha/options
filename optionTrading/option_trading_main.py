@@ -1,3 +1,6 @@
+import urllib.request
+from urllib.error import URLError
+
 import pandas as pd
 # from urllib3.exceptions import NotOpenSSLWarning
 
@@ -155,19 +158,22 @@ def main():
             logger.info("\n###################################################################################")
             logger.info(f"{Colors.PURPLE}Getting Portfolio Positions ...{Colors.WHITE}")
             # Get portfolio positions from all brokers accounts.
-            # icici_portfolio_holdings = iciciDirect.get_portfolio_holdings(timeout=c.TIMEOUT_SECONDS)
-            # nuvama_portfolio_holdings = nuvama.get_portfolio_holdings(timeout=c.TIMEOUT_SECONDS)
-            # if icici_portfolio_holdings is not None or nuvama_portfolio_holdings is not None:
-            #     portfolio_holdings_df = pd.concat([icici_portfolio_holdings, nuvama_portfolio_holdings])
-            #     portfolio_holdings_df.reset_index(drop=True, inplace=True)
-            #     trading_helper.persist(portfolio_holdings_df, c.PORTFOLIO_HOLDINGS_TABLE_NAME, if_exists='append')
+            icici_portfolio_holdings = iciciDirect.get_portfolio_holdings(timeout=c.TIMEOUT_SECONDS)
+            nuvama_portfolio_holdings = nuvama.get_portfolio_holdings(timeout=c.TIMEOUT_SECONDS)
+            if icici_portfolio_holdings is not None or nuvama_portfolio_holdings is not None:
+                portfolio_holdings_df = pd.concat([icici_portfolio_holdings, nuvama_portfolio_holdings])
+                portfolio_holdings_df.reset_index(drop=True, inplace=True)
+                trading_helper.persist(portfolio_holdings_df, c.PORTFOLIO_HOLDINGS_TABLE_NAME, if_exists='append')
 
             logger.info("\n###################################################################################")
-            logger.info(f"{Colors.ORANGE}All done going to sleep for {c.REFRESH_TIME_SECONDS} sec at {datetime.today()}. {Colors.WHITE}")
+            logger.info(f"{Colors.ORANGE}All done going to sleep for {c.REFRESH_TIME_SECONDS/60} min at {datetime.today().strftime('%I:%M %p')} {Colors.WHITE}")
             time.sleep(c.REFRESH_TIME_SECONDS)
     except Exception as e:
-        logger.error(f"{Colors.RED}Error in main{Colors.WHITE}")
-        traceback.print_exc()
+        if isinstance(e, URLError):
+            logger.error(f"{Colors.RED}Check if internet is connected{Colors.RESET}")
+        else:
+            logger.error(f"{Colors.RED}Error in main{Colors.WHITE}")
+            traceback.print_exc()
     finally:
         if trading_helper.is_market_open() | c.TEST_RUN:
             time.sleep(c.REFRESH_TIME_SECONDS)

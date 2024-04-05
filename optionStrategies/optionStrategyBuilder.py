@@ -222,6 +222,7 @@ def option_strategies_builder():
         for symbol in fno_stock_list:
             try:
                 logger.debug(f"{i}. {Colors.GREEN}Running for {symbol}{Colors.RESET}")
+                print(f"{symbol}..", end=' ')
                 option_chain_json = get_optionchain(symbol, timeout=20)
                 if option_chain_json is None:
                     raise Exception("Timed Out")
@@ -294,7 +295,7 @@ def option_strategies_builder():
             except Exception as ex:
                 # Many times the nse website response gets stuck an results in whole program halts
                 logger.error(f"{Colors.WHITE}Error in processing {symbol} is:  {ex}{Colors.RESET}")
-                traceback.print_exc()
+                # traceback.print_exc()
 
     except Exception as ex:
         logger.error(f"{Colors.RED}Error in creating option strategies is:  {ex} {Colors.RESET}")

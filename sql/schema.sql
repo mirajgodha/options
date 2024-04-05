@@ -195,3 +195,7 @@ select *,  round((ltp-average_price )* quantity,0) as profit , ROUND(average_pri
 ROUND(ltp* quantity,0) as current_value  from portfolio_holdings where timestamp =
 (select  max(timestamp) from portfolio_holdings where  broker = 'NUVAMA' )
 and   broker = 'NUVAMA';
+
+
+CREATE view if not exists view_portfolio_holdings as
+SELECT * from view_nuvama_portfolio_holdings vnph   union select * from view_icici_portfolio_holdings viph ;

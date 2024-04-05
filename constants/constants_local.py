@@ -3,7 +3,7 @@ import datetime
 from dao.Option import Expiry
 
 # Option trading constants
-REFRESH_TIME_SECONDS = 300
+REFRESH_TIME_SECONDS = 150
 TEST_RUN = False
 
 # All Times in mins
@@ -19,17 +19,17 @@ OPTION_STRATEGIES_DELAY_TIME = 15
 # This value is in Rs.
 # This value is used in contract_value() method in trading_helper.py file
 # This value is used in get_pnl_target() method in trading_helper.py file
-CONTRACT_MIN_VALUE_TO_BE_SQ_OFFED = 2000
+CONTRACT_MIN_VALUE_TO_BE_SQ_OFFED = 1000
 
 # OPTION Strategies constants
-OPTIONS_STRATEGIES_EXPIRY_MONTH = Expiry.NEXT
+OPTIONS_STRATEGIES_EXPIRY_MONTH = Expiry.CURRENT
 OPTIONS_STRATEGIES_TEST_RUN = False
 OPTIONS_STRATEGIES_WRITE_TO_FILE = False
 OPTIONS_STRATEGIES_WRITE_TO_DB = True
 # Percent up and down from the current price it will consider while selecting the strikes
 # for building different option strategies.
 # Percent has to be given in absolute number like to give 8% give 8 as input.
-OPTIONS_STRATEGIES_STRIKE_RANGE_PERCENTAGE = 5
+OPTIONS_STRATEGIES_STRIKE_RANGE_PERCENTAGE = 8
 OPTIONS_STRATEGIES_EXEL_FILE = output_file = '../data/output/' + datetime.datetime.now().strftime("%Y-%m-%d") + '.xlsx'
 
 PROCESS_STARTED = 'Started'
