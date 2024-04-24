@@ -117,6 +117,7 @@ def update_funds():
 
             if funds is not None:
                 funds = funds['eq']['data']
+                logger.debug(f"Nuvama Funds response:  {funds}")
                 sqlt.nuvama_funds(funds)
     except Exception as e:
         print(e)

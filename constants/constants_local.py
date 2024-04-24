@@ -4,6 +4,11 @@ from dao.Option import Expiry
 
 # Option trading constants
 REFRESH_TIME_SECONDS = 150
+
+# Refresh time fastens up by this factor during market start
+# and ending hours, as we need frequent updates during that time.
+REFRESH_TIME_FASTEN_FACTOR = 5
+
 TEST_RUN = False
 
 # All Times in mins
@@ -22,7 +27,7 @@ OPTION_STRATEGIES_DELAY_TIME = 15
 CONTRACT_MIN_VALUE_TO_BE_SQ_OFFED = 1000
 
 # OPTION Strategies constants
-OPTIONS_STRATEGIES_EXPIRY_MONTH = Expiry.CURRENT
+OPTIONS_STRATEGIES_EXPIRY_MONTH = Expiry.NEXT
 OPTIONS_STRATEGIES_TEST_RUN = False
 OPTIONS_STRATEGIES_WRITE_TO_FILE = False
 OPTIONS_STRATEGIES_WRITE_TO_DB = True

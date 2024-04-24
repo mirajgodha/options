@@ -1,6 +1,9 @@
+import datetime
+
 from dao.Option import Option, OptionType, TranxType
 import pandas as pd
 from util import optionStrategies
+import constants.constants_local as c
 
 
 def get_nth_option(options, condition, n=1):
@@ -105,3 +108,18 @@ def get_list_option_strategies():
         print(name)
 
 
+def get_sleep_time():
+    # Define start and end times
+    # start_time = datetime.datetime.time(9, 15)
+    # end_time = datetime.datetime.time(10, 30)
+    # current_time = datetime.datetime.now().time()
+    #
+    # if start_time <= current_time <= end_time:
+    #     return c.REFRESH_TIME_SECONDS/c.REFRESH_TIME_FASTEN_FACTOR
+    #
+    # start_time = datetime.datetime.time(14, 30)
+    # end_time = datetime.datetime.time(15, 30)
+    # if start_time <= current_time <= end_time:
+    #     return c.REFRESH_TIME_SECONDS/c.REFRESH_TIME_FASTEN_FACTOR
+
+    return c.REFRESH_TIME_SECONDS

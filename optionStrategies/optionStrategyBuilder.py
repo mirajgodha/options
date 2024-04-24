@@ -188,7 +188,7 @@ def write_data():
             except:
                 pass
 
-@timeoutable()
+
 def option_strategies_builder():
     """
     Function to build option strategies

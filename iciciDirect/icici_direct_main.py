@@ -45,12 +45,16 @@ def get_api_session():
 # Get the portfolio positions
 @timeoutable()
 def get_portfolio_positions():
-    portfolio_positions_response = api.get_portfolio_positions()
-    if portfolio_positions_response['Status'] == 200:
-        portfolio_positions_response = portfolio_positions_response['Success']
-        portfolio_positions_df = get_icici_option_open_positions_df(portfolio_positions_response)
-        # print(portfolio_positions_df)
-        return portfolio_positions_df
+    try:
+        portfolio_positions_response = api.get_portfolio_positions()
+        logger.info(portfolio_positions_response)
+        if portfolio_positions_response['Status'] == 200:
+            portfolio_positions_response = portfolio_positions_response['Success']
+            portfolio_positions_df = get_icici_option_open_positions_df(portfolio_positions_response)
+            # print(portfolio_positions_df)
+            return portfolio_positions_df
+    finally:
+        return None
 
 
 @timeoutable()

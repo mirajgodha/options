@@ -21,6 +21,7 @@ import trading_helper as trading_helper
 import optionStrategies.optionStrategyBuilder as optionStrategyBuilder
 from dao.historicalOrderBookDF import convert_to_historical_df
 import warnings
+from util.utils import get_sleep_time
 
 # Filter out FutureWarnings
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -35,15 +36,30 @@ current_date = datetime.now()
 
 # Calculate the 23th date of the last month
 last_month_start_date = datetime(current_date.year if current_date.month != 1 else current_date.year - 1,
-                                  current_date.month - 1 if current_date.month != 1 else 12,
-                                  25)
+                                 current_date.month - 1 if current_date.month != 1 else 12,
+                                 25)
+
+import signal
+
+
+class TimeoutError(Exception):
+    pass
+
+
+def handler(signum, frame):
+    raise TimeoutError("Method call timed out")
+
+
+# Set the signal handler
+signal.signal(signal.SIGALRM, handler)
 
 
 def main():
     # Your main code goes here
     try:
-        while trading_helper.is_market_open() :
-            logger.info(f"{Colors.ORANGE}Options Trading Dashboarding Toolbox Running at {datetime.today()}{Colors.WHITE}")
+        while trading_helper.is_market_open():
+            logger.info(
+                f"{Colors.ORANGE}Options Trading Dashboarding Toolbox Running at {datetime.today()}{Colors.WHITE}")
             api = iciciDirect.get_api_session()
 
             logger.info(f"{Colors.PURPLE}Getting Portfolio Positions ...{Colors.WHITE}")
@@ -106,7 +122,7 @@ def main():
             # Used to figure out historical pnl booked on positions.
             icici_order_history = iciciDirect.get_historical_order_book(
                 from_date=last_month_start_date.strftime(c.ICICI_DATE_FORMAT),
-                to_date=yesterday_date.strftime(c.ICICI_DATE_FORMAT),timeout=c.TIMEOUT_SECONDS)
+                to_date=yesterday_date.strftime(c.ICICI_DATE_FORMAT), timeout=c.TIMEOUT_SECONDS)
 
             nuvama_order_history = nuvama.get_historical_order_book(
                 from_date=last_month_start_date.strftime(c.ICICI_DATE_FORMAT),
@@ -152,7 +168,15 @@ def main():
             logger.info("#####################################################################################")
             logger.info(f"{Colors.PURPLE}Starting building option strategies {datetime.today()}...{Colors.WHITE}")
             # Build option strategies
-            optionStrategyBuilder.option_strategies_builder(timeout=300)
+            signal.alarm(c.TIMEOUT_SECONDS * 15)  # Set the alarm
+            try:
+                optionStrategyBuilder.option_strategies_builder()
+                pass
+            except TimeoutError as e:
+                logger.error("Option strategies builder method call timed out")
+            finally:
+                # Disable the alarm
+                signal.alarm(0)
             logger.debug(f"{Colors.PURPLE}Finished building option strategies...{Colors.WHITE}")
 
             logger.info("\n###################################################################################")
@@ -166,8 +190,9 @@ def main():
                 trading_helper.persist(portfolio_holdings_df, c.PORTFOLIO_HOLDINGS_TABLE_NAME, if_exists='append')
 
             logger.info("\n###################################################################################")
-            logger.info(f"{Colors.ORANGE}All done going to sleep for {c.REFRESH_TIME_SECONDS/60} min at {datetime.today().strftime('%I:%M %p')} {Colors.WHITE}")
-            time.sleep(c.REFRESH_TIME_SECONDS)
+            logger.info(
+                f"{Colors.ORANGE}All done going to sleep for {c.REFRESH_TIME_SECONDS / 60} min at {datetime.today().strftime('%I:%M %p')} {Colors.WHITE}")
+            time.sleep(get_sleep_time())
     except Exception as e:
         if isinstance(e, URLError):
             logger.error(f"{Colors.RED}Check if internet is connected{Colors.RESET}")
@@ -176,7 +201,7 @@ def main():
             traceback.print_exc()
     finally:
         if trading_helper.is_market_open() | c.TEST_RUN:
-            time.sleep(c.REFRESH_TIME_SECONDS)
+            time.sleep(get_sleep_time())
             main()
         else:
             if not trading_helper.is_market_open():
@@ -193,7 +218,7 @@ def test():
         if icici_portfolio_holdings is not None or nuvama_portfolio_holdings is not None:
             portfolio_holdings_df = pd.concat([icici_portfolio_holdings, nuvama_portfolio_holdings])
             portfolio_holdings_df.reset_index(drop=True, inplace=True)
-            trading_helper.persist(portfolio_holdings_df,c.PORTFOLIO_HOLDINGS_TABLE_NAME, if_exists='append')
+            trading_helper.persist(portfolio_holdings_df, c.PORTFOLIO_HOLDINGS_TABLE_NAME, if_exists='append')
 
 
 
@@ -202,7 +227,6 @@ def test():
         traceback.print_exc()
     finally:
         logger.info(f"{Colors.PURPLE}All done")
-
 
 
 # Main function to be executed in the main thread
@@ -215,4 +239,3 @@ if __name__ == "__main__":
     else:
         logger.info(f"{Colors.ORANGE}Starting Live Trading{Colors.WHITE}")
         main()
-

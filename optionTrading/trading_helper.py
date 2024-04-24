@@ -205,7 +205,7 @@ def calculate_margin_used(open_positions_df, api):
                     continue
 
                 margin_response = api.margin_calculator(df.to_dict(orient='records'), "NFO")
-                logger.debug(f"Margin Response: {margin_response} ")
+                logger.info(f"Margin Response: {margin_response} ")
 
                 if margin_response['Status'] == 200:
                     sqlt.insert_margins_used(stock, expiry_date, margin_response['Success'])

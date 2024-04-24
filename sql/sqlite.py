@@ -372,10 +372,10 @@ def nuvama_funds(nuvama_funds):
                               nuvama_funds['mrgUtd']['mrgUtd'], nuvama_funds['mrgUtd']['prmPdRcd'],
                               nuvama_funds['mrgUtd']['rlPnl'], nuvama_funds['mrgUtd']['unRlMtm'],
                               nuvama_funds['mtmMg'], nuvama_funds['nvl'], nuvama_funds['nvlPer'],
-                              nuvama_funds['unPstdChrgs']['ntUnPstdChrg']['dpcharges'],
-                              nuvama_funds['unPstdChrgs']['ntUnPstdChrg']['dpdues'],
-                              nuvama_funds['unPstdChrgs']['ntUnPstdChrg']['fnopenality'],
-                              nuvama_funds['unPstdChrgs']['ntUnPstdChrg']['ist']
+                              nuvama_funds.get('unPstdChrgs', {}).get('ntUnPstdChrg', {}).get('dpcharges', 0),
+                              nuvama_funds.get('unPstdChrgs', {}).get('ntUnPstdChrg', {}).get('dpdues', 0),
+                              nuvama_funds.get('unPstdChrgs', {}).get('ntUnPstdChrg', {}).get('fnopenality', 0),
+                              nuvama_funds.get('unPstdChrgs', {}).get('ntUnPstdChrg', {}).get('ist', 0)
                               ))
     except sqlite3.OperationalError as e:
         if e.args[0] == 'no such table: nuvama_funds':
