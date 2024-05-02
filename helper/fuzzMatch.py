@@ -57,6 +57,7 @@ def get_stock_code_pairs_using_fuzzy_match(small_list, full_list):
             f"Length: {len(small_list) - len(matched_pairs)}, Remaining List: {remaining_list}{Colors.RESET}")
         print(f"List Small list: {small_list}")
         print(f"List Full list: {full_list}")
+        print("Add the stock code to ../data/icici_stock_codes.csv file, to resolve the issue")
 
     # print(f"{Colors.BOLD}{Colors.GREEN}Matched Length: {len(matched_pairs)}, Matched List: {matched_pairs}{Colors.RESET}")
     return matched_pairs

@@ -3,6 +3,7 @@ import constants.constants_local as c
 from datetime import datetime
 
 from helper.stockCodes import get_icici_stock_code
+from helper.logger import logger
 
 # ---------------------------------------------------------------------------------------------------------------------
 # Portfolio Holdings DF
@@ -112,9 +113,20 @@ def get_average_price(stock):
         "TIMKEN": 3248.07,
         "VEDL": 290.49,
         "ZOMATO": 134.17,
-        "BHINVIT-IV": 100
+        "BHINVIT-IV": 100,
+        "KOTAKBANK": 1637
     }
-    return stock_buy_price_map[stock]
+
+    try:
+        # Attempt to access the value for the given key
+        buy_price = stock_buy_price_map[stock]
+        return buy_price
+    except KeyError:
+        # Handle the case where the key does not exist
+        logger.error("Error: Stock", stock, "not found in the stocks map. "
+                                            "Update the Portfolio holdings DF file. "
+                                            "Looks like new stock brought in Nuvama account")
+        return 0
 
 
 

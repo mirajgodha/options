@@ -57,7 +57,7 @@ signal.signal(signal.SIGALRM, handler)
 def main():
     # Your main code goes here
     try:
-        while trading_helper.is_market_open():
+        while trading_helper.is_market_open() | True:
             logger.info(
                 f"{Colors.ORANGE}Options Trading Dashboarding Toolbox Running at {datetime.today()}{Colors.WHITE}")
             api = iciciDirect.get_api_session()
@@ -225,6 +225,8 @@ def test():
     except Exception as e:
         logger.error(f"{Colors.RED}Error in test{Colors.WHITE}")
         traceback.print_exc()
+        print("-------------")
+        print(e)
     finally:
         logger.info(f"{Colors.PURPLE}All done")
 
@@ -239,3 +241,4 @@ if __name__ == "__main__":
     else:
         logger.info(f"{Colors.ORANGE}Starting Live Trading{Colors.WHITE}")
         main()
+    exit(0)
