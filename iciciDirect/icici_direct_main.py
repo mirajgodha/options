@@ -13,6 +13,7 @@ from dao.openPositionsDF import get_icici_option_open_positions_df
 from dao.orderBookDF import get_icici_order_book_df
 from helper.colours import Colors
 from helper.logger import logger
+from messagning.slack_messaging import send_message
 from optionTrading.trading_helper import persist, get_table_as_df
 import sql.sqlite as sqlt
 import constants.constants_local as c
@@ -106,11 +107,13 @@ def update_funds():
     if sqlt.get_last_updated_time("icici_funds") < (
             datetime.now() - timedelta(minutes=c.FUNDS_DELAY_TIME)):
         funds_response = api.get_funds()
+        logger.debug(f"ICICI Funds Response:  {funds_response}")
         if funds_response['Status'] != 200:
             logger.error(f"{Colors.RED}Error while getting funds: {funds_response}{Colors.RESET}")
             return
 
         margin_response = api.get_margin('nfo')
+        logger.debug(f"ICICI margin FNO response: {margin_response}" )
         if margin_response['Status'] != 200:
             logger.error(f"{Colors.RED}Error while getting margin: {margin_response}{Colors.RESET}")
             return
@@ -118,6 +121,10 @@ def update_funds():
         if funds_response is not None and margin_response is not None:
             funds_response = funds_response['Success']
             margin_response = margin_response['Success']
+            limit_available = (float(sum(item['amount'] for item in margin_response['limit_list']))*-1)
+            if limit_available < c.LOW_MARGIN_MONEY_THRESHOLD:
+                send_message(f"ICICI Amount limit is below 50K, options can be sq offed. {limit_available}",
+                             c.MWPL_CHANNEL)
             sqlt.insert_icici_funds(funds_response, margin_response)
 
 @timeoutable()

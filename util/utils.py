@@ -4,6 +4,7 @@ from dao.Option import Option, OptionType, TranxType
 import pandas as pd
 from util import optionStrategies
 import constants.constants_local as c
+from helper.logger import logger
 
 
 def get_nth_option(options, condition, n=1):
@@ -85,8 +86,12 @@ def merge_dataframes(*dfs):
     :return:
     """
     merged_df = pd.concat(dfs, axis=0)
-    filtered_df = merged_df[merged_df['MaxLoss'] > -1000]
-    filtered_df1 = filtered_df[filtered_df['MaxProfit'] > 1000]
+    filtered_df1 = merged_df
+    try:
+        filtered_df = merged_df[merged_df['MaxLoss'] > -1000]
+        filtered_df1 = filtered_df[filtered_df['MaxProfit'] > 1000]
+    except Exception as e:
+        logger.error("Error in getting key, returning default df")
 
     return filtered_df1
 

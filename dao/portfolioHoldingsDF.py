@@ -114,7 +114,8 @@ def get_average_price(stock):
         "VEDL": 290.49,
         "ZOMATO": 134.17,
         "BHINVIT-IV": 100,
-        "KOTAKBANK": 1637
+        "KOTAKBANK": 1637,
+        "PSUBNKBEES": 76.4
     }
 
     try:

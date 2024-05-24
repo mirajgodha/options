@@ -18,10 +18,24 @@ from tabulate import tabulate
 from profitnloss import Call, Put, Strategy
 
 from helper.stockCodes import get_nse_stock_code
-import nsepython as nse
+
 from util.nsepythonUtil import get_option_price, nse_optionchain_scrapper
 from messagning.slack_messaging import send_message
 
+import os
+import sys
+
+# Save a reference to the original stdout
+original_stdout = sys.stdout
+
+# Redirect stdout to a null device (to discard output)
+sys.stdout = open(os.devnull, 'w')
+import nsepython as nse
+
+# Restore the original stdout
+sys.stdout = original_stdout
+# Now, print statements from external_library will not be displayed on the console
+# do not change the above logic as nsepython print gets to print on console, and nothing is visible on console
 
 def is_market_open():
     # Check if the market is open on weekdays
@@ -462,7 +476,7 @@ def get_and_persist_ltp_stock(portfolio_positions_df):
                 except Exception as e:
                     # This will help to persist the ltp which we are able to get from NSE
                     logger.error(f"{Colors.RED}Exception while getting LTP for {stock}: {e}{Colors.RESET}")
-                    traceback.print_exc()
+                    # traceback.print_exc()
     except Exception as e:
         logger.error(f"{Colors.RED}Exception while getting LTP for {stock}: {e}{Colors.RESET}")
         traceback.print_exc()

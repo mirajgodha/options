@@ -37,7 +37,7 @@ current_date = datetime.now()
 # Calculate the 23th date of the last month
 last_month_start_date = datetime(current_date.year if current_date.month != 1 else current_date.year - 1,
                                  current_date.month - 1 if current_date.month != 1 else 12,
-                                 25)
+                                 20)
 
 import signal
 
@@ -57,7 +57,7 @@ signal.signal(signal.SIGALRM, handler)
 def main():
     # Your main code goes here
     try:
-        while trading_helper.is_market_open() | True:
+        while trading_helper.is_market_open():
             logger.info(
                 f"{Colors.ORANGE}Options Trading Dashboarding Toolbox Running at {datetime.today()}{Colors.WHITE}")
             api = iciciDirect.get_api_session()
@@ -170,7 +170,7 @@ def main():
             # Build option strategies
             signal.alarm(c.TIMEOUT_SECONDS * 15)  # Set the alarm
             try:
-                optionStrategyBuilder.option_strategies_builder()
+                # optionStrategyBuilder.option_strategies_builder()
                 pass
             except TimeoutError as e:
                 logger.error("Option strategies builder method call timed out")

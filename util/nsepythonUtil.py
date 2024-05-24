@@ -209,17 +209,24 @@ def get_lot_size(symbol):
     :param symbol: 
     :return: 
     """
-    global lot_sizes
-    if lot_sizes.empty:
-        lot_sizes = nse_get_fno_lot_sizes(mode="pandas")
-
-    # remove spaces from column names
-    lot_sizes = lot_sizes.rename(columns=lambda x: x.replace(' ', ''))
-    # remove spaces from values
-    lot_sizes = lot_sizes.replace('\s+', '', regex=True)
-
-    lot_size: int = int(lot_sizes[lot_sizes["SYMBOL"] == symbol].iloc[0, 2])
-
+    # global lot_sizes
+    # try:
+    #     if lot_sizes.empty:
+    #         lot_sizes = nse_get_fno_lot_sizes(mode="pandas")
+    #
+    #     # remove spaces from column names
+    #     lot_sizes = lot_sizes.rename(columns=lambda x: x.replace(' ', ''))
+    #     # remove spaces from values
+    #     lot_sizes = lot_sizes.replace('\s+', '', regex=True)
+    #
+    #     lot_size: int = int(lot_sizes[lot_sizes["SYMBOL"] == symbol].iloc[0, 2])
+    # except Exception as e:
+    #     # this url is not accessable now
+    #     # url="https://archives.nseindia.com/content/fo/fo_mktlots.csv" and resulted error
+    #     # so temp added 1 as lot size solution to run code.
+    #     print(e)
+    #     lot_size = 1
+    lot_size = nsepython.nse_quote(symbol=symbol)['stocks'][0]['marketDeptOrderBook']['tradeInfo']['marketLot']
     return lot_size
 
 
@@ -354,3 +361,4 @@ def get_black_scholes_dexter(S0, X, t, σ="", r=10, q=0.0, td=365):
 # print(get_option_price(nse_optionchain_scrapper("DLF"),900,OptionType.PUT,TranxType.BUY,expiry_list("DLF","list")[0]))
 # print(expiry_list("DLF","list")[0])
 # print(nse_optionchain_scrapper("DLF"))
+# print(nsepython.nse_quote(symbol='DLF')['stocks'][0]['marketDeptOrderBook']['tradeInfo']['marketLot'])

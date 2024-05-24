@@ -1,4 +1,6 @@
 import datetime
+import time
+
 from helper.logger import logger
 import sys
 import traceback
@@ -7,13 +9,13 @@ import numpy as np
 import pandas as pd
 
 import constants.constants_local as c
-from dao.Option import Expiry
+
 import sql.sqlite as sqlt
+
 from util.nsepythonUtil import get_fno_stocks, get_optionchain, get_expiry_date
 from util.optionStrategies import OptionStrategies
 from util.utils import clear_df, concat_df, merge_dataframes
 from helper.colours import Colors
-from stopit import threading_timeoutable as timeoutable
 
 excel_columns = ['Stock', 'PremiumCreditTotal', 'MaxProfit', 'MaxLoss', 'LTP',
                  'CE_sell_price', 'CE_sell_strike',
@@ -199,7 +201,7 @@ def option_strategies_builder():
     if os_last_update_time > (
             datetime.datetime.now() - datetime.timedelta(minutes=c.OPTION_STRATEGIES_DELAY_TIME)):
         # Updated MWPL less than a hour ago, so not updating now.
-        logger.debug(f"Option Strategies already updated at {os_last_update_time}, so not updating now.")
+        logger.info(f"Option Strategies already updated at {os_last_update_time}, so not updating now.")
         return
 
     sqlt.insert_os_lastupdated("os_status", c.PROCESS_STARTED)
@@ -295,7 +297,7 @@ def option_strategies_builder():
             except Exception as ex:
                 # Many times the nse website response gets stuck an results in whole program halts
                 logger.error(f"{Colors.WHITE}Error in processing {symbol} is:  {ex}{Colors.RESET}")
-                # traceback.print_exc()
+                traceback.print_exc()
 
     except Exception as ex:
         logger.error(f"{Colors.RED}Error in creating option strategies is:  {ex} {Colors.RESET}")
@@ -306,6 +308,31 @@ def option_strategies_builder():
         write_data()
         sqlt.insert_os_lastupdated("os_status", c.PROCESS_COMPLETED)
 
+
+def is_market_open():
+    # Check if the market is open on weekdays
+    today = datetime.datetime.now().date()
+    if today.weekday() < 5:  # Monday to Friday (0 to 4 are the weekdays)
+        current_time = datetime.datetime.now().time()
+        market_open_time = datetime.time(9, 00)  # Assuming market opens at 9:00 AM
+        market_close_time = datetime.time(15, 30)  # Assuming market closes at 3:30 PM
+        return market_open_time <= current_time <= market_close_time
+    else:
+        return False
+
 # # Press the green button in the gutter to run the script.
-# if __name__ == '__main__':
-#     option_strategies_builder()
+if __name__ == '__main__':
+    try:
+        while is_market_open()| True:
+            option_strategies_builder()
+            logger.info(f"{Colors.GREEN}Finished updating option strategies{Colors.WHITE}")
+            time.sleep(c.REFRESH_TIME_SECONDS)
+    finally:
+        if is_market_open():
+            REFRESH_TIME_SECONDS = 150
+            time.sleep(c.REFRESH_TIME_SECONDS)
+            option_strategies_builder()
+        else:
+            if not is_market_open():
+                logger.info(f"{Colors.PURPLE}Market Closed{Colors.WHITE}")
+

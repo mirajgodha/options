@@ -330,17 +330,17 @@ def insert_icici_funds(funds_response, margin_response):
                              "(total_bank_balance,allocated_equity, "
                              "allocated_fno, block_by_trade_equity, "
                              "block_by_trade_fno, block_by_trade_balance,"
-                             "unallocated_balance,limit_used,limit_available,"
-                             "limit_total) "
+                             "unallocated_balance,limit_used,limit_total,limit_available) "
                              "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                              (funds_response['total_bank_balance'], funds_response['allocated_equity'],
                               funds_response['allocated_fno'], funds_response['block_by_trade_equity'],
                               funds_response['block_by_trade_fno'], funds_response['block_by_trade_balance'],
-                              funds_response['unallocated_balance'], margin_response['limit_list'][0]['amount'],
+                              funds_response['unallocated_balance'],
+                              (float(sum(item['amount'] for item in margin_response['limit_list']))*-1),
                               margin_response['cash_limit'],
-                              (float(margin_response['limit_list'][0]['amount']) * -1) + float(
+                              (float(sum(item['amount'] for item in margin_response['limit_list'])) + float(
                                   margin_response['cash_limit'])
-                              ))
+                              )))
     except sqlite3.OperationalError as e:
         if e.args[0] == 'no such table: icici_funds':
             logger.error("Table not found - icici_funds")

@@ -12,13 +12,16 @@
       <change beforePath="$PROJECT_DIR$/data/nse_stock_codes.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/nse_stock_codes.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/output/2022-10-31.xlsx" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/data/output/2022-11-10.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/helper/fuzzMatch.py" beforeDir="false" afterPath="$PROJECT_DIR$/helper/fuzzMatch.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/iciciDirect/icici_direct_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/iciciDirect/icici_direct_main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/metabase/metabase.db.mv.db" beforeDir="false" afterPath="$PROJECT_DIR$/metabase/metabase.db.mv.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/optionStrategies/optionStrategyBuilder.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionStrategies/optionStrategyBuilder.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/optionTrading/option_trading_main.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionTrading/option_trading_main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/optionTrading/trading_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/optionTrading/trading_helper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/secretes/config.ini" beforeDir="false" afterPath="$PROJECT_DIR$/secretes/config.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/sqlite.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/sqlite.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sql/stocks.db" beforeDir="false" afterPath="$PROJECT_DIR$/sql/stocks.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/nsepythonUtil.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/nsepythonUtil.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/util/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/util/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,6 +67,7 @@
     "Python.nsepyUtil.executor": "Run",
     "Python.nsepythonUtil.executor": "Run",
     "Python.nuvama_main.executor": "Run",
+    "Python.optionStrategyBuilder.executor": "Run",
     "Python.option_trading_main.executor": "Run",
     "Python.test.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
@@ -73,7 +77,7 @@
     "git-widget-placeholder": "master",
     "last_opened_file_path": "/Users/mirajgodha/Library/Mobile Documents/com~apple~CloudDocs/Documents/code/options",
     "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "preferences.keymap"
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -93,28 +97,6 @@
     </key>
   </component>
   <component name="RunManager" selected="Python.option_trading_main">
-    <configuration name="icici_direct_main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="options" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/iciciDirect" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/iciciDirect/icici_direct_main.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="nsepythonUtil" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="options" />
       <option name="ENV_FILES" value="" />
@@ -129,6 +111,28 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/util/nsepythonUtil.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="optionStrategyBuilder" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="options" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/optionStrategies" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/optionStrategies/optionStrategyBuilder.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -223,7 +227,7 @@
     </configuration>
     <list>
       <item itemvalue="Python.sqlite" />
-      <item itemvalue="Python.icici_direct_main" />
+      <item itemvalue="Python.optionStrategyBuilder" />
       <item itemvalue="Python.nsepythonUtil" />
       <item itemvalue="Python.option_trading_main" />
       <item itemvalue="Python.test" />
@@ -232,10 +236,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.option_trading_main" />
+        <item itemvalue="Python.optionStrategyBuilder" />
+        <item itemvalue="Python.nsepythonUtil" />
         <item itemvalue="Python tests.pytest in option_trading_main.py" />
         <item itemvalue="Python.test" />
-        <item itemvalue="Python.icici_direct_main" />
-        <item itemvalue="Python.nsepythonUtil" />
       </list>
     </recent_temporary>
   </component>
@@ -551,7 +555,15 @@
       <option name="project" value="LOCAL" />
       <updated>1713935969473</updated>
     </task>
-    <option name="localTasksCounter" value="42" />
+    <task id="LOCAL-00042" summary="Few generic things">
+      <option name="closed" value="true" />
+      <created>1714668596194</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1714668596194</updated>
+    </task>
+    <option name="localTasksCounter" value="43" />
     <servers />
   </component>
   <component name="UnknownFeatures">

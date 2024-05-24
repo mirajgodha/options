@@ -18,6 +18,9 @@ FUNDS_DELAY_TIME = 15
 PORTFOLIO_DELAY_TIME = 120
 OPTION_STRATEGIES_DELAY_TIME = 15
 
+#Slack alert for low margin amount threashold
+LOW_MARGIN_MONEY_THRESHOLD = 50000
+
 # Value of the sold contract to be sq off
 # This is the minimum value of the contract which should be sq off, and will be visible on Sq off dashboard.
 # If the value of the contract is less than this value, it will be sq off
@@ -27,7 +30,7 @@ OPTION_STRATEGIES_DELAY_TIME = 15
 CONTRACT_MIN_VALUE_TO_BE_SQ_OFFED = 1000
 
 # OPTION Strategies constants
-OPTIONS_STRATEGIES_EXPIRY_MONTH = Expiry.CURRENT
+OPTIONS_STRATEGIES_EXPIRY_MONTH = Expiry.NEXT
 OPTIONS_STRATEGIES_TEST_RUN = False
 OPTIONS_STRATEGIES_WRITE_TO_FILE = False
 OPTIONS_STRATEGIES_WRITE_TO_DB = True
