@@ -115,7 +115,12 @@ def get_average_price(stock):
         "ZOMATO": 134.17,
         "BHINVIT-IV": 100,
         "KOTAKBANK": 1637,
-        "PSUBNKBEES": 76.4
+        "PSUBNKBEES": 76.4,
+        "SILVERBEES": 88.6,
+        "IDEA": 17.1,
+        "GRANULES": 685,
+        "AGARIND": 1140,
+        "ABB": 7980
     }
 
     try:
