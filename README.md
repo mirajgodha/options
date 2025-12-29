@@ -5,17 +5,17 @@
 [![NSE](https://img.shields.io/badge/Exchange-NSE-green.svg)](https://www.nseindia.com/)
 [![Status: Active](https://img.shields.io/badge/Status-Active-brightgreen.svg)]()
 
-A comprehensive Python platform for NSE options traders to analyze, calculate, and visualize multi-leg options strategies with real-time P&L tracking across multiple brokers.
+A comprehensive Python platform for NSE options traders to analyze, calculate, and visualize multi-leg options strategies with real-time P&L tracking across multiple brokers (ICICI Direct, Nuvama).
 
 ## 🎯 What It Does
 
 - **Strategy Analysis:** Calculates max profit, max loss, and breakeven points for 13 predefined options strategies
 - **Greeks Calculation:** Computes Delta, Gamma, Theta, Vega, and IV for portfolio risk analysis
 - **Profitability Scanning:** Automatically scans entire NSE F&O universe for profitable opportunities
-- **Multi-Broker Integration:** Consolidates positions and P&L across ICICI Direct and other brokers
+- **Multi-Broker Integration:** Consolidates positions and P&L across ICICI Direct and Nuvama Wealth
 - **Real-time Dashboard:** Visualize strategies and P&L using Metabase (open-source BI tool)
 - **Excel Export:** Generates sorted, formatted Excel sheets with all strategy metrics
-- **Risk Management:** Monitor margin, set P&L alerts, track order execution
+- **Risk Management:** Monitor margin, set P&L alerts, track order execution across brokers
 
 ## 📊 Supported Strategies
 
@@ -52,8 +52,6 @@ All strategies are exported to Excel with complete P&L analysis:
 
 ![Strategy P&L](https://github.com/mirajgodha/options/assets/3658490/d1c2d70c-0a88-42db-a0d6-89635d24490b)
 
-### Position Management & Risk Tracking
-
 **Stock Strategy P&L Charts:**
 
 ![Stock Strategy Charts](https://github.com/mirajgodha/options/assets/3658490/dae464e0-c903-4721-9725-e80827281e67)
@@ -77,10 +75,6 @@ All strategies are exported to Excel with complete P&L analysis:
 **Orders Management Dashboard:**
 
 ![Orders Dashboard](https://github.com/mirajgodha/options/assets/3658490/a7b344fa-189a-4737-a699-a675fc4446c3)
-
-**Multi-Strategy Analysis:**
-
-![Multi-Strategy Dashboard](https://github.com/mirajgodha/options/assets/3658490/5b7f4eb6-d764-4bc8-86e8-026625bd54cc)
 
 **Profitable Strategies Scan Results:**
 
@@ -156,18 +150,25 @@ scanner.export_to_excel(results, 'profitable_strategies.xlsx')
 scanner.export_to_database(results)
 ```
 
-### Monitor Live Positions (ICICI Direct)
+### Monitor Live Positions
 
 ```python
 from brokers.icici_direct import ICICIDirectConnector
+from brokers.nuvama import NuvamaBrokerConnector
 
-connector = ICICIDirectConnector(username='your_id', password='your_pwd')
-positions = connector.get_positions()
-margin = connector.get_margin_used()
+# Connect to ICICI Direct
+icici = ICICIDirectConnector(username='your_id', password='your_pwd')
+icici.authenticate()
+icici_positions = icici.get_positions()
 
-print(f"Total Margin Used: ₹{margin['used']}")
-for pos in positions:
-    print(f"{pos['stock']} - P&L: ₹{pos['pnl']}")
+# Connect to Nuvama
+nuvama = NuvamaBrokerConnector(client_id='your_client_id', password='your_pwd')
+nuvama.authenticate()
+nuvama_positions = nuvama.get_positions()
+
+# Consolidated view
+total_pnl = sum(p['pnl'] for p in (icici_positions + nuvama_positions))
+print(f"Total P&L across all brokers: ₹{total_pnl:,.2f}")
 ```
 
 ## 📁 Project Structure
@@ -187,6 +188,7 @@ options/
 │   └── historical_data.py         # Historical prices
 ├── brokers/                        # Broker integrations
 │   ├── icici_direct.py            # ICICI Direct connector
+│   ├── nuvama.py                  # Nuvama Wealth connector
 │   └── broker_base.py             # Abstract interface
 ├── scanner/                        # Scanning engine
 │   ├── profitability_scanner.py   # Strategy scanning
@@ -198,12 +200,15 @@ options/
 ├── dashboard/                      # Metabase configs
 ├── metabase/                       # Metabase JAR and configs
 ├── main.py                         # Entry point
-└── docs/                           # 📚 Documentation (see below)
+└── docs/                           # 📚 Documentation
+    ├── START_HERE.md
+    ├── QUICK_NUVAMA_SETUP.md
+    ├── installation_guide.md
+    ├── nuvama_integration_guide.md
+    ├── multi_broker_integration_guide.md
     ├── comprehensive_docs_with_screenshots.md
     ├── api_documentation.md
-    ├── installation_guide.md
-    ├── DOCUMENTATION_INDEX.md
-    └── START_HERE.md
+    └── DOCUMENTATION_INDEX.md
 ```
 
 ## ⚙️ Configuration
@@ -224,16 +229,130 @@ MAX_LOSS_THRESHOLD = 1000          # Scanning filter
 DB_TYPE = 'sqlite'
 DB_CONNECTION_STRING = 'sqlite:///options_data.db'
 
-# Broker
+# Broker Configuration
+ENABLE_BROKER_SYNC = True
+
+# ICICI Direct
 ICICI_DIRECT_ENABLED = True
 ICICI_USERNAME = 'your_username'
 ICICI_PASSWORD = 'your_password'
+
+# Nuvama Wealth
+NUVAMA_ENABLED = True
+NUVAMA_CLIENT_ID = 'your_client_id'      # Get from profile
+NUVAMA_PASSWORD = 'your_password'
 
 # Output
 WRITE_TO_EXCEL = True
 WRITE_TO_SQL = True
 EXCEL_OUTPUT_PATH = './output/'
 ```
+
+## 🔌 Broker Integration
+
+### Supported Brokers
+
+| Broker | Status | API Charges | F&O Support | Documentation |
+|--------|--------|-------------|-------------|----------------|
+| **ICICI Direct** | ✅ Production Ready | No | Yes | [Setup](./docs/installation_guide.md) |
+| **Nuvama Wealth** | ✅ Production Ready | No | Yes | [Guide](./docs/nuvama_integration_guide.md) |
+| **Multi-Broker** | ✅ Production Ready | No | Yes | [Guide](./docs/multi_broker_integration_guide.md) |
+| **Zerodha** | 📋 Roadmap | No | Yes | - |
+| **5Paisa** | 📋 Roadmap | No | Yes | - |
+
+### ICICI Direct
+
+```python
+from brokers.icici_direct import ICICIDirectConnector
+
+connector = ICICIDirectConnector(username='your_id', password='your_pwd')
+connector.authenticate()
+
+positions = connector.get_positions()       # Current positions
+margin = connector.get_margin_used()        # Margin status
+orders = connector.get_orders(status='OPEN') # Open orders
+mwpl = connector.check_mwpl()               # Ban list alerts
+```
+
+### Nuvama Wealth
+
+```python
+from brokers.nuvama import NuvamaBrokerConnector
+
+# Get Client ID from https://www.nuvamawealth.com/login → Profile
+connector = NuvamaBrokerConnector(client_id='your_client_id', password='your_pwd')
+connector.authenticate()
+
+positions = connector.get_positions()        # Current positions
+margin = connector.get_margin_used()         # Margin status
+orders = connector.get_orders(status='OPEN') # Open orders
+mwpl = connector.check_mwpl()                # MWPL status
+```
+
+### Consolidated Multi-Broker Dashboard
+
+```python
+from brokers.icici_direct import ICICIDirectConnector
+from brokers.nuvama import NuvamaBrokerConnector
+
+# Connect to both brokers
+icici = ICICIDirectConnector(username='id', password='pwd')
+nuvama = NuvamaBrokerConnector(client_id='id', password='pwd')
+
+icici.authenticate()
+nuvama.authenticate()
+
+# Consolidated metrics
+icici_pnl = sum(p['pnl'] for p in icici.get_positions())
+nuvama_pnl = sum(p['pnl'] for p in nuvama.get_positions())
+
+print(f"ICICI Direct: ₹{icici_pnl:,.2f}")
+print(f"Nuvama Wealth: ₹{nuvama_pnl:,.2f}")
+print(f"Total: ₹{icici_pnl + nuvama_pnl:,.2f}")
+```
+
+### Broker Documentation
+
+**Quick Start (10 minutes):**
+- [**QUICK_NUVAMA_SETUP.md**](./docs/QUICK_NUVAMA_SETUP.md) - Get started with Nuvama immediately
+
+**Complete Integration Guides (30-40 minutes each):**
+- [**Nuvama Integration Guide**](./docs/nuvama_integration_guide.md) - Complete setup, 12+ working examples, troubleshooting, advanced features
+- [**Multi-Broker Integration Guide**](./docs/multi_broker_integration_guide.md) - Use ICICI Direct + Nuvama together, consolidated dashboard, real-time monitoring script
+
+**General Setup & Reference:**
+- [**Installation Guide**](./docs/installation_guide.md) - All platforms (Windows/Mac/Linux/Docker), 10 troubleshooting solutions
+- [**API Reference**](./docs/api_documentation.md) - 50+ working code examples
+
+**Complete Feature Documentation:**
+- [**Comprehensive Guide**](./docs/comprehensive_docs_with_screenshots.md) - All features, 13 strategies, 13 integrated screenshots
+
+### Nuvama Wealth - Key Benefits
+
+✅ **No API charges** - Completely free integration  
+✅ **₹20/lot options** - Competitive options brokerage  
+✅ **Deep OTM trading** - Trade far out-of-money options in NRML mode  
+✅ **Discounted exchange charges** - ~₹3,500/Cr vs standard rates  
+✅ **Online margin pledge** - Enhance margin instantly  
+✅ **SEBI regulated** - Safe and trustworthy broker  
+
+**Quick Links:**
+- Account Opening: https://www.nuvamawealth.com/demat-account
+- Login Portal: https://www.nuvamawealth.com/login
+- API Documentation: https://www.nuvamawealth.com/api-connect/
+- Support: 1800-102-3335 | helpdesk@nuvama.com
+
+### Adding New Brokers
+
+To add support for Zerodha, 5Paisa, or other brokers, see [Multi-Broker Guide - Adding New Brokers](./docs/multi_broker_integration_guide.md#adding-new-brokers) section.
+
+Implement the `BrokerInterface` abstract class:
+- `authenticate()`
+- `get_positions()`
+- `get_margin_used()`
+- `get_orders()`
+- `check_mwpl()`
+- `place_order()` (optional)
 
 ## 📈 Visualization with Metabase
 
@@ -255,6 +374,7 @@ java -jar metabase.jar
 - Order execution analysis
 - Greeks heatmaps
 - MWPL monitoring
+- Multi-broker position tracking
 
 ## 📊 Excel Output Format
 
@@ -310,24 +430,6 @@ results = backtest.run(strike_difference=100, profit_target=0.30)
 print(f"Win Rate: {results['win_rate']:.2%}")
 ```
 
-## 🔌 Broker Integration
-
-### ICICI Direct
-```python
-connector = ICICIDirectConnector(username='id', password='pwd')
-connector.get_positions()      # Current positions
-connector.get_margin_used()    # Margin utilization
-connector.get_orders()         # Order status
-connector.check_mwpl()         # Ban list alerts
-```
-
-### Adding New Brokers
-Extend `brokers/broker_base.py` and implement:
-- `authenticate()`
-- `get_positions()`
-- `get_margin_used()`
-- `get_orders()`
-
 ## 📝 Greeks Reference
 
 - **Delta:** Directional sensitivity (range: -1 to +1)
@@ -340,61 +442,67 @@ Extend `brokers/broker_base.py` and implement:
 
 Complete documentation is available in the `/docs` folder. Start here based on your needs:
 
-### 🚀 New Users
-- **[START_HERE.md](./docs/START_HERE.md)** - Quick overview and setup guide (5 minutes)
-- **[Installation Guide](./docs/installation_guide.md)** - Step-by-step setup for your platform
+### 🚀 New Users (Quick Path: 30 minutes)
+1. **[START_HERE.md](./docs/START_HERE.md)** (5 min) - Overview and what to do next
+2. **[QUICK_NUVAMA_SETUP.md](./docs/QUICK_NUVAMA_SETUP.md)** (10 min) - Get started with Nuvama in 10 minutes
+3. **[Installation Guide](./docs/installation_guide.md)** (15 min) - Complete setup for your platform
 
-### 📖 Learning the Tool
-- **[Comprehensive Guide](./docs/comprehensive_docs_with_screenshots.md)** - Complete documentation with all 13 strategies, features, and integrated screenshots
+### 📖 Learning the Tool (1-2 hours)
+- **[Comprehensive Guide](./docs/comprehensive_docs_with_screenshots.md)** - Complete documentation with all 13 strategies, features, and 13 integrated screenshots
 
-### 💻 Developers
+### 💻 Developers (1 hour)
 - **[API Reference](./docs/api_documentation.md)** - Complete API documentation with 50+ working code examples
-- **[API Reference](./docs/api_documentation.md#complete-code-examples)** - 5 complete working applications
+- **[Multi-Broker Guide](./docs/multi_broker_integration_guide.md)** - Integration patterns, 9+ examples
 
-### 🔧 Configuration & Reference
-- **[Configuration Guide](./docs/installation_guide.md#configuration)** - All configuration options explained
-- **[Strategy Reference](./docs/comprehensive_docs_with_screenshots.md#strategy-reference)** - Detailed explanation of all 13 strategies
+### 🔧 Broker Integration (30-40 minutes each)
+- **[Nuvama Integration Guide](./docs/nuvama_integration_guide.md)** - Complete Nuvama setup, 12+ examples, advanced features
+- **[Multi-Broker Integration Guide](./docs/multi_broker_integration_guide.md)** - Use multiple brokers with unified interface
 
-### 🗺️ Documentation Navigation
+### 🗺️ Navigation & Reference
 - **[Documentation Index](./docs/DOCUMENTATION_INDEX.md)** - Complete index of all documentation files
 
-### 📊 Documentation Overview
+### 📊 Documentation Quick Reference
 
-| Document | Purpose | Audience | Time |
-|----------|---------|----------|------|
-| **START_HERE.md** | Quick start guide | Everyone | 5 min |
-| **Installation Guide** | Setup instructions | New users | 15 min |
-| **Comprehensive Guide** | All features & strategies | All users | 30-60 min |
-| **API Reference** | Code examples & API docs | Developers | 20-30 min |
-| **Configuration Guide** | All config options | Advanced users | 10 min |
-| **Strategy Reference** | Strategy mechanics | Traders | 20 min |
-| **Documentation Index** | File navigation | Reference | 10 min |
+| Document | Time | Best For |
+|----------|------|----------|
+| START_HERE.md | 5 min | Everyone - start here |
+| QUICK_NUVAMA_SETUP.md | 10 min | Nuvama quick start |
+| Installation Guide | 15 min | New users |
+| Comprehensive Guide | 60 min | Learning all features |
+| API Reference | 20 min | Developers |
+| Nuvama Integration | 30 min | Nuvama users |
+| Multi-Broker Guide | 30 min | Multi-broker setup |
+| Documentation Index | 10 min | Finding things |
 
 ## 🐛 Troubleshooting
 
 **NSE data not fetching?**
 - Check internet connectivity
 - Verify TEST_RUN flag during market hours
-- See [Installation Guide](./docs/installation_guide.md#common-issues--solutions)
+- See [Installation Guide - Common Issues](./docs/installation_guide.md#common-issues--solutions)
 
 **ICICI Direct auth failing?**
 - Ensure 2FA is disabled for API access
 - Verify username/password in config
-- See [Installation Guide](./docs/installation_guide.md#common-issues--solutions)
+- See [Installation Guide - Common Issues](./docs/installation_guide.md#common-issues--solutions)
+
+**Nuvama auth failing?**
+- Verify Client ID is correct (6-8 digits from profile)
+- Check password
+- See [Nuvama Guide - Troubleshooting](./docs/nuvama_integration_guide.md#troubleshooting)
 
 **Metabase not loading?**
 - Check if Java is installed: `java -version`
 - Verify Metabase is running: `curl http://localhost:3000`
-- See [Comprehensive Guide](./docs/comprehensive_docs_with_screenshots.md#dashboard--visualization)
 
 **Greeks returning NaN?**
 - Ensure time to expiry > 0
 - Verify IV > 0
-- Check stock price and strike are positive
-- See [API Reference](./docs/api_documentation.md#greeks-calculator-module)
+- See [API Reference - Greeks](./docs/api_documentation.md#greeks-calculator-module)
 
-**Still having issues?**
-- See **10 Common Issues & Solutions** in [Installation Guide](./docs/installation_guide.md#common-issues--solutions)
+**Need more help?**
+- See **[Installation Guide](./docs/installation_guide.md#common-issues--solutions)** for 10 common issues & solutions
+- Check **[Documentation Index](./docs/DOCUMENTATION_INDEX.md)** for complete file navigation
 
 ## 🤝 Contributing
 
@@ -451,8 +559,10 @@ MIT License - See [LICENSE](LICENSE) file for details
 
 ## 🙋 Support
 
-- **Issues:** [GitHub Issues](https://github.com/mirajgodha/options/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/mirajgodha/options/discussions)
+- **GitHub Issues:** [GitHub Issues](https://github.com/mirajgodha/options/issues)
+- **GitHub Discussions:** [GitHub Discussions](https://github.com/mirajgodha/options/discussions)
+- **ICICI Direct Support:** 9650200000
+- **Nuvama Support:** 1800-102-3335
 - **Documentation:** See `/docs` folder for comprehensive guides
 
 ## 🎯 Roadmap
