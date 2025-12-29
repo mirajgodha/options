@@ -35,6 +35,57 @@ A comprehensive Python platform for NSE options traders to analyze, calculate, a
 | Naked Call | Credit | Unlimited | Limited | Bearish |
 | Naked Put | Credit | Unlimited | Limited | Bullish |
 
+## 📈 Visual Dashboards & Output
+
+### Excel Strategy Analysis
+All strategies are exported to Excel with complete P&L analysis:
+
+![Excel Output Format](https://user-images.githubusercontent.com/3658490/232991057-11ee44a8-c231-4aea-b196-762cc7f62960.png)
+
+### Metabase Dashboards
+
+**Consolidated P&L Dashboard** - Total profit/loss across all brokers:
+
+![Consolidated P&L](https://github.com/mirajgodha/options/assets/3658490/b30698a0-654a-4f8f-b369-89c0d84da46e)
+
+**Strategy Performance Dashboard** - Individual stock strategy analysis:
+
+![Strategy P&L](https://github.com/mirajgodha/options/assets/3658490/d1c2d70c-0a88-42db-a0d6-89635d24490b)
+
+### Position Management & Risk Tracking
+
+**Stock Strategy P&L Charts:**
+
+![Stock Strategy Charts](https://github.com/mirajgodha/options/assets/3658490/dae464e0-c903-4721-9725-e80827281e67)
+
+**Time-Series P&L Analysis:**
+
+![TimeSeries Analysis](https://github.com/mirajgodha/options/assets/3658490/0f9c76e0-eca1-4466-83f3-0fa18c56afae)
+
+**MWPL (Ban List) Monitoring:**
+
+![MWPL Dashboard](https://github.com/mirajgodha/options/assets/3658490/32953db0-0350-4b91-83d0-dbd290d9b13e)
+
+**Option Price Charts:**
+
+![Option Price Charts](https://github.com/mirajgodha/options/assets/3658490/32813d73-abdc-4687-a7de-09ee03bb481c)
+
+**Margin Tracking Dashboard:**
+
+![Margin Usage](https://github.com/mirajgodha/options/assets/3658490/f4c42c0b-f820-4fba-afa7-5acc5fa6c431)
+
+**Orders Management Dashboard:**
+
+![Orders Dashboard](https://github.com/mirajgodha/options/assets/3658490/a7b344fa-189a-4737-a699-a675fc4446c3)
+
+**Multi-Strategy Analysis:**
+
+![Multi-Strategy Dashboard](https://github.com/mirajgodha/options/assets/3658490/5b7f4eb6-d764-4bc8-86e8-026625bd54cc)
+
+**Profitable Strategies Scan Results:**
+
+![All Profitable Strategies](https://github.com/mirajgodha/options/assets/3658490/4fc94f21-285a-4db8-9878-b6c0837d0124)
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -48,6 +99,12 @@ A comprehensive Python platform for NSE options traders to analyze, calculate, a
 # Clone the repository
 git clone https://github.com/mirajgodha/options.git
 cd options
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Mac/Linux
+# OR
+venv\Scripts\activate  # Windows
 
 # Install dependencies
 pip install -r requirements.txt
@@ -77,6 +134,7 @@ strategy = calc.calculate(short_put_strike=2700, short_call_strike=3100, quantit
 print(f"Max Profit: ₹{strategy.max_profit}")
 print(f"Max Loss: ₹{strategy.max_loss}")
 print(f"Theta (Daily Decay): ₹{strategy.greeks['theta']}")
+print(f"Breakeven: {strategy.breakeven_points}")
 ```
 
 ### Scan All Stocks for Opportunities
@@ -95,9 +153,10 @@ results = scanner.scan_all_strategies(
 )
 
 scanner.export_to_excel(results, 'profitable_strategies.xlsx')
+scanner.export_to_database(results)
 ```
 
-### Monitor Live Positions
+### Monitor Live Positions (ICICI Direct)
 
 ```python
 from brokers.icici_direct import ICICIDirectConnector
@@ -115,28 +174,36 @@ for pos in positions:
 
 ```
 options/
-├── strategy/                 # Core calculation engine
-│   ├── calculator.py        # Strategy calculator
-│   ├── definitions.py       # Strategy definitions
-│   └── greeks.py           # Greeks calculation
-├── data/                     # Data fetching
-│   ├── nse_fetcher.py      # NSE option chain data
-│   └── historical_data.py  # Price & IV history
-├── brokers/                  # Broker integrations
-│   ├── icici_direct.py     # ICICI Direct connector
-│   └── broker_base.py      # Abstract interface
-├── scanner/                  # Profitability scanning
-│   ├── profitability_scanner.py
-│   └── filters.py
-├── output/                   # Export functionality
-│   ├── excel_writer.py
-│   ├── sql_writer.py
-│   └── metabase_config.py
-├── dashboard/               # Metabase configurations
-├── helper/                  # Utilities
-│   └── constants.py        # Global settings
-├── main.py                 # Entry point
-└── requirements.txt        # Dependencies
+├── README.md                       # This file
+├── requirements.txt                # Python dependencies
+├── helper/
+│   └── constants.py               # Configuration settings
+├── strategy/                       # Core calculation engine
+│   ├── calculator.py              # Strategy calculator
+│   ├── definitions.py             # Strategy definitions
+│   └── greeks.py                  # Greeks calculation
+├── data/                           # Data fetching
+│   ├── nse_fetcher.py             # NSE option chain data
+│   └── historical_data.py         # Historical prices
+├── brokers/                        # Broker integrations
+│   ├── icici_direct.py            # ICICI Direct connector
+│   └── broker_base.py             # Abstract interface
+├── scanner/                        # Scanning engine
+│   ├── profitability_scanner.py   # Strategy scanning
+│   └── filters.py                 # Filtering logic
+├── output/                         # Export functionality
+│   ├── excel_writer.py            # Excel export
+│   ├── sql_writer.py              # Database export
+│   └── metabase_config.py         # Metabase setup
+├── dashboard/                      # Metabase configs
+├── metabase/                       # Metabase JAR and configs
+├── main.py                         # Entry point
+└── docs/                           # 📚 Documentation (see below)
+    ├── comprehensive_docs_with_screenshots.md
+    ├── api_documentation.md
+    ├── installation_guide.md
+    ├── DOCUMENTATION_INDEX.md
+    └── START_HERE.md
 ```
 
 ## ⚙️ Configuration
@@ -187,11 +254,11 @@ java -jar metabase.jar
 - Real-time margin tracking
 - Order execution analysis
 - Greeks heatmaps
+- MWPL monitoring
 
-## 📊 Output Formats
+## 📊 Excel Output Format
 
-### Excel Export
-Each strategy generates a separate Excel sheet with:
+Each strategy generates a separate tab with:
 - Symbol, premium, max profit/loss
 - Breakeven points
 - Greeks (Delta, Gamma, Theta, Vega, IV)
@@ -204,13 +271,6 @@ RELIANCE | Premium: ₹850 | Max Profit: ₹850 | Max Loss: ₹2150
 Theta: ₹45.3/day | Delta: -0.15 | IV: 18.5%
 Breakeven: 2650, 3050
 ```
-
-### Database Storage
-Results stored in SQL database for:
-- Historical analysis
-- Performance backtesting
-- Metabase visualization
-- Data aggregation
 
 ## 🔧 Advanced Features
 
@@ -232,7 +292,7 @@ monitor.add_loss_trigger(strategy_id=123, loss_limit=2000)
 monitor.start()
 ```
 
-### Greeks-Based Rebalancing
+### Greeks Rebalancing
 ```python
 # Rebalance portfolio to target Greeks
 rebalancer.suggest_rebalance(
@@ -276,32 +336,65 @@ Extend `brokers/broker_base.py` and implement:
 - **Vega:** Volatility sensitivity (per 1% IV change)
 - **IV:** Implied Volatility (market's volatility expectations)
 
+## 📚 Documentation
+
+Complete documentation is available in the `/docs` folder. Start here based on your needs:
+
+### 🚀 New Users
+- **[START_HERE.md](./docs/START_HERE.md)** - Quick overview and setup guide (5 minutes)
+- **[Installation Guide](./docs/installation_guide.md)** - Step-by-step setup for your platform
+
+### 📖 Learning the Tool
+- **[Comprehensive Guide](./docs/comprehensive_docs_with_screenshots.md)** - Complete documentation with all 13 strategies, features, and integrated screenshots
+
+### 💻 Developers
+- **[API Reference](./docs/api_documentation.md)** - Complete API documentation with 50+ working code examples
+- **[API Reference](./docs/api_documentation.md#complete-code-examples)** - 5 complete working applications
+
+### 🔧 Configuration & Reference
+- **[Configuration Guide](./docs/installation_guide.md#configuration)** - All configuration options explained
+- **[Strategy Reference](./docs/comprehensive_docs_with_screenshots.md#strategy-reference)** - Detailed explanation of all 13 strategies
+
+### 🗺️ Documentation Navigation
+- **[Documentation Index](./docs/DOCUMENTATION_INDEX.md)** - Complete index of all documentation files
+
+### 📊 Documentation Overview
+
+| Document | Purpose | Audience | Time |
+|----------|---------|----------|------|
+| **START_HERE.md** | Quick start guide | Everyone | 5 min |
+| **Installation Guide** | Setup instructions | New users | 15 min |
+| **Comprehensive Guide** | All features & strategies | All users | 30-60 min |
+| **API Reference** | Code examples & API docs | Developers | 20-30 min |
+| **Configuration Guide** | All config options | Advanced users | 10 min |
+| **Strategy Reference** | Strategy mechanics | Traders | 20 min |
+| **Documentation Index** | File navigation | Reference | 10 min |
+
 ## 🐛 Troubleshooting
 
 **NSE data not fetching?**
 - Check internet connectivity
 - Verify TEST_RUN flag during market hours
+- See [Installation Guide](./docs/installation_guide.md#common-issues--solutions)
 
 **ICICI Direct auth failing?**
 - Ensure 2FA is disabled for API access
 - Verify username/password in config
+- See [Installation Guide](./docs/installation_guide.md#common-issues--solutions)
 
 **Metabase not loading?**
 - Check if Java is installed: `java -version`
 - Verify Metabase is running: `curl http://localhost:3000`
-- Check database connection settings
+- See [Comprehensive Guide](./docs/comprehensive_docs_with_screenshots.md#dashboard--visualization)
 
 **Greeks returning NaN?**
 - Ensure time to expiry > 0
 - Verify IV > 0
 - Check stock price and strike are positive
+- See [API Reference](./docs/api_documentation.md#greeks-calculator-module)
 
-## 📚 Documentation
-
-- **[Comprehensive Guide](./docs/comprehensive_documentation.md)** - Detailed documentation with examples
-- **Strategy Reference** - In-depth strategy explanations
-- **[API Documentation](./docs/API.md)** - Function signatures and examples
-- **[Configuration Guide](./docs/CONFIGURATION.md)** - All config options
+**Still having issues?**
+- See **10 Common Issues & Solutions** in [Installation Guide](./docs/installation_guide.md#common-issues--solutions)
 
 ## 🤝 Contributing
 
@@ -360,7 +453,7 @@ MIT License - See [LICENSE](LICENSE) file for details
 
 - **Issues:** [GitHub Issues](https://github.com/mirajgodha/options/issues)
 - **Discussions:** [GitHub Discussions](https://github.com/mirajgodha/options/discussions)
-- **Email:** Contact repo owner
+- **Documentation:** See `/docs` folder for comprehensive guides
 
 ## 🎯 Roadmap
 
