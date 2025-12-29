@@ -1,168 +1,393 @@
 # Options Strategy Builder
-This helps people to look at different options strategies on NSE stocks.
-Stock option Strategies calculator calculates the Max profit and loss which you can incurs in this strategy.
-The final output is printed to an excel sheet in a sorted format for all the Fno stocks of NSE
-This will help you decide which option strategy you can take on a stock for your best profit based on current market conditons.
-There are list of predifined strategies already been created
 
-- Long Call Condor
-- Long Iron Butterfly
-- Long Put Condor
-- Short Call Butterfly
-- Short Call Condor
-- Short Guts
-- Short Iron Butterfly
-- Short Put Butterfly
-- Short Put Condor
-- Short Straddle
-- Short Strangle
-- Naked Call
-- Naked Put
+[![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![NSE](https://img.shields.io/badge/Exchange-NSE-green.svg)](https://www.nseindia.com/)
+[![Status: Active](https://img.shields.io/badge/Status-Active-brightgreen.svg)]()
 
-When write to Excel is enalbled it will create an excel file. For each of these strategies you will get a separate tab in excel sheet.
-Whne write to SQL is enabled it will create a table for each strategy in DB and that can be visualized on Metabase
+A comprehensive Python platform for NSE options traders to analyze, calculate, and visualize multi-leg options strategies with real-time P&L tracking across multiple brokers.
 
-Metabase Strategies looks like this:
-<img width="1356" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/b30698a0-654a-4f8f-b369-89c0d84da46e">
+## 🎯 What It Does
 
-<img width="1385" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/d1c2d70c-0a88-42db-a0d6-89635d24490b">
-All Strategies Profitable is a special case, which goes throught each of the above strategy and check if max loss is less than a given threashold and profit probablity is high. It scans for all stocks across all given strategies.
+- **Strategy Analysis:** Calculates max profit, max loss, and breakeven points for 13 predefined options strategies
+- **Greeks Calculation:** Computes Delta, Gamma, Theta, Vega, and IV for portfolio risk analysis
+- **Profitability Scanning:** Automatically scans entire NSE F&O universe for profitable opportunities
+- **Multi-Broker Integration:** Consolidates positions and P&L across ICICI Direct and other brokers
+- **Real-time Dashboard:** Visualize strategies and P&L using Metabase (open-source BI tool)
+- **Excel Export:** Generates sorted, formatted Excel sheets with all strategy metrics
+- **Risk Management:** Monitor margin, set P&L alerts, track order execution
 
-<img width="1378" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/4fc94f21-285a-4db8-9878-b6c0837d0124">
+## 📊 Supported Strategies
 
-In constants file you can configure, how much strike difference it should look for these strategies. This is very usefull specially for Sort Strangle, Naked Call, Naked Put etc.
+| Strategy | Type | Risk | Reward | Best For |
+|----------|------|------|--------|----------|
+| Long Call Condor | Debit | Limited | Limited | Neutral, low vol |
+| Long Iron Butterfly | Debit | Limited | Limited | Range-bound |
+| Long Put Condor | Debit | Limited | Limited | Bearish, low vol |
+| Short Call Butterfly | Credit | Limited | Limited | Sideways |
+| Short Call Condor | Credit | Limited | Limited | Bullish, high vol |
+| Short Guts | Credit | Unlimited | Limited | High volatility |
+| Short Iron Butterfly | Credit | Limited | Limited | Tight range |
+| Short Put Butterfly | Credit | Limited | Limited | Support holding |
+| Short Put Condor | Credit | Limited | Limited | Bullish, narrow |
+| Short Straddle | Credit | Unlimited | Limited | Neutral, low vol |
+| Short Strangle | Credit | Unlimited | Limited | Neutral, wide |
+| Naked Call | Credit | Unlimited | Limited | Bearish |
+| Naked Put | Credit | Unlimited | Limited | Bullish |
 
+## 🚀 Quick Start
 
+### Prerequisites
+- Python 3.7+
+- pip / conda
+- Optional: Java (for Metabase dashboards)
 
-The sample output file looks like this:
+### Installation
 
-![image](https://user-images.githubusercontent.com/3658490/232991057-11ee44a8-c231-4aea-b196-762cc7f62960.png)
+```bash
+# Clone the repository
+git clone https://github.com/mirajgodha/options.git
+cd options
 
-Columns explanation:
+# Install dependencies
+pip install -r requirements.txt
 
-- Stock	- NSE symbol of stock
-- PremiumCredit	- Premium which will be credited for this strategy
-- MaxProfit	- Max profit which you will get in this strategy
-- MaxLoss	- Max loss which you can incur in this strategy
-- PE_sell_price	- Sell price of put
-- PE_sell_strike - Strike at which put is sold
-- PE_buy_price	- Buy price of put
-- PE_buy_strike	- Strike price of put buy
-- lot_size - option lot size
-- pl_on_strikes - It gives you a range of pices and what is the profit and loss in that range. E.g. [(-430.0, 1120, 1420), (2320.0, 1420, 1440), (-430.0, 1440, 1800)] -- This tells at expirty if stock closes between 1120 to 1420 you will incur a loss of 430 Rs and if stock closes between 1420 and 1440 you will get a profit of 2320 Rs. 
-- Strikes - Different strikes traded for the options. E.g. [1120, 1140, 1160, 1180, 1190, 1200, 1210, 1220, 1230, 1240, 1250, 1260, 1270, 1280, 1290, 1300, 1310, 1320, 1330, 1340, 1350, 1360, 1370, 1380, 1390, 1400, 1410, 1420, 1430, 1440, 1450, 1460, 1470, 1480, 1490, 1500, 1510, 1520, 1530, 1540, 1550, 1560, 1570, 1580, 1590, 1600, 1610, 1620, 1630, 1640, 1660, 1680, 1700, 1720, 1740, 1760, 1780, 1800]
+# Configure settings
+# Edit helper/constants.py with your preferences
 
-It will also calcualte the greeks for the option price:
+# Run analysis
+python main.py
+```
 
-Below greeks are calcualted for the whole option strategy 
+### Basic Usage
 
-- IV - Implied Volatility for the whole strategy.
-- Theta - Theta is the measure of the sensitivity of the option price relative to the option's time to maturity. If the option's time to maturity goes down in one day, the option's price will change by the theta amount.
-- Total Theta - Total theta decay amount for the whole option lot in the strategy
-- Delta - It's a measure of the sensitivity of an option's price changes that are relative to the changes in the underlying asset' prices.
-- Total Delta - Total delta for the whole option lots in the strategy
-- Gamma  - Gamma is a measure of the Delta's change relative to the changes in the price of the underlying asset.
-- Vega - Vega is an option Greek that would measure the sensitivity of the option price that is relative to the volatility of the asset
+```python
+from strategy.calculator import StrategyCalculator
+from data.nse_fetcher import NSEDataFetcher
 
-## Option Strategies
+# Fetch option chain data
+fetcher = NSEDataFetcher()
+option_chain = fetcher.fetch_option_chain('RELIANCE', expiry_date='2025-01-30')
 
-### Long Call Condor
+# Calculate SHORT_STRANGLE strategy
+calc = StrategyCalculator('RELIANCE', option_chain, 'SHORT_STRANGLE')
+strategy = calc.calculate(short_put_strike=2700, short_call_strike=3100, quantity=1)
 
-Long Call Condor is a strategy that must be devised when the  __investor is neutral on the market direction and expects volatility to be less in the market.__
+# View results
+print(f"Max Profit: ₹{strategy.max_profit}")
+print(f"Max Loss: ₹{strategy.max_loss}")
+print(f"Theta (Daily Decay): ₹{strategy.greeks['theta']}")
+```
 
-A Long Call Condor strategy is formed by buying Out-of-the-Money Call Option (lower strike), buying In- the-Money Call Option (lower strike), selling Out-of-the-Money Call Option (higher middle) and selling In- the-Money Call Option (higher middle). All Call Options must have the same underlying security and expiration month.
+### Scan All Stocks for Opportunities
 
-This strategy is very similar to a Long Call Butterfly. The difference is that the sold options have different strikes. The profit pay off profile is wider than that of the Long Butterfly.
+```python
+from scanner.profitability_scanner import ProfitabilityScanner
 
-Investor view: Neutral on direction and bearish on Stock/ Index volatility.
+scanner = ProfitabilityScanner(
+    max_loss_threshold=2000,
+    profit_probability_threshold=0.60
+)
 
-**Risk:** Limited.
+results = scanner.scan_all_strategies(
+    strategies=['SHORT_STRANGLE', 'SHORT_STRADDLE'],
+    strike_difference=100
+)
 
-**Reward:** Limited.
+scanner.export_to_excel(results, 'profitable_strategies.xlsx')
+```
 
-**Lower breakeven:** Lowest Strike + net premium paid. 
+### Monitor Live Positions
 
-**Higher breakeven:** Highest Strike – net premium paid. 
+```python
+from brokers.icici_direct import ICICIDirectConnector
 
-![image](https://user-images.githubusercontent.com/3658490/233072905-24081545-ffcf-4577-9dd9-02ebd5194ced.png)
+connector = ICICIDirectConnector(username='your_id', password='your_pwd')
+positions = connector.get_positions()
+margin = connector.get_margin_used()
 
-# Added intergration with multiple brokes
+print(f"Total Margin Used: ₹{margin['used']}")
+for pos in positions:
+    print(f"{pos['stock']} - P&L: ₹{pos['pnl']}")
+```
 
-This section of code is added to solve the following problems:
+## 📁 Project Structure
 
-As a option trader, when you do trading on multiple platfrom, its difficult to manage positions across different brokers. So to get a consolidated positons accross different borkers I started this idea.
-Now as the code is growing its helping me to visulize lot of things on a single nice dashboard.
-- Nice Dashboard for get the consolidated total PnL across different borkers.
-- Nice charts to view the PnL over time. Which is not possible in any of the brokers tools or apps.
+```
+options/
+├── strategy/                 # Core calculation engine
+│   ├── calculator.py        # Strategy calculator
+│   ├── definitions.py       # Strategy definitions
+│   └── greeks.py           # Greeks calculation
+├── data/                     # Data fetching
+│   ├── nse_fetcher.py      # NSE option chain data
+│   └── historical_data.py  # Price & IV history
+├── brokers/                  # Broker integrations
+│   ├── icici_direct.py     # ICICI Direct connector
+│   └── broker_base.py      # Abstract interface
+├── scanner/                  # Profitability scanning
+│   ├── profitability_scanner.py
+│   └── filters.py
+├── output/                   # Export functionality
+│   ├── excel_writer.py
+│   ├── sql_writer.py
+│   └── metabase_config.py
+├── dashboard/               # Metabase configurations
+├── helper/                  # Utilities
+│   └── constants.py        # Global settings
+├── main.py                 # Entry point
+└── requirements.txt        # Dependencies
+```
 
-As a option trader when you create different strategies, on different stocks there is no way to keep track of profit and loss across different stock strategies. So to solve that problem, this dashboards, help in:
-- Getting nice charts to view the loss profit bar graphs across different Stock strategies.
-  <img width="1356" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/dae464e0-c903-4721-9725-e80827281e67">
+## ⚙️ Configuration
 
+Edit `helper/constants.py`:
 
-- View the timeseries chart of PnL across each stock strategy.
-<img width="1277" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/0f9c76e0-eca1-4466-83f3-0fa18c56afae">
+```python
+# Market settings
+TEST_RUN = False                    # Test outside market hours
+MARKET_OPEN_HOUR = 9
+MARKET_CLOSE_HOUR = 15
 
+# Strategy configuration
+STRIKE_DIFFERENCE = 100             # For strangle/straddle
+MAX_LOSS_THRESHOLD = 1000          # Scanning filter
 
+# Database
+DB_TYPE = 'sqlite'
+DB_CONNECTION_STRING = 'sqlite:///options_data.db'
 
-When the stock is about to go to ban list its difficult to exit the positions or add new ones to safegaurd your strategies. Its very difficult, to get the MWPL (Market wide open positions), to handle that problem, i have added a nice MWPL dashboard, which will not only show the MWPL for your stocks but will also hightlight the possible entrants.
+# Broker
+ICICI_DIRECT_ENABLED = True
+ICICI_USERNAME = 'your_username'
+ICICI_PASSWORD = 'your_password'
 
-<img width="847" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/32953db0-0350-4b91-83d0-dbd290d9b13e">
+# Output
+WRITE_TO_EXCEL = True
+WRITE_TO_SQL = True
+EXCEL_OUTPUT_PATH = './output/'
+```
 
+## 📈 Visualization with Metabase
 
-When you have different option strategies open, there is no tool to show you the historical price chart for the price of given strike for a stock. I have added a charting option to plot the option price charts of your open positions.
+```bash
+# Download Metabase
+cd metabase/
+wget https://downloads.metabase.com/v0.46.6/metabase.jar
 
-<img width="1290" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/32813d73-abdc-4687-a7de-09ee03bb481c">
+# Start Metabase
+java -jar metabase.jar
 
-As a option writer, when you have many open positions its difficult to track which positions you should exit based on different rules. There could be automated triggers to exit, but you know whne you exit with Market order how much loss you will face even for profitiable exits. So to handle this problem there are few solutions implemented:
-- Charts with continous PnL at strategy level, so that can get a quick view.
-- PnL tracker alerts - In the excel sheet profit_loss.xlsx fill in the trigger prices for profit and loss and it will alert you.
+# Access at http://localhost:3000
+```
 
-Margin is the most killing thing to manage as a option writer. It just vanishes in your open positions, so to keep an track of margin used realtime, I have added nice chart to track total Margin used and split across strategies of different stocks positions.
-<img width="998" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/f4c42c0b-f820-4fba-afa7-5acc5fa6c431">
+**Available Dashboards:**
+- Consolidated P&L across all brokers
+- Strategy-wise P&L breakdown
+- Real-time margin tracking
+- Order execution analysis
+- Greeks heatmaps
 
-When you place multiple orders and as a Strangle or Straddle writer, you might have to put multiple orders together, and if one gets execcuted its urgent to trigger the other one(s) at the current market price to stop the loss or prevent your strategy from spoiling. So its difficult to keep track orders, therefore added the orders dashbaords as well. It will help in following ways:
-- Get all the open orders list at realtime, along with LTP which is most important thing as most brokers do not show LTP and its difficult to figure out when your order will be triggered.
-- Get the list of executed orders.
-- It also shows the nice chart along with executed orders, to find out how much Mark to market loss or profit you have for for your executed orders. Its nice to figure out how good was your decision to place that order.
+## 📊 Output Formats
 
-Option price LTP charts for all your open positions, very helpful in looking at the option price.
-<img width="803" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/a7b344fa-189a-4737-a699-a675fc4446c3">
+### Excel Export
+Each strategy generates a separate Excel sheet with:
+- Symbol, premium, max profit/loss
+- Breakeven points
+- Greeks (Delta, Gamma, Theta, Vega, IV)
+- P&L at different price levels
+- Available strike prices
 
+**Example Output:**
+```
+RELIANCE | Premium: ₹850 | Max Profit: ₹850 | Max Loss: ₹2150
+Theta: ₹45.3/day | Delta: -0.15 | IV: 18.5%
+Breakeven: 2650, 3050
+```
 
-## ICICI Direct
+### Database Storage
+Results stored in SQL database for:
+- Historical analysis
+- Performance backtesting
+- Metabase visualization
+- Data aggregation
 
-Gets following data from ICICI Direct:
+## 🔧 Advanced Features
 
-- Get the Current Positions
-- Margins used
-- Order list of executed orders
-- Order list of pendng orders
-  
+### Batch Scanning
+```python
+# Scan multiple strategies across all NSE F&O stocks
+scanner.scan_multiple(
+    strategies=['SHORT_STRANGLE', 'NAKED_PUT', 'SHORT_STRADDLE'],
+    strike_differences={'SHORT_STRANGLE': 150, 'NAKED_PUT': 100}
+)
+```
 
-**How to run ICICI Direct positions:**
-Run icici_direct_main.py file in your IDE or via console.
+### Position Monitoring
+```python
+# Real-time P&L alerts
+monitor = PositionMonitor()
+monitor.add_profit_trigger(strategy_id=123, profit_target=5000)
+monitor.add_loss_trigger(strategy_id=123, loss_limit=2000)
+monitor.start()
+```
 
-# Added Metabase
-A nice dashboard which will help you with the following:
+### Greeks-Based Rebalancing
+```python
+# Rebalance portfolio to target Greeks
+rebalancer.suggest_rebalance(
+    target_delta=-0.2,
+    target_vega=0
+)
+```
 
-Consolidated total loss and profit across all option strategies across all borkers
-Charts of profit and loss of total PnL 
-Charts of profit and loss of each stock option strategy -- This is the very important feature i was looking for and was not available any where including Sensibull and Quantsapp.
+### Backtesting
+```python
+# Historical analysis of strategy returns
+backtest = StrategyBacktester('SHORT_STRANGLE', 'RELIANCE', 
+    start_date='2024-01-01', end_date='2024-12-31')
+results = backtest.run(strike_difference=100, profit_target=0.30)
+print(f"Win Rate: {results['win_rate']:.2%}")
+```
 
-<img width="1272" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/3580e74e-ac6f-4dc4-bc17-5d26daa6b1f4">
+## 🔌 Broker Integration
 
-<img width="1061" alt="image" src="https://github.com/mirajgodha/options/assets/3658490/5b7f4eb6-d764-4bc8-86e8-026625bd54cc">
+### ICICI Direct
+```python
+connector = ICICIDirectConnector(username='id', password='pwd')
+connector.get_positions()      # Current positions
+connector.get_margin_used()    # Margin utilization
+connector.get_orders()         # Order status
+connector.check_mwpl()         # Ban list alerts
+```
 
-**How to Run Metabase:**
-- Download the Metabase jar https://www.metabase.com/start/oss/jar inside the metabase folder
-- Please install java if not installed
-- Run the command on your command line:
-- cd to the metabase directory in the code and from there run the below command, as this directory contains the metabase dashboards files.
-- java -jar metabase.jar
-- Once it starts, on your browser type: http://localhost:3000/dashboard/1-pnl?tab=1-tab-1
+### Adding New Brokers
+Extend `brokers/broker_base.py` and implement:
+- `authenticate()`
+- `get_positions()`
+- `get_margin_used()`
+- `get_orders()`
 
-# Points to note
-- Broker positions and other stuff runs only when Market is open on weekdays, for test run if you want to run update the flag TEST_RUN to True in file helper.constants.py
-- 
+## 📝 Greeks Reference
 
+- **Delta:** Directional sensitivity (range: -1 to +1)
+- **Gamma:** Rate of delta change (positive for long options)
+- **Theta:** Daily time decay (positive for short options)
+- **Vega:** Volatility sensitivity (per 1% IV change)
+- **IV:** Implied Volatility (market's volatility expectations)
+
+## 🐛 Troubleshooting
+
+**NSE data not fetching?**
+- Check internet connectivity
+- Verify TEST_RUN flag during market hours
+
+**ICICI Direct auth failing?**
+- Ensure 2FA is disabled for API access
+- Verify username/password in config
+
+**Metabase not loading?**
+- Check if Java is installed: `java -version`
+- Verify Metabase is running: `curl http://localhost:3000`
+- Check database connection settings
+
+**Greeks returning NaN?**
+- Ensure time to expiry > 0
+- Verify IV > 0
+- Check stock price and strike are positive
+
+## 📚 Documentation
+
+- **[Comprehensive Guide](./comprehensive_documentation.md)** - Detailed documentation with examples
+- **Strategy Reference** - In-depth strategy explanations
+- **[API Documentation](./docs/API.md)** - Function signatures and examples
+- **[Configuration Guide](./docs/CONFIGURATION.md)** - All config options
+
+## 🤝 Contributing
+
+We welcome contributions! Please:
+
+1. Fork the repository
+2. Create feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open Pull Request
+
+### Code Style
+```bash
+pip install flake8
+flake8 options/ --max-line-length=100
+```
+
+### Testing
+```bash
+pip install pytest
+pytest tests/ -v
+```
+
+## 📋 Requirements
+
+```
+pandas>=1.3.0
+numpy>=1.21.0
+openpyxl>=3.6.0
+requests>=2.26.0
+beautifulsoup4>=4.9.3
+lxml>=4.6.3
+sqlalchemy>=1.4.0
+py_vollib>=0.1.0
+scipy>=1.7.0
+matplotlib>=3.4.0
+```
+
+## 🔒 Disclaimer
+
+**This tool is for educational and research purposes.** Options trading involves substantial risk of loss. Always:
+
+- ✓ Understand strategies before trading
+- ✓ Use proper risk management
+- ✓ Paper trade before live trading
+- ✓ Consult financial advisors
+- ✓ Start with small positions
+
+**Past performance does not guarantee future results.**
+
+## 📄 License
+
+MIT License - See [LICENSE](LICENSE) file for details
+
+## 🙋 Support
+
+- **Issues:** [GitHub Issues](https://github.com/mirajgodha/options/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/mirajgodha/options/discussions)
+- **Email:** Contact repo owner
+
+## 🎯 Roadmap
+
+- [ ] Additional broker integrations (Zerodha, 5Paisa, ICICI Securities)
+- [ ] ML-based strategy recommendations
+- [ ] Options spreads optimizer
+- [ ] Real-time SMS/Email alerts
+- [ ] Mobile app for monitoring
+- [ ] Portfolio optimization module
+- [ ] Advanced Greeks visualizations
+- [ ] Options chain screener
+
+## 👏 Acknowledgments
+
+Built by options traders, for options traders. Inspired by professional tools like SensiBull and QuantsApp, but open-source and free.
+
+## 📞 Connect
+
+- GitHub: [@mirajgodha](https://github.com/mirajgodha)
+- Contributions welcome!
+
+---
+
+**⭐ If you find this useful, please star the repository!**
+
+---
+
+**Last Updated:** Jan 2025  
+**Version:** 1.0.0  
+**Python:** 3.7+

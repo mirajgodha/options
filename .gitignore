@@ -1,4 +1,9 @@
 /metabase/plugins/googleanalytics.metabase-driver.jar
+data/output/*.xl*
+**__pycache__**
+nuvama/apiconnect.log
+.idea/
+.DS_Store
 /metabase/plugins/*.jar
 /nuvama/mfInstruments.zip
 /nuvama/instruments.zip
@@ -11,3 +16,6 @@
 /optionTrading/data_1hEqmOmIh5_H2A.txt
 /optionTrading/instruments.zip
 /optionTrading/mfInstruments.zip
+metabase/*.db
+/logs
+data/output/
