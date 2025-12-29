@@ -1,4 +1,5 @@
 /metabase/plugins/googleanalytics.metabase-driver.jar
+secretes/config.ini
 data/output/*.xl*
 **__pycache__**
 nuvama/apiconnect.log

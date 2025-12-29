@@ -298,7 +298,7 @@ Extend `brokers/broker_base.py` and implement:
 
 ## 📚 Documentation
 
-- **[Comprehensive Guide](./comprehensive_documentation.md)** - Detailed documentation with examples
+- **[Comprehensive Guide](./docs/comprehensive_documentation.md)** - Detailed documentation with examples
 - **Strategy Reference** - In-depth strategy explanations
 - **[API Documentation](./docs/API.md)** - Function signatures and examples
 - **[Configuration Guide](./docs/CONFIGURATION.md)** - All config options
